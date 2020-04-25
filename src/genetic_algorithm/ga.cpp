@@ -2,12 +2,28 @@
 
 using namespace std;
 
+/*
+ * Método para gerar a população inicial com tamanho POPULATION_SIZE
+ */
 void GenerateInitialPopulation(vector<GASolution> &population)
 {
     GASolution * my_solution;
 
     /*Gerar uma população inicial*/
-    for (int i = 0; i < POPULATION_SIZE; ++i) {
+    /*Gerar uma solução gulosa considerando o objetivo do makespan*/
+    my_solution = new GASolution();
+    my_solution->GreedyInitialSolutionMakespan();
+    //population.push_back(*my_solution);
+    PopulationAddIndividual(population, *my_solution);
+
+
+    /*Gerar uma solução gulosa considerando o objetivo do TEC*/
+    my_solution = new GASolution();
+    my_solution->GreedyInitialSolutionTEC();
+    population.push_back(*my_solution);
+
+    /*Gerar o restante dos indivíduos aleatoriamente*/
+    for (int i = 0; i < POPULATION_SIZE-2; ++i) {
         my_solution = new GASolution();
         //my_solution->DummyInitialSolution();
         my_solution->RandomInitialSolution();
@@ -15,6 +31,9 @@ void GenerateInitialPopulation(vector<GASolution> &population)
     }
 }
 
+/*
+ * Método para imprimir um vetor de soluções
+ */
 void PrintPopulation(vector<GASolution> &population)
 {
     for(auto it = population.begin(); it != population.end(); ++it){
@@ -22,51 +41,97 @@ void PrintPopulation(vector<GASolution> &population)
     }
 }
 
+/*
+ * Cruzamento para gerar TAM_CROSSOVER indivíduos
+ * Uso de torneio binário para selecionar os indivíduos para o cruzamento
+ */
 void Crossover(vector<GASolution> &population, vector<GASolution> &new_population)
 {
     GASolution *parent1, *parent2, *offspring1, *offspring2;
-    size_t ind1, ind2;
+    unsigned ind1, ind2;
+    unsigned size = population.size();
 
-    new_population = population;
+    //Gerar novos indivíduos com o cruzamento
+    for (unsigned i = 0; i < TAM_CROSSOVER; ++i) {
 
-    ind1 = rand()%POPULATION_SIZE;
-    ind2 = rand()%POPULATION_SIZE;
+        //Seleção de indivíduos por torneio binário
 
-    parent1 = &population[ind1];
-    parent2 = &population[ind2];
+        //Escolher dois indivíduos aleatoriamente
+        ind1 = rand()%size;
+        ind2 = rand()%size;
+        //Escolher o melhor indivíduo para ser o pai 1
+        if(population[ind1] < population[ind2]){
+            parent1 = &population[ind1];
+        }
+        else{
+            parent1 = &population[ind2];
+        }
 
-    //GenerateOffspring1(parent1, parent2, offspring1, offspring2);
-    for (unsigned i = 0; i < NEW_POPULATION_SIZE; ++i) {
+        //Escolher dois indivíduos aleatoriamente
+        ind1 = rand()%size;
+        ind2 = rand()%size;
+        //Escolher o melhor indivíduo para ser o pai 2
+        if(population[ind1] < population[ind2]){
+            parent2 = &population[ind1];
+        }
+        else{
+            parent2 = &population[ind2];
+        }
 
+        //Realizar o cruzamento
         offspring1 = new GASolution();
         offspring2 = new GASolution();
-
-        //GenerateOffspring1(*parent1, *parent2, *offspring1, *offspring2);
-        //GenerateOffspring2(*parent1, *parent2, *offspring1, *offspring2);
         GenerateOffspring3(*parent1, *parent2, *offspring1, *offspring2);
 
+        //Adicionar os filhos gerados à nova população
         new_population.push_back(*offspring1);
 
     }
 
 }
 
+/*
+ * Método para adicionar nova solução gerada a partir de uma mutação
+ */
 void Mutation(vector<GASolution> &population, vector<GASolution> &new_population)
 {
-    GASolution *parent1, *offspring1;
+    GASolution *individual;
     size_t ind1;
+    unsigned op;
 
-    new_population = population;
+    unsigned prob;
 
-    ind1 = rand()%POPULATION_SIZE;
+    for (unsigned i = 0; i < population.size(); ++i) {
 
-    parent1 = &population[ind1];
+        //Gerar um número entre zero e cem
+        prob = rand()%100;
 
-    offspring1 = parent1;
+        //Se o número gerado é menor que a probabilidade definida, fazer a mutação
+        if(prob < PROBABILITY_MUTATION){
 
-    new_population.push_back(*offspring1);
+            //Escolher o indivídua para fazer a mutação
+            ind1 = rand()%POPULATION_SIZE;
+            individual = new GASolution();
+            *individual = population[ind1];
 
+            //Escolher um tipo de mutação
+            op = rand()%1;
+
+            switch (op) {
+                case 0:
+                    MutationOperatorSwapInside(*individual);
+                    break;
+                default:
+                    break;
+            }
+
+            new_population.push_back(*individual);
+
+        }
+    }
 }
+
+
 
 void Selection(vector<GASolution> &population, vector<GASolution> &new_population)
 {
@@ -264,60 +329,97 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
 {
 
     //Vetores para os filhos
-    //vector<int> o1(Instance::numJobs+1, -1), o2(Instance::numJobs+1, -1);
-
     vector<bool> o1(Instance::numJobs+1, false), o2(Instance::numJobs+1, false);
 
     unsigned size;
 
-    //Selecionar uma parte do pai 1 para o filho 1, e o complemento para o filho 2
+    unsigned op = rand()%2;
+
+    //Para cada máquina, a primeira parte das tarefas do pai 1 é herdada pelo filho 1
+    //A segunda parte é herdada pelo filho 2
     for (unsigned i = 1; i <= Instance::numMachine; ++i) {
 
-        //Filho 1
-        size = rand()%parent1.scheduling.size();
-        for(auto it = parent1.scheduling[i].begin(); it != parent1.scheduling[i].begin()+size; ++it){
-            offspring1.scheduling[i].push_back(*it);
-            o1[*it] = true;
+        if(parent1.scheduling[i].size() > 0){
+            //O filho 1 herda a primeira parte das tarefas do pai 1, na máquina i
+            size = rand()%parent1.scheduling[i].size();
+            for(auto it = parent1.scheduling[i].begin(); it != parent1.scheduling[i].begin()+size; ++it){
+                offspring1.scheduling[i].push_back(*it);
+                o1[*it] = true;
 
-            //Herdar o modo de operação do pai 1
-            offspring1.job_mode_op[*it] = parent1.job_mode_op[*it];
+                //O filho 1 herda o modo de operação do pai 1
+                offspring1.job_mode_op[*it] = parent1.job_mode_op[*it];
+            }
+
+            //O filho 2 herda a segunda parte das tarefas do pai 1, na máquina i
+            size = parent1.scheduling[i].size() - size;
+            for(auto it = parent1.scheduling[i].begin(); it != parent1.scheduling[i].begin()+size; ++it){
+                offspring2.scheduling[i].push_back(*it);
+                o2[*it] = true;
+
+                //O filho 2 herda o modo de operação do pai 1
+                offspring2.job_mode_op[*it] = parent1.job_mode_op[*it];
+            }
         }
 
-        //Filho 2
-        size = parent1.scheduling.size() - size;
-        for(auto it = parent1.scheduling[i].begin(); it != parent1.scheduling[i].begin()+size; ++it){
-            offspring2.scheduling[i].push_back(*it);
-            o2[*it] = true;
-
-            //Herdar o modo de operação do pai 1
-            offspring2.job_mode_op[*it] = parent1.job_mode_op[*it];
-        }
     }
 
-    //Completar os filhos 1 e 2 com o pai 2
+    //As tarefas restantes dos filhos 1 e 2 são herdadas de acordo com característica do pai 2
     for (unsigned i = 1; i <= Instance::numMachine; ++i) {
         for(auto it = parent2.scheduling[i].begin(); it != parent2.scheduling[i].end(); ++it){
 
-            //Se a tarefa it não está no filho 1, então ela deve ser adicionada
+            //Se a tarefa it ainda não está no filho 1, então ela deve ser adicionada
             if(!o1[*it]){
-                offspring1.scheduling[i].push_back(*it);
 
                 //Herdar o modo de operação do pai 2
-                offspring1.job_mode_op[*it] = parent2.job_mode_op[*it];
+                //offspring1.job_mode_op[*it] = parent2.job_mode_op[*it];
+
+                //Inserir a nova tarefa, na melhor posição considerando um dos objetivos
+                if(op == 0){
+                //if(true){
+                    //offspring1.scheduling[i].push_back(*it);
+                    offspring1.AddJobGreedyMakespanMachine(i, *it, parent2.job_mode_op[*it]);
+                }
+                else{
+                    offspring1.AddJobGreedyTECMachine(i, *it, parent2.job_mode_op[*it]);
+                }
+
             }
 
             //Se a tarefa it não está no filho 2, então ela deve ser adicionada
             if(!o2[*it]){
-                offspring2.scheduling[i].push_back(*it);
 
                 //Herdar o modo de operação do pai 2
-                offspring2.job_mode_op[*it] = parent2.job_mode_op[*it];
+                //offspring2.job_mode_op[*it] = parent2.job_mode_op[*it];
+
+                //Inserir a nova tarefa, na melhor posição considerando um dos objetivos
+                if(op == 0){
+                //if(true){
+                    //offspring2.scheduling[i].push_back(*it);
+                    offspring2.AddJobGreedyMakespanMachine(i, *it, parent2.job_mode_op[*it]);
+                }
+                else{
+                    offspring2.AddJobGreedyTECMachine(i, *it, parent2.job_mode_op[*it]);
+                }
+
             }
         }
     }
 
-    offspring1.CalculateInitialTimeMin();
-    offspring2.CalculateInitialTimeMin();
+    if(op == 0){
+        //Definir o instance inicial de cada tarefa presente na sequência
+        //considerando o menor valor para o tempo de término em cada máquina
+        offspring1.CalculateInitialTimeMin();
+        offspring2.CalculateInitialTimeMin();
+    }
+    else{
+        //Definir o instance inicial de cada tarefa presente na sequência
+        //considerando o menor valor para o custo de energia
+        offspring1.CalculateInitialTimeAvoidPeak();
+        offspring2.CalculateInitialTimeAvoidPeak();
+    }
+
+
+    //Calcular a função objetivo
     offspring1.CalculateObjective();
     offspring2.CalculateObjective();
 
@@ -340,10 +442,90 @@ void SolutionListToVector(GASolution s, vector<unsigned> &v_solution)
 
 bool CompareMakespan(GASolution & l, GASolution & r) //(2)
 {
-    return l.makeSpan < r.makeSpan;
+    if(l.makeSpan < r.makeSpan){
+        return true;
+    }
+    else if (l.makeSpan > r.makeSpan){
+        return false;
+    }
+    else{
+        if(l.TEC < r.TEC){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+}
+
+bool CompareTEC(GASolution & l, GASolution & r) //(2)
+{
+    if(l.TEC < r.TEC){
+        return true;
+    }
+    else if (l.TEC > r.TEC){
+        return false;
+    }
+    else{
+        if(l.makeSpan < r.makeSpan){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
 }
 
 void SortByMakespan(vector<GASolution> &population)
 {
     sort(population.begin(), population.end(), CompareMakespan);
+}
+
+void SortByTEC(vector<GASolution> &population)
+{
+    sort(population.begin(), population.end(), CompareTEC);
+}
+
+/*
+ * Método para realizar mutação em um indivíduo
+ * A mutação consiste em trocar duas tarefas de posição na mesma máquina
+ */
+void MutationOperatorSwapInside(GASolution &individual)
+{
+    unsigned machine, pos_job1, pos_job2;
+    //Escolher aleatoriamente a máquina na qual a troca será realizada
+    machine = 1 + rand()%Instance::numMachine;
+
+    //Caso não tenha pelo menos duas tarefas, não deve realizar a mutação
+    if(individual.scheduling[machine].size() < 2){
+        return;
+    }
+
+    //Escolher a tarefa
+    pos_job1 = rand()%individual.scheduling[machine].size();
+    do{
+        pos_job2 = rand()%individual.scheduling[machine].size();
+
+    }while(pos_job1 != pos_job2);
+
+    individual.SwapInside(machine, pos_job1, pos_job2);
+}
+
+void PopulationAddIndividual(vector<GASolution> &population, GASolution &individual)
+{
+    bool add = true;
+    for(auto it = population.begin(); it != population.end(); ++it){
+        //Se já tem um indivíduo igual na população
+        if(individual.makeSpan == it->makeSpan && individual.TEC == it->TEC){
+            //Não adicionar
+            add = false;
+            break;
+        }
+    }
+
+    if(add){
+        population.push_back(individual);
+    }
 }

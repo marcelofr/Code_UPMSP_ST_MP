@@ -23,7 +23,7 @@ int main(int argc, char** argv)
         Param.seed = "1296910683";
         Param.algorithm = "GA";
         Param.fileSolution = "../Solution/Test/" + Param.algorithm + "/teste.txt";
-        Param.timeLimit = 300;
+        Param.timeLimit = 10000;
 
     }
 
