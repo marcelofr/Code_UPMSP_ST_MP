@@ -70,5 +70,4 @@ int Find( int uf[], int x ) {
     }*/
 
     return r;
-
 }

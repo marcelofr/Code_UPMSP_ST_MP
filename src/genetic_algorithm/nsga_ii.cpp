@@ -1,14 +1,12 @@
 ﻿#include "nsga_ii.h"
 
-void nsga_ii(unsigned time_limit){
+void nsga_ii(unsigned time_limit, vector<Solution> &non_dominated_set){
     vector<GASolution> P;
 
     GenerateInitialPopulation(P);
 
     cout << "====População Inicial========" << endl;
-
     PrintPopulation(P);
-
     cout << "=============================" << endl;
 
     vector<GASolution> Q, R;
@@ -79,6 +77,12 @@ void nsga_ii(unsigned time_limit){
     PrintPopulation(F[0]);
 
     t1->printElapsedTimeInMilliSec();
+
+    for(auto it = F[0].begin(); it != F[0].end(); ++it){
+        non_dominated_set.push_back(*it);
+    }
+
+    //(vector<GASolution>)set_solution_dominated = F[0];
 
 }
 

@@ -1,7 +1,8 @@
 TEMPLATE = app
-CONFIG += console c++11
+CONFIG += console c++20
 CONFIG -= app_bundle
 CONFIG -= qt
+QMAKE_CXXFLAGS += -std=gnu++1z
 
 SOURCES += \
         common/experiments.cpp \
@@ -10,7 +11,9 @@ SOURCES += \
         common/utils.cpp \
         genetic_algorithm/ga.cpp \
         genetic_algorithm/nsga_ii.cpp \
-        main.cpp
+        main.cpp \
+        metric/hypervolume.cpp \
+        metric/metric.cpp
 
 HEADERS += \
     common/Timer.h \
@@ -19,4 +22,6 @@ HEADERS += \
     common/solution.h \
     common/utils.h \
     genetic_algorithm/ga.h \
-    genetic_algorithm/nsga_ii.h
+    genetic_algorithm/nsga_ii.h \
+    metric/hypervolume.h \
+    metric/metric.h
