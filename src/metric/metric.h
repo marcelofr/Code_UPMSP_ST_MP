@@ -24,6 +24,4 @@ void CalculateMetric(string folder_solution);
 void ReadFilesInFolder(string folder_solution, vector<string> &files);
 void ReadFile(string file_name, instance_result &ir);
 
-void SalveSolution(instance_result ir, string file_solution);
-
 #endif // METRIC_H

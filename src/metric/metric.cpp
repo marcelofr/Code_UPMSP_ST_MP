@@ -18,6 +18,10 @@ void CalculateMetric(string folder_solution)
 
 }
 
+/*
+ * Método para identificar os arquivos presentes em uma pasta e
+ * salvar seus nomes em um vetor
+ */
 void ReadFilesInFolder(string folder_solution, vector<string> &files)
 {
 
@@ -28,6 +32,10 @@ void ReadFilesInFolder(string folder_solution, vector<string> &files)
 
 }
 
+/*
+ * Método para ler um arquivo com um conjunto de soluções não-dominadas e
+ * salvar os dados na estrutura ir
+ */
 void ReadFile(string file_name, instance_result &ir)
 {
     fstream file;
@@ -65,20 +73,4 @@ void ReadFile(string file_name, instance_result &ir)
     }
 
     file.close();
-}
-
-void SalveSolution(instance_result ir, string file_solution){
-
-    ofstream MyFile(file_solution);
-
-    MyFile << ir.algorithm_name << endl;
-    MyFile << ir.time << endl;
-    MyFile << ir.instance_name << endl;
-    MyFile << ir.seed << endl;
-    MyFile << endl;
-    MyFile << "makespan" << "\t" << "tec" << endl;
-
-    for (auto it=ir.non_dominated_set.begin(); it != ir.non_dominated_set.end();++it) {
-        MyFile << it->first << "\t" << it->second << endl;
-    }
 }

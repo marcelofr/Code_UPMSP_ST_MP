@@ -22,6 +22,12 @@ string itos(size_t i) {
     return s.str();
 }
 
+string itos(unsigned i) {
+    stringstream s;
+    s << i;
+    return s.str();
+}
+
 string dtos(double i) {
     stringstream s;
     s << i;

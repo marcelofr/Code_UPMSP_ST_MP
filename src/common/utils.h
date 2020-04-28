@@ -7,8 +7,8 @@
 #include <sstream>
 #include <vector>
 
-//#define RELEASE
-#define DEBUG
+#define RELEASE
+//#define DEBUG
 //#define IRACE
 
 
@@ -20,6 +20,7 @@ using namespace std;
 void MakeTrace();
 string itos(int i);
 string itos(size_t i);
+string itos(unsigned i);
 string dtos(double i);
 
 void init(int uf[], int N ) ;

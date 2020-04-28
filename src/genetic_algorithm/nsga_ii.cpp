@@ -5,9 +5,12 @@ void nsga_ii(unsigned time_limit, vector<Solution> &non_dominated_set){
 
     GenerateInitialPopulation(P);
 
+#ifdef DEBUG
     cout << "====População Inicial========" << endl;
     PrintPopulation(P);
     cout << "=============================" << endl;
+#endif
+
 
     vector<GASolution> Q, R;
     vector<vector<GASolution>> F;
@@ -73,10 +76,12 @@ void nsga_ii(unsigned time_limit, vector<Solution> &non_dominated_set){
     //Criar as frentes F[1], F[2], ...
     FastNonDominatedSort(F, R);
 
+#ifdef DEBUG
     //PrintPopulation(population);
     PrintPopulation(F[0]);
 
     t1->printElapsedTimeInMilliSec();
+#endif
 
     for(auto it = F[0].begin(); it != F[0].end(); ++it){
         non_dominated_set.push_back(*it);
