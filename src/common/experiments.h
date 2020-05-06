@@ -8,6 +8,7 @@
 #include "genetic_algorithm/nsga_ii.h"
 #include "metric/metric.h"
 #include "math_model/run_model.h"
+#include "common/solution.h"
 
 using namespace std;
 

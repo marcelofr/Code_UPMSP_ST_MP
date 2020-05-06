@@ -7,8 +7,8 @@
 #include <sstream>
 #include <vector>
 
-#define RELEASE
-//#define DEBUG
+//#define RELEASE
+#define DEBUG
 //#define IRACE
 
 

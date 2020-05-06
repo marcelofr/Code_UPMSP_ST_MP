@@ -147,17 +147,17 @@ void GenerateOffspring1(GASolution parent1, GASolution parent2,
 
     //Criar a representação em forma de vetor para cada pai
     //Pai 1
-    vector<unsigned> p1(Instance::numJobs+1);
+    vector<unsigned> p1(Instance::num_jobs+1);
     SolutionListToVector(parent1, p1);
 
     //Pai 2
-    vector<unsigned> p2(Instance::numJobs+1);
+    vector<unsigned> p2(Instance::num_jobs+1);
     SolutionListToVector(parent2, p2);
 
     //Genes iguais
-    vector<int> o1(Instance::numJobs+1, -1), o2(Instance::numJobs+1, -1);
-    vector<unsigned> o1_g(Instance::numJobs+1, 0), o2_g(Instance::numJobs+1, 0);
-    for (unsigned j = 0; j <= Instance::numJobs; ++j) {
+    vector<int> o1(Instance::num_jobs+1, -1), o2(Instance::num_jobs+1, -1);
+    vector<unsigned> o1_g(Instance::num_jobs+1, 0), o2_g(Instance::num_jobs+1, 0);
+    for (unsigned j = 0; j <= Instance::num_jobs; ++j) {
         if(p1[j] == p2[j]){
             o1[j] = p1[j];
             o1_g[p1[j]] = 1;
@@ -168,7 +168,7 @@ void GenerateOffspring1(GASolution parent1, GASolution parent2,
 
     unsigned aux1;
     //Genes diferentes
-    for (unsigned j = 0; j <= Instance::numJobs; ++j) {
+    for (unsigned j = 0; j <= Instance::num_jobs; ++j) {
         //Se o filho 1 ainda não herdou o gene j dos pais
         if(o1[j] == -1){
             //Se ele pode herdar de qualquer um dos dois pais
@@ -200,10 +200,10 @@ void GenerateOffspring1(GASolution parent1, GASolution parent2,
     //Identificar as tarefas que não foram alocadas
     vector<unsigned> o1_r;
     unsigned k = 0;
-    for (unsigned j = 0; j <= Instance::numJobs; ++j) {
+    for (unsigned j = 0; j <= Instance::num_jobs; ++j) {
         //Se o filho 1 ainda não herdou o gene j dos pais
         if(o1_g[j] == 0){
-            while (k <= Instance::numJobs) {
+            while (k <= Instance::num_jobs) {
                 if(o1[k] == -1){
                     o1[k] = j;
                 }
@@ -215,7 +215,7 @@ void GenerateOffspring1(GASolution parent1, GASolution parent2,
     //Completar o filho gerado
     unsigned tam = 3;
     aux1 = 0;
-    for (unsigned i = 1; i <= Instance::numMachine; ++i) {
+    for (unsigned i = 1; i <= Instance::num_machine; ++i) {
         unsigned j = 0;
         while(j < tam){
             offspring1.scheduling[i].push_back(o1[aux1]);
@@ -235,19 +235,19 @@ void GenerateOffspring2(GASolution parent1, GASolution parent2,
 {
     //Criar a representação em forma de vetor para cada pai
     //Pai 1
-    vector<unsigned> p1(Instance::numJobs+1);
+    vector<unsigned> p1(Instance::num_jobs+1);
     SolutionListToVector(parent1, p1);
 
     //Pai 2
-    vector<unsigned> p2(Instance::numJobs+1);
+    vector<unsigned> p2(Instance::num_jobs+1);
     SolutionListToVector(parent2, p2);
 
     //Vetores para os filhos
-    vector<int> o1(Instance::numJobs+1, -1), o2(Instance::numJobs+1, -1);
+    vector<int> o1(Instance::num_jobs+1, -1), o2(Instance::num_jobs+1, -1);
 
     //Realizar o cruzamento
     unsigned next_index = 0;
-    for (unsigned j = 0; j <= Instance::numJobs; ++j) {
+    for (unsigned j = 0; j <= Instance::num_jobs; ++j) {
         if(o1[p1[next_index]] < 0 && o1[p2[next_index]] < 0){
             if(p1[next_index] == p2[next_index]){
                 o1[next_index] = p1[next_index];
@@ -271,13 +271,13 @@ void GenerateOffspring2(GASolution parent1, GASolution parent2,
         }
         else{
             unsigned k;
-            for (k = 0; k <= Instance::numJobs; ++k) {
+            for (k = 0; k <= Instance::num_jobs; ++k) {
                 if(o1[k] < 0 && k != next_index){
                     o1[next_index] = k;
                     break;
                 }
             }
-            if(k == Instance::numJobs+1){
+            if(k == Instance::num_jobs+1){
                 o1[next_index] = 0;
             }
         }
@@ -296,7 +296,7 @@ void GenerateOffspring2(GASolution parent1, GASolution parent2,
     unsigned size_machine, sum_jobs;
     next_index = 0;
     sum_jobs = 0;
-    for (unsigned i = 1; i < Instance::numMachine; ++i) {
+    for (unsigned i = 1; i < Instance::num_machine; ++i) {
         if(parent1.scheduling[i].size() == parent2.scheduling[i].size()){
             size_machine = parent1.scheduling[i].size();
         }
@@ -311,9 +311,9 @@ void GenerateOffspring2(GASolution parent1, GASolution parent2,
             next_index = o1[next_index];
         }
     }
-    size_machine = Instance::numJobs - sum_jobs;
+    size_machine = Instance::num_jobs - sum_jobs;
     for (unsigned j = 0; j < size_machine; ++j) {
-        offspring1.scheduling[Instance::numMachine].push_back(o1[next_index]);
+        offspring1.scheduling[Instance::num_machine].push_back(o1[next_index]);
         next_index = o1[next_index];
     }
     offspring1.CalculateInitialTimeMin();
@@ -329,7 +329,7 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
 {
 
     //Vetores para os filhos
-    vector<bool> o1(Instance::numJobs+1, false), o2(Instance::numJobs+1, false);
+    vector<bool> o1(Instance::num_jobs+1, false), o2(Instance::num_jobs+1, false);
 
     unsigned size;
 
@@ -337,7 +337,7 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
 
     //Para cada máquina, a primeira parte das tarefas do pai 1 é herdada pelo filho 1
     //A segunda parte é herdada pelo filho 2
-    for (unsigned i = 1; i <= Instance::numMachine; ++i) {
+    for (unsigned i = 1; i <= Instance::num_machine; ++i) {
 
         if(parent1.scheduling[i].size() > 0){
             //O filho 1 herda a primeira parte das tarefas do pai 1, na máquina i
@@ -364,7 +364,7 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
     }
 
     //As tarefas restantes dos filhos 1 e 2 são herdadas de acordo com característica do pai 2
-    for (unsigned i = 1; i <= Instance::numMachine; ++i) {
+    for (unsigned i = 1; i <= Instance::num_machine; ++i) {
         for(auto it = parent2.scheduling[i].begin(); it != parent2.scheduling[i].end(); ++it){
 
             //Se a tarefa it ainda não está no filho 1, então ela deve ser adicionada
@@ -430,7 +430,7 @@ void SolutionListToVector(GASolution s, vector<unsigned> &v_solution)
 
     //Criar a representação em forma de vetor
     unsigned index = 0;
-    for (unsigned i = 1; i <= Instance::numMachine; ++i) {
+    for (unsigned i = 1; i <= Instance::num_machine; ++i) {
         v_solution[index] = s.scheduling[i][0];
         for (unsigned j = 0; j < s.scheduling[i].size()-1; ++j) {
             index = v_solution[index];
@@ -496,7 +496,7 @@ void MutationOperatorSwapInside(GASolution &individual)
 {
     unsigned machine, pos_job1, pos_job2;
     //Escolher aleatoriamente a máquina na qual a troca será realizada
-    machine = 1 + rand()%Instance::numMachine;
+    machine = 1 + rand()%Instance::num_machine;
 
     //Caso não tenha pelo menos duas tarefas, não deve realizar a mutação
     if(individual.scheduling[machine].size() < 2){

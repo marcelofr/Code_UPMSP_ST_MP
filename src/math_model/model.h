@@ -6,7 +6,7 @@
 #include "gurobi_c++.h"
 #include "common/utils.h"
 #include "common/instance.h"
-//#include "solution.h"
+#include "common/solution.h"
 
 
 class Model
@@ -25,7 +25,7 @@ public:
 
     void Create(GRBModel *model, double MaxTime);
     void AddVar();
-    //void SetInitialSolutionToMathModel(Solution &MySolutionLS);
+    void SetInitialSolutionToMathModel(Solution *MySolutionLS);
     void SetObjective(double alpha);
     void SetConstraint();
     void Optimize();

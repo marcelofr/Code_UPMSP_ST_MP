@@ -8,6 +8,6 @@
 
 using namespace std;
 
-void RunMathModel(string instance_file, unsigned max_time, double alpha);
+void RunMathModel(unsigned max_time, double alpha, Solution * my_solution);
 
 #endif // RUN_MODEL_H

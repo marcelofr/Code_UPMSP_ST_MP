@@ -13,12 +13,13 @@ void RunAlgorithm(Parameters Param){
     //srand (time(NULL));
 
     //Read instance
-    Instance::ReadJulioInstance(Param.instance_file);
+    //Instance::ReadJulioInstance(Param.instance_file);
+    Instance::ReadMarceloInstance(Param.instance_file);
 
     //Critério de parada baseado no artigo do Luciano, Swarm 2019
     stringstream ss1(Param.max_time_factor);
     ss1 >> max_time_factor;
-    max_time = max_time_factor * Instance::numJobs;
+    max_time = max_time_factor * Instance::num_jobs;
 
     vector<Solution> non_dominated_set;
     instance_result ir;
@@ -28,7 +29,13 @@ void RunAlgorithm(Parameters Param){
         nsga_ii(max_time, non_dominated_set);
     }
     else if(Param.algorithm == "EXACT"){
-        RunMathModel(Param.instance_file, max_time, 0);
+        Solution * my_solution;
+        /*Gerar uma população inicial*/
+        /*Gerar uma solução gulosa considerando o objetivo do makespan*/
+        my_solution = new Solution();
+        my_solution->GreedyInitialSolutionMakespan();
+
+        RunMathModel(max_time, 0, my_solution);
     }
 
     SalveSolution(non_dominated_set, Param, ir);
@@ -47,7 +54,7 @@ void SalveSolution(vector<Solution> non_dominated_set, Parameters Param, instanc
     ir.algorithm_name = Param.algorithm;
     stringstream ss1(Param.max_time_factor);
     ss1 >> max_time_factor;
-    ir.time = max_time_factor*Instance::numJobs;
+    ir.time = max_time_factor*Instance::num_jobs;
     ir.instance_name = Param.instance_name;
     stringstream ss(Param.seed);
     ss >> ir.seed;

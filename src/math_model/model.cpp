@@ -16,10 +16,10 @@ void Model::Create(GRBModel *model, double MaxTime)
 
     model->set(GRB_IntParam_OutputFlag, 1);
 
-    model->set(GRB_IntParam_Threads, 1);
+    model->set(GRB_IntParam_Threads, 4);
     //model->set(GRB_IntParam_LazyConstraints, 1);
-    //model.set(GRB_IntParam_Presolve, 1);
-    model->set(GRB_DoubleParam_TimeLimit, MaxTime);
+    //model->set(GRB_IntParam_Presolve, 0);
+    //model->set(GRB_DoubleParam_TimeLimit, MaxTime);
     //model->set(GRB_DoubleParam_TimeLimit, 30.0);
     model->set(GRB_DoubleParam_MIPGap, EPS);
 
@@ -32,15 +32,15 @@ void Model::AddVar()
     //X_ijhl = 1 Variável binária que assume valor 1 se a tarefa j for alocada à máquina i
     //no instante de tempo h e no modo de operação l, e valor 0, caso contrário
     this->X = vector<vector<vector<vector<GRBVar>>>>
-                (Instance::numMachine+1, vector<vector<vector<GRBVar>>>
-                    (Instance::numJobs+1, vector<vector<GRBVar>>
-                        (Instance::numPlanningHorizon+1, vector<GRBVar>
-                            (Instance::numModeOp+1))));
+                (Instance::num_machine+1, vector<vector<vector<GRBVar>>>
+                    (Instance::num_jobs+1, vector<vector<GRBVar>>
+                        (Instance::num_planning_horizon+1, vector<GRBVar>
+                            (Instance::num_mode_op+1))));
 
-    for (size_t i = 1; i <= Instance::numMachine; i++) {
-        for (size_t j = 1; j <= Instance::numJobs; j++) {
-            for (size_t h = 0; h <= Instance::numPlanningHorizon; h++) {
-                for (size_t l = 1; l <= Instance::numModeOp; l++) {
+    for (size_t i = 1; i <= Instance::num_machine; i++) {
+        for (size_t j = 1; j <= Instance::num_jobs; j++) {
+            for (size_t h = 0; h <= Instance::num_planning_horizon; h++) {
+                for (size_t l = 1; l <= Instance::num_mode_op; l++) {
                     str = "X[" + itos(i) + "][" + itos(j) + "][" + itos(h) + "][" + itos(l) + "]";
                     X[i][j][h][l] = model->addVar(0, 1, 0, GRB_BINARY, str);
                 }
@@ -61,26 +61,20 @@ void Model::AddVar()
     model->update();
 }
 
-//void Exact::SetInitialSolutionToMathModel(Solution &MySolutionLS)
-//{
-//    string str;
-//    size_t size;
-//    for (size_t i = 1; i <= Instance::numMachine; i++) {
-//        size = MySolutionLS.scheduling[i].size();
-//        /*Primeira tarefa*/
-//        if(size){
-//            //str = "x[" + itos(i) + "][" + itos(0) + "][" + itos(MySolutionLS.scheduling[i][0]) + "]";
-//            //model->getVarByName(str).set(GRB_DoubleAttr_Start, 1);
-//            this->X[i][0][MySolutionLS.scheduling[i][0]].set(GRB_DoubleAttr_Start, 1);
-//        }
-//        /*Demais tarefas*/
-//        for (size_t j = 1; j < size; j++) {
-//            //str = "x[" + itos(i) + "][" + itos(MySolutionLS.scheduling[i][j-1]) + "][" + itos(MySolutionLS.scheduling[i][j]) + "]";
-//            //model->getVarByName(str).set(GRB_DoubleAttr_Start, 1);
-//            this->X[i][MySolutionLS.scheduling[i][j-1]][MySolutionLS.scheduling[i][j]].set(GRB_DoubleAttr_Start, 1);
-//        }
-//    }
-//}
+void Model::SetInitialSolutionToMathModel(Solution *MySolutionLS)
+{
+    string str;
+    unsigned size;
+    for (unsigned i = 1; i <= Instance::num_machine; i++) {
+        size = MySolutionLS->scheduling[i].size();
+        //Demais tarefas
+        for (auto j = MySolutionLS->scheduling[i].begin(); j != MySolutionLS->scheduling[i].end(); ++j) {
+            //str = "x[" + itos(i) + "][" + itos(MySolutionLS.scheduling[i][j-1]) + "][" + itos(MySolutionLS.scheduling[i][j]) + "]";
+            //model->getVarByName(str).set(GRB_DoubleAttr_Start, 1);
+            this->X[i][*j][MySolutionLS->H1[*j]][MySolutionLS->job_mode_op[*j]].set(GRB_DoubleAttr_Start, 1);
+        }
+    }
+}
 
 void Model::SetObjective(double alpha)
 {
@@ -88,10 +82,10 @@ void Model::SetObjective(double alpha)
     //(2)
     //double alpha = 0.5;
     //GRBLinExpr aux = (CMax/Instance::numPlanningHorizon)*alpha +((PecOn+PecOff)/Instance::maxCost)*(1-alpha);
-    //GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
+    GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
     //GRBLinExpr aux = (CMax);
     //GRBLinExpr aux = (PecOn+PecOff);
-    GRBLinExpr aux = PecOn;
+    //GRBLinExpr aux = PecOn;
     //GRBLinExpr aux = PecOff;
     model->setObjective(aux, GRB_MINIMIZE);
 }
@@ -105,19 +99,20 @@ void Model::SetConstraint()
     //(3)
     //Toda tarefa j deve ser processada apenas uma vez
     unsigned limit, pt_round;
-    for (unsigned j = 1; j <= Instance::numJobs; j++) {
+    for (unsigned j = 1; j <= Instance::num_jobs; j++) {
         aux1 = 0;
-        for (unsigned i = 1; i <= Instance::numMachine; i++) {
-            for (unsigned l = 1; l <= Instance::numModeOp; l++) {
-                pt_round = ceil(Instance::ProcessingTime[i][j]/Instance::SpeedFactor[l]);
-                limit = Instance::numPlanningHorizon - pt_round;
+        for (unsigned i = 1; i <= Instance::num_machine; i++) {
+            for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
+                pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                limit = Instance::num_planning_horizon - pt_round;
+                //limit = Instance::num_planning_horizon;
                 for (unsigned h = 0; h <= limit; h++) {
                     aux1 +=X[i][j][h][l];
                 }
             }
         }
-        str = "Sum(X[i, " + itos(j) + ", l, h]) = 1 | i(1:" + itos(Instance::numMachine) +
-                "), l(1:" + itos(Instance::numModeOp) + "), h(0:" + itos(Instance::numPlanningHorizon) + ")";
+        str = "Sum(X[i, " + itos(j) + ", l, h]) = 1 | i(1:" + itos(Instance::num_machine) +
+                "), l(1:" + itos(Instance::num_mode_op) + "), h(0:" + itos(Instance::num_planning_horizon) + ")";
         model->addConstr(aux1, GRB_EQUAL, 1, str);
     }
 
@@ -125,19 +120,19 @@ void Model::SetConstraint()
     //
     unsigned limit2;
     int a, b;
-    for (unsigned i = 1; i <= Instance::numMachine; i++) {
-        for (unsigned j = 1; j <= Instance::numJobs; j++) {
-            for (unsigned k = 1; k <= Instance::numJobs; k++) {
+    for (unsigned i = 1; i <= Instance::num_machine; i++) {
+        for (unsigned j = 1; j <= Instance::num_jobs; j++) {
+            for (unsigned k = 1; k <= Instance::num_jobs; k++) {
                 if(j != k ){
-                    for (unsigned l = 1; l <= Instance::numModeOp; l++) {
-                        for (unsigned h = 0; h <= Instance::numPlanningHorizon; h++) {
+                    for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
+                        for (unsigned h = 0; h <= Instance::num_planning_horizon; h++) {
                             aux1 = 0;
-                            pt_round = ceil(Instance::ProcessingTime[i][j]/Instance::SpeedFactor[l]);
-                            a = h + pt_round + Instance::SetupTime[i][j][k] - 1;
-                            b = Instance::numPlanningHorizon;
+                            pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                            a = h + pt_round + Instance::m_setup_time[i][j][k] - 1;
+                            b = Instance::num_planning_horizon;
                             limit2 = unsigned(min(a, b));
                             for (unsigned u = h; u <= limit2; u++) {
-                                for (unsigned l1 = 1; l1 <= Instance::numModeOp; l1++) {
+                                for (unsigned l1 = 1; l1 <= Instance::num_mode_op; l1++) {
                                     aux1 +=X[i][k][u][l1];
                                 }
                             }
@@ -151,14 +146,14 @@ void Model::SetConstraint()
     }
 
     //(5)
-    for (unsigned i = 1; i <= Instance::numMachine; i++) {
-        for (unsigned j = 1; j <= Instance::numJobs; j++) {
-            for (unsigned l = 1; l <= Instance::numModeOp; l++) {
-                for (unsigned h = 0; h <= Instance::numPlanningHorizon; h++) {
+    for (unsigned i = 1; i <= Instance::num_machine; i++) {
+        for (unsigned j = 1; j <= Instance::num_jobs; j++) {
+            for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
+                for (unsigned h = 0; h <= Instance::num_planning_horizon; h++) {
                     //str = "Sum(X[i, " + itos(j) + ", l, h]) = 1 |
                     //i(1:" + itos(Instance::numMachine) + "), l(1:" + itos(Instance::numModeOp) + "),
                     //h(0:" + itos(Instance::numPlanningHorizon) + ")";
-                    pt_round = ceil(Instance::ProcessingTime[i][j]/Instance::SpeedFactor[l]);
+                    pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
                     model->addConstr(CMax, GRB_GREATER_EQUAL, X[i][j][h][l]*(h+pt_round), str);
                 }
             }
@@ -172,34 +167,35 @@ void Model::SetConstraint()
 
     resultado = 0;
     aux0 = 0;
-    for (unsigned i = 1; i <= Instance::numMachine; i++) {
-        for (unsigned j = 1; j <= Instance::numJobs; j++) {
-            for (unsigned l = 1; l <= Instance::numModeOp; l++) {
+    for (unsigned i = 1; i <= Instance::num_machine; i++) {
+        for (unsigned j = 1; j <= Instance::num_jobs; j++) {
+            for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
 
-                aux0 = Instance::ConsumptionFactor[l]*
-                        Instance::MachinePotency[i]*
-                        Instance::rateOnPeakHours/6;
+                aux0 = Instance::v_consumption_factor[l]*
+                        Instance::v_machine_potency[i]*
+                        Instance::rate_on_peak/6;
 
                 aux2 = 0;
-                for (unsigned h = 0; h < Instance::peakStart; h++) {
-                    pt_round = ceil(Instance::ProcessingTime[i][j]/Instance::SpeedFactor[l]);
+                for (unsigned h = 0; h < Instance::peak_start; h++) {
+                    pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
                     a = h + pt_round - 1;
-                    b = Instance::peakEnd;
+                    b = Instance::peak_end;
                     c = min(a, b);
                     a = 0;
-                    b = c - (Instance::peakStart - 1);
+                    b = c - (Instance::peak_start - 1);
                     c = max(a, b);
                     aux2 += X[i][j][h][l]*c;
 
-                    cout << aux2 << endl;
+                    //cout << aux2 << endl;
                 }
 
                 aux3 = 0;
-                for (unsigned h = Instance::peakStart; h <= Instance::peakEnd; h++) {
-                    pt_round = ceil(Instance::ProcessingTime[i][j]/Instance::SpeedFactor[l]);
+                for (unsigned h = Instance::peak_start; h <= Instance::peak_end; h++) {
+                    pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
                     a = h + pt_round;
-                    b = Instance::peakEnd + 1;
-                    c = min(a, b) - h;
+                    b = Instance::peak_end + 1;
+                    c = min(a, b);
+                    c -= h;
                     aux3 += X[i][j][h][l]*c;
                 }
 
@@ -213,43 +209,46 @@ void Model::SetConstraint()
     model->addConstr(PecOn, GRB_GREATER_EQUAL, resultado, str);
 
 
-    //(7)
+    //(7) PEC_off
     aux1 = 0;
     aux2 = 0;
     aux3 = 0;
     aux4 = 0;
     aux0 = 0;
     resultado = 0;
-    for (unsigned i = 1; i <= Instance::numMachine; i++) {
-        for (unsigned j = 1; j <= Instance::numJobs; j++) {
-            for (unsigned l = 1; l <= Instance::numModeOp; l++) {
+    for (unsigned i = 1; i <= Instance::num_machine; i++) {
+        for (unsigned j = 1; j <= Instance::num_jobs; j++) {
+            for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
 
-                aux0 = Instance::ConsumptionFactor[l]*
-                        Instance::MachinePotency[i]*
-                        Instance::rateOnPeakHours/6;
+                aux0 = Instance::v_consumption_factor[l]*
+                        Instance::v_machine_potency[i]*
+                        Instance::rate_off_peak/6;
 
-                for (unsigned h = 0; h <= Instance::peakStart; h++) {
-                    a = int(h+ceil(Instance::ProcessingTime[i][j]/Instance::SpeedFactor[l]));
-                    b = int(Instance::peakEnd);
-                    c = min(a, b) - int(h);
+                aux2 = 0;
+                for (unsigned h = 0; h < Instance::peak_start; h++) {
+                    a = h+ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                    b = Instance::peak_start;
+                    c = min(a, b);
+                    c -= h;
                     a = 0;
-                    b = int(h+ceil(Instance::ProcessingTime[i][j]/
-                                   Instance::SpeedFactor[l])-Instance::peakEnd+1);
-                    c = c + max(a, b);
+                    b = h+ceil(Instance::m_processing_time[i][j]/
+                                   Instance::v_speed_factor[l])-Instance::peak_end-1;
+                    c += max(a, b);
                     aux2 += X[i][j][h][l]*c;
                 }
 
-
-                for (unsigned h = Instance::peakStart; h <= Instance::peakEnd; h++) {
+                aux3 = 0;
+                for (unsigned h = Instance::peak_start; h <= Instance::peak_end; h++) {
                     a = 0;
-                    b = int(h+ceil(Instance::ProcessingTime[i][j]/
-                                   Instance::SpeedFactor[l])-Instance::peakEnd-1);
+                    b = h+ceil(Instance::m_processing_time[i][j]/
+                                   Instance::v_speed_factor[l])-Instance::peak_end-1;
                     c = max(a, b);
                     aux3 += X[i][j][h][l]*c;
                 }
 
-                for (unsigned h = Instance::peakStart; h <= Instance::numPlanningHorizon; h++) {
-                    c = int(ceil(Instance::ProcessingTime[i][j]/Instance::SpeedFactor[l]));
+                aux4 = 0;
+                for (unsigned h = Instance::peak_end+1; h <= Instance::num_planning_horizon; h++) {
+                    c = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
                     aux4 += X[i][j][h][l]*c;
                 }
 
@@ -344,43 +343,27 @@ void Model::Optimize()
 //    }
 //}
 
-//void Exact::PrintVars()
-//{
+void Model::PrintVars()
+{
 
-//    double valor;
-//    string str;
+    double valor;
+    string str;
 
-//    cout << "=======  X  ==========" << endl << endl;
+    cout << "=======  X  ==========" << endl << endl;
 
-//    for (size_t i = 1; i < NumMachines; i++) {
-//        for (size_t j = 0; j < NumJobs; j++) {
-//            for (size_t k = 0; k < NumJobs; k++) {
-//                if(j != k){
-//                    str = "X[" + itos(i) + "][" + itos(j) + "][" + itos(k) + "]";
-//                    valor = model->getVarByName(str).get(GRB_DoubleAttr_X);
-//                }
-//                else{
-//                    valor = 0;
-//                }
-//                //this->SolutionPLIM[i][j][k] = valor;
-//                //cout << this->SolutionPLIM[i][j][k] << " ";
-//                cout << valor << " ";
+    for (unsigned i = 1; i <= Instance::num_machine; i++) {
+        for (unsigned j = 1; j <= Instance::num_jobs; j++) {
+            for (unsigned h = 0; h <= Instance::num_planning_horizon; h++) {
+                for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
 
-//            }
-//            cout << endl;
-//        }
-//        cout << endl << endl;
-//    }
+                    str = "X[" + itos(i) + "][" + itos(j) + "][" + itos(h) + "][" + itos(l) + "]";
+                    valor = model->getVarByName(str).get(GRB_DoubleAttr_X);
 
-//    cout << "========  Y  ===========" << endl << endl;
+                    if(valor > 0)
+                        cout << str << endl;
 
-//    for (size_t i = 1; i < NumMachines; i++) {
-//        for (size_t j = 0; j < NumJobs; j++) {
-//            str = "Y[" + itos(i) + "][" + itos(j) + "]";
-//            valor = model->getVarByName(str).get(GRB_DoubleAttr_X);
-//            cout << valor << " ";
-
-//        }
-//        cout << endl;
-//    }
-//}
+                }
+            }
+        }
+    }
+}

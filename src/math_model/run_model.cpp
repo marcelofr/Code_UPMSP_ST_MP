@@ -1,10 +1,10 @@
 #include "run_model.h"
 
 
-void RunMathModel(string instance_file, unsigned max_time, double alpha)
+void RunMathModel(unsigned max_time, double alpha, Solution * my_solution)
 {
 
-    Instance::ReadJulioInstance(instance_file);
+    //Instance::ReadJulioInstance(instance_file);
     Instance::PrintInstance1();
 
     try {
@@ -19,11 +19,19 @@ void RunMathModel(string instance_file, unsigned max_time, double alpha)
         Mymodel->AddVar();
         Mymodel->SetObjective(alpha);
         Mymodel->SetConstraint();
+        Mymodel->SetInitialSolutionToMathModel(my_solution);
         Mymodel->Optimize();
 
         string var = "CMax";
-        cout << "CMax: " << model.getVarByName(var).get(GRB_DoubleAttr_X);
+        cout << endl;
+        cout << var << ": " <<  model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
+        var = "PecOn";
+        cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
+        var = "PecOff";
+        cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
         //Mymodel->get
+
+        Mymodel->PrintVars();
 
     } catch(GRBException e) {
         cout << "Error code = " << e.getErrorCode() << endl;
