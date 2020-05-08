@@ -19,7 +19,7 @@ void GenerateInitialPopulation(vector<GASolution> &population)
 
     /*Gerar uma solução gulosa considerando o objetivo do TEC*/
     my_solution = new GASolution();
-    my_solution->GreedyInitialSolutionTEC();
+    my_solution->GreedyInitialSolutionTEC3();
     population.push_back(*my_solution);
 
     /*Gerar o restante dos indivíduos aleatoriamente*/
@@ -45,14 +45,16 @@ void PrintPopulation(vector<GASolution> &population)
  * Cruzamento para gerar TAM_CROSSOVER indivíduos
  * Uso de torneio binário para selecionar os indivíduos para o cruzamento
  */
-void Crossover(vector<GASolution> &population, vector<GASolution> &new_population)
+void Crossover(vector<GASolution> &population, vector<GASolution> &new_population, vector<vector<GASolution>> F)
 {
     GASolution *parent1, *parent2, *offspring1, *offspring2;
     unsigned ind1, ind2;
     unsigned size = population.size();
 
+    new_population.clear();
+
     //Gerar novos indivíduos com o cruzamento
-    for (unsigned i = 0; i < TAM_CROSSOVER; ++i) {
+    for (unsigned i = 0; i < TAM_CROSSOVER/2; ++i) {
 
         //Seleção de indivíduos por torneio binário
 
@@ -85,6 +87,7 @@ void Crossover(vector<GASolution> &population, vector<GASolution> &new_populatio
 
         //Adicionar os filhos gerados à nova população
         new_population.push_back(*offspring1);
+        new_population.push_back(*offspring2);
 
     }
 
@@ -316,7 +319,7 @@ void GenerateOffspring2(GASolution parent1, GASolution parent2,
         offspring1.scheduling[Instance::num_machine].push_back(o1[next_index]);
         next_index = o1[next_index];
     }
-    offspring1.CalculateInitialTimeMin();
+    offspring1.CalculateShorterTimeHorizon();
     offspring1.CalculateObjective();
 
 }
@@ -380,7 +383,8 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
                     offspring1.AddJobGreedyMakespanMachine(i, *it, parent2.job_mode_op[*it]);
                 }
                 else{
-                    offspring1.AddJobGreedyTECMachine(i, *it, parent2.job_mode_op[*it]);
+                    //offspring1.AddJobGreedyTECMachine(i, *it, parent2.job_mode_op[*it]);
+                    offspring1.AddJobGreedyTECMachine3(i, *it, parent2.job_mode_op[*it]);
                 }
 
             }
@@ -398,7 +402,8 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
                     offspring2.AddJobGreedyMakespanMachine(i, *it, parent2.job_mode_op[*it]);
                 }
                 else{
-                    offspring2.AddJobGreedyTECMachine(i, *it, parent2.job_mode_op[*it]);
+                    //offspring2.AddJobGreedyTECMachine(i, *it, parent2.job_mode_op[*it]);
+                    offspring2.AddJobGreedyTECMachine3(i, *it, parent2.job_mode_op[*it]);
                 }
 
             }
@@ -408,14 +413,14 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
     if(op == 0){
         //Definir o instance inicial de cada tarefa presente na sequência
         //considerando o menor valor para o tempo de término em cada máquina
-        offspring1.CalculateInitialTimeMin();
-        offspring2.CalculateInitialTimeMin();
+        offspring1.CalculateShorterTimeHorizon();
+        offspring2.CalculateShorterTimeHorizon();
     }
     else{
         //Definir o instance inicial de cada tarefa presente na sequência
         //considerando o menor valor para o custo de energia
-        offspring1.CalculateInitialTimeAvoidPeak();
-        offspring2.CalculateInitialTimeAvoidPeak();
+        offspring1.CalculateHorizonAvoidingPeak();
+        offspring2.CalculateHorizonAvoidingPeak();
     }
 
 
@@ -518,7 +523,7 @@ void PopulationAddIndividual(vector<GASolution> &population, GASolution &individ
     bool add = true;
     for(auto it = population.begin(); it != population.end(); ++it){
         //Se já tem um indivíduo igual na população
-        if(individual.makeSpan == it->makeSpan && individual.TEC == it->TEC){
+        if(individual.makeSpan == it->makeSpan && abs(individual.TEC - it->TEC) < EPS){
             //Não adicionar
             add = false;
             break;
@@ -527,5 +532,22 @@ void PopulationAddIndividual(vector<GASolution> &population, GASolution &individ
 
     if(add){
         population.push_back(individual);
+    }
+}
+
+/*
+ * População @R recebe a união entre @P e @Q
+ */
+void UnionPopulation(vector<GASolution> &R, vector<GASolution> P, vector<GASolution> Q)
+{
+
+    R.clear();
+
+    for(auto it = P.begin(); it != P.end(); ++it){
+        PopulationAddIndividual(R, *it);
+    }
+
+    for(auto it = Q.begin(); it != Q.end(); ++it){
+        PopulationAddIndividual(R, *it);
     }
 }

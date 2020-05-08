@@ -19,8 +19,8 @@ void Model::Create(GRBModel *model, double MaxTime)
     model->set(GRB_IntParam_Threads, 4);
     //model->set(GRB_IntParam_LazyConstraints, 1);
     //model->set(GRB_IntParam_Presolve, 0);
-    //model->set(GRB_DoubleParam_TimeLimit, MaxTime);
-    //model->set(GRB_DoubleParam_TimeLimit, 30.0);
+    model->set(GRB_DoubleParam_TimeLimit, MaxTime);
+    //model->set(GRB_DoubleParam_TimeLimit, 300.0);
     model->set(GRB_DoubleParam_MIPGap, EPS);
 
 }
@@ -81,8 +81,8 @@ void Model::SetObjective(double alpha)
     // Set objective
     //(2)
     //double alpha = 0.5;
-    //GRBLinExpr aux = (CMax/Instance::numPlanningHorizon)*alpha +((PecOn+PecOff)/Instance::maxCost)*(1-alpha);
-    GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
+    GRBLinExpr aux = (CMax/Instance::num_planning_horizon)*alpha +((PecOn+PecOff)/Instance::max_cost)*(1-alpha);
+    //GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
     //GRBLinExpr aux = (CMax);
     //GRBLinExpr aux = (PecOn+PecOff);
     //GRBLinExpr aux = PecOn;
@@ -105,7 +105,6 @@ void Model::SetConstraint()
             for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
                 pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
                 limit = Instance::num_planning_horizon - pt_round;
-                //limit = Instance::num_planning_horizon;
                 for (unsigned h = 0; h <= limit; h++) {
                     aux1 +=X[i][j][h][l];
                 }
@@ -160,11 +159,11 @@ void Model::SetConstraint()
         }
     }
 
-    //(6)
     aux1 = 0;
     int c;
 
 
+    //(6)
     resultado = 0;
     aux0 = 0;
     for (unsigned i = 1; i <= Instance::num_machine; i++) {

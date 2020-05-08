@@ -17,14 +17,14 @@ void nsga_ii(unsigned time_limit, vector<Solution> &non_dominated_set){
 
     Timer *t1 = new Timer();
 
-    unsigned i;
+    unsigned i, j;
+
+    j = 0;
 
     while (t1->getElapsedTimeInMilliSec() < time_limit) {
 
         //R_t <- P_t U Q_t
-        R.resize(P.size() + Q.size());
-        move(P.begin(), P.end(), R.begin());
-        move(Q.begin(), Q.end(), R.begin()+P.size());
+        UnionPopulation(R, P, Q);
 
         //Criar as frentes F[1], F[2], ...
         FastNonDominatedSort(F, R);
@@ -60,18 +60,18 @@ void nsga_ii(unsigned time_limit, vector<Solution> &non_dominated_set){
         }
 
         //Criar um população Q_{t+1} de tamanho N
-        Crossover(P, Q);
+        Crossover(P, Q, F);
         Mutation(P, Q);
 
         //Registar a contagem do tempo
         t1->stop();
 
+        j++;
+
     }
 
     //R_t <- P_t U Q_t
-    R.resize(P.size() + Q.size());
-    move(P.begin(), P.end(), R.begin());
-    move(Q.begin(), Q.end(), R.begin()+P.size());
+    UnionPopulation(R, P, Q);
 
     //Criar as frentes F[1], F[2], ...
     FastNonDominatedSort(F, R);
@@ -83,6 +83,7 @@ void nsga_ii(unsigned time_limit, vector<Solution> &non_dominated_set){
     t1->printElapsedTimeInMilliSec();
 #endif
 
+    non_dominated_set.clear();
     for(auto it = F[0].begin(); it != F[0].end(); ++it){
         non_dominated_set.push_back(*it);
     }
@@ -101,6 +102,7 @@ void FastNonDominatedSort(vector<vector<GASolution> > &F, vector<GASolution> P)
     vector<GASolution> Q;
 
     Q.clear();
+    F.clear();
 
     //Gerar cada frente F[i]
     for(auto p = P.begin(); p != P.end(); ++p){
@@ -209,19 +211,28 @@ void ComputeCrowdingDistance(vector<GASolution> &F_i)
  */
 bool CompareCrowdingDistance(GASolution & l, GASolution & r) //(2)
 {
-    if((l.rank < r.rank) ||
+    /*if((l.rank < r.rank) ||
             (l.rank == r.rank && l.crowding_distance > r.crowding_distance)){
         return false;
     }
     else{
         return true;
-    }
+    }*/
+    return (l.rank < r.rank) ||
+            (l.rank == r.rank && l.crowding_distance > r.crowding_distance);
 }
 
 /*
  * Ordenar as soluções da frente F[i] de acordo com a crowding distance
  */
-void Sort(vector<GASolution> &F_i)
+void Sort(vector<GASolution> F_i)
 {
-    sort(F_i.begin(), F_i.end(), CompareCrowdingDistance);
+    try
+    {
+        sort(F_i.begin(), F_i.end(), CompareCrowdingDistance);
+    }
+    catch (bad_alloc & exception)
+    {
+        cerr << "bad_alloc detected: " << exception.what();
+    }
 }

@@ -7,6 +7,8 @@ void RunMathModel(unsigned max_time, double alpha, Solution * my_solution)
     //Instance::ReadJulioInstance(instance_file);
     Instance::PrintInstance1();
 
+    double d_num;
+
     try {
         // Criar ambiente
         GRBEnv env = GRBEnv();
@@ -19,15 +21,24 @@ void RunMathModel(unsigned max_time, double alpha, Solution * my_solution)
         Mymodel->AddVar();
         Mymodel->SetObjective(alpha);
         Mymodel->SetConstraint();
-        Mymodel->SetInitialSolutionToMathModel(my_solution);
+        //Mymodel->SetInitialSolutionToMathModel(my_solution);
         Mymodel->Optimize();
 
-        string var = "CMax";
-        cout << endl;
-        cout << var << ": " <<  model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
+        string var;
+
+        var = "CMax";
+        d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
+        my_solution->makeSpan = d_num;
+        cout << endl << var << ": " << d_num << endl;
+
         var = "PecOn";
+        d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
+        my_solution->TEC = d_num;
         cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
+
         var = "PecOff";
+        d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
+        my_solution->TEC += d_num;
         cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
         //Mymodel->get
 

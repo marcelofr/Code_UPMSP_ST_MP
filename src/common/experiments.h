@@ -22,6 +22,7 @@ struct Parameters{
     string file_solution;
     string folder_solution;
     string max_time_factor;
+    string alpha;
 };
 
 void RunAlgorithm(Parameters Param);

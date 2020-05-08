@@ -230,7 +230,7 @@ void Instance::ReadMarceloInstance(string instance_file_name)
 
     //Leitura do custo máximo
     arqEntrada >> next;
-    //arqEntrada >> u_num;
+    arqEntrada >> u_num;
     Instance::max_cost = u_num;
 
     Instance::Init();

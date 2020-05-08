@@ -8,7 +8,7 @@
 #define NEW_POPULATION_SIZE 100
 #define PROBABILITY_CROSSOVER 80
 #define TAM_CROSSOVER 98
-#define PROBABILITY_MUTATION 1
+#define PROBABILITY_MUTATION 5
 
 class GASolution : public Solution{
 public:
@@ -22,7 +22,7 @@ public:
 void GenerateInitialPopulation(vector<GASolution> &population);
 void PopulationAddIndividual(vector<GASolution> &population, GASolution &individual);
 void PrintPopulation(vector<GASolution> &population);
-void Crossover(vector<GASolution> &population, vector<GASolution> &new_population);
+void Crossover(vector<GASolution> &population, vector<GASolution> &new_population, vector<vector<GASolution>> F);
 void Mutation(vector<GASolution> &population, vector<GASolution> &new_population);
 void Selection(vector<GASolution> &population, vector<GASolution> &new_population);
 void GenerateOffspring1(GASolution parent1, GASolution parent2,
@@ -41,5 +41,7 @@ void SolutionListToVector(GASolution s, vector<unsigned> &v_solution);
 
 void SortByMakespan(vector<GASolution> &population);
 void SortByTEC(vector<GASolution> &population);
+
+void UnionPopulation(vector<GASolution> &R, vector<GASolution> P, vector<GASolution> Q);
 
 #endif // GA_H
