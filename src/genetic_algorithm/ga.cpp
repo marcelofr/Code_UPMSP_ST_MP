@@ -143,6 +143,12 @@ void Mutation(vector<GASolution> &population, vector<GASolution> &new_population
                     break;
             }
 
+            if(op < 4){
+                individual->CalculateShorterTimeHorizon();
+            }
+
+            individual->CalculateObjective();
+
             new_population.push_back(*individual);
 
         }
