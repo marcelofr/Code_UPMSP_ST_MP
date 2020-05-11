@@ -16,6 +16,7 @@ public:
     //Objetivos
     unsigned makeSpan;
     double TEC;
+    bool is_optimal;
 
     //Sequenciamento
     vector<vector<unsigned>> scheduling;

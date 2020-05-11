@@ -16,7 +16,7 @@ void Model::Create(GRBModel *model, double MaxTime)
 
     model->set(GRB_IntParam_OutputFlag, 1);
 
-    model->set(GRB_IntParam_Threads, 4);
+    model->set(GRB_IntParam_Threads, 1);
     //model->set(GRB_IntParam_LazyConstraints, 1);
     //model->set(GRB_IntParam_Presolve, 0);
     model->set(GRB_DoubleParam_TimeLimit, MaxTime);

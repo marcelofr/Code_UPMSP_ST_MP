@@ -17,6 +17,8 @@ void nsga_ii(unsigned time_limit, vector<Solution> &non_dominated_set){
 
     Timer *t1 = new Timer();
 
+    t1->start();
+
     unsigned i, j;
 
     j = 0;

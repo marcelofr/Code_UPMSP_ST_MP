@@ -2,27 +2,36 @@
 
 cd ..
 
-instance_folder="Instances/";
+instance_folder="Instances/Small/";
 #instance_folder="Instances/Debug/";
 
-#files="I_50_10_S_1-9_1"
-files="*"
+files="6_2_143_3_S_1-9"
+#files="*"
 instance_extension=".dat"
 
-#Sementes
-seed[1]=1296910683
-#Pega quantas sementes serao executadas
-size_seed=${#seed[@]}
+#Alpha
+alpha[1]=0.9
+alpha[2]=0.8
+alpha[3]=0.7
+alpha[4]=0.6
+alpha[5]=0.5
+alpha[6]=0.4
+alpha[7]=0.3
+alpha[8]=0.2
+alpha[9]=0.1
+
+#Pega quantos alphas serao executados
+size_alpha=${#alpha[@]}
 
 #Algoritmos
-algorithm[1]="GA"
+algorithm[1]="EXACT"
 #Pega quantos algoritmos serao executados
 size_algorithm=${#algorithm[@]}
 
-folder_solution="Solutions/2020-04-28/"
+folder_solution="Solutions/2020_05_11/"
 
-#tempo em milisegundos (valor sera multiplicado pela numero de tarefas da instancia)
-max_time_factor[1]=10
+#tempo em segundos (valor sera multiplicado pela numero de tarefas da instancia)
+max_time_factor[1]=600
 #Pega quantos tempos serao executados
 size_max_time_factor=${#max_time_factor[@]}
 
@@ -45,11 +54,11 @@ do
 
         algorithm=${algorithm[$k]}
 
-        #percorre as sementes
-        for((l=1;l<=$size_seed;l++))
+        #percorre os alphas
+        for((l=1;l<=$size_alpha;l++))
         do
 
-            seed=${seed[$j]}
+            alpha=${alpha[$j]}
 
             #percorre todos os arquivos instance_extension
             find $instance_folder -maxdepth 1 -name $files$instance_extension -type f -print0 | while read -d $'\0' full_path_file; do
@@ -93,12 +102,12 @@ do
                     echo "Start: $(date)"
                     echo "  instance_folder: "$instance_folder
                     echo "  instance: "$instance_name$instance_extension
-                    echo "  seed: "$seed
+                    echo "  alpha: "$alpha
                     echo "  algorithm: "$algorithm
                     echo "  max_time_factor: "$max_time_factor
                     echo "  folder_solution: "$folder_solution
 
-                     ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $max_time_factor $folder_solution
+                     ./build/src/src $instance_folder $instance_name $instance_extension "1" $algorithm $max_time_factor $folder_solution $alpha
 
                     echo "End: $(date)"
                     #date
@@ -122,7 +131,7 @@ do
                     #   #echo "Arquivo Não executado"
                     #   echo $file
 
-                    #   ./build/src/src $file $seed $algorithm $fileSolution $time $NVezesMax $nivelMax 2>> $fileLogError
+                    #   ./build/src/src $file "1" $algorithm $fileSolution $time $NVezesMax $nivelMax $alpha 2>> $fileLogError
 
                     #   echo "End"
                     #   date

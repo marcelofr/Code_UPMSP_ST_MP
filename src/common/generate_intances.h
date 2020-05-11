@@ -14,6 +14,7 @@
 #define RATE_IN_PEAK 0.47753
 #define RATE_OFF_PEAK 0.32282
 #define PLAN_HORIZON_SIZE 143
+#define MAX_COST 999
 
 
 

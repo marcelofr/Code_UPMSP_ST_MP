@@ -9,8 +9,8 @@ void GenerateSmallInstances()
 
     //TODO mudar aqui
     vector<unsigned> num_jobs;
-    for(unsigned i=1; i<=1; i++){
-        num_jobs.push_back(4 + (2*i));
+    for(unsigned i=1; i<=5; i++){
+        num_jobs.push_back(5 + (1*i));
     }
 
     //TODO mudar aqui
@@ -37,7 +37,7 @@ void GenerateSmallInstances()
     range_potency.second = 200;
     ip.range_potency = range_potency;
 
-    ip.destination = "../../Instances/New/";
+    ip.destination = "../../Instances/Small/";
 
     ip.speed_factor.push_back(1.2);
     ip.speed_factor.push_back(1);
@@ -96,7 +96,7 @@ void CreateNewIntance(InstanceParam ip)
     MyFile << "peak_end " << PEAK_END << endl;
     MyFile << "rate_in_peak " << RATE_IN_PEAK << endl;
     MyFile << "rate_off_peak " << RATE_OFF_PEAK << endl;
-    MyFile << "max_cost " << endl;
+    MyFile << "max_cost " << MAX_COST << endl;
 
     MyFile << endl;
 

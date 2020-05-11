@@ -24,6 +24,13 @@ void RunMathModel(unsigned max_time, double alpha, Solution * my_solution)
         //Mymodel->SetInitialSolutionToMathModel(my_solution);
         Mymodel->Optimize();
 
+        if(model.get(GRB_IntAttr_Status) == GRB_OPTIMAL){
+            my_solution->is_optimal = true;
+        }
+        else{
+            my_solution->is_optimal = false;
+        }
+
         string var;
 
         var = "CMax";

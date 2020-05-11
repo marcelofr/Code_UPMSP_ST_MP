@@ -2,6 +2,9 @@
 
 void RunAlgorithm(Parameters Param){
     unsigned seed, max_time, max_time_factor;
+    double alpha;
+    Solution * my_solution;
+    Timer *t1 = new Timer();
 
     //Make trace log in file (.trace.log)
     MakeTrace();
@@ -30,13 +33,12 @@ void RunAlgorithm(Parameters Param){
     }
     else if(Param.algorithm == "EXACT"){
 
-        double alpha;
+        t1->start();
 
         //Set seed
         stringstream ss(Param.alpha);
         ss >> alpha;
 
-        Solution * my_solution;
         /*Gerar uma população inicial*/
         /*Gerar uma solução gulosa considerando o objetivo do makespan*/
         my_solution = new Solution();
@@ -46,9 +48,30 @@ void RunAlgorithm(Parameters Param){
 
         non_dominated_set.push_back(*my_solution);
 
+        t1->stop();
+
     }
 
     SalveSolution(non_dominated_set, Param, ir);
+
+    if(Param.algorithm == "EXACT"){
+        ofstream MyFile;
+        double time_s;
+        MyFile.open(Param.file_solution, ios_base::out | ios_base::in | ios_base::ate);  // will not create file
+        MyFile << "\t" << alpha;
+        if(my_solution->is_optimal){
+            MyFile << "\t" << "*";
+        }
+        time_s = t1->getElapsedTimeInMilliSec()/1000;
+        MyFile << "\t" << time_s;
+        MyFile.close();
+    }
+    else{
+        ofstream MyFile;
+        MyFile.open(Param.file_solution, ios_base::out | ios_base::in | ios_base::ate);  // will not create file
+        MyFile << "\t" << "END";
+
+    }
 
 }
 
@@ -87,10 +110,12 @@ void SalveSolution(vector<Solution> non_dominated_set, Parameters Param, instanc
         MyFile << ir.instance_name << endl;
         MyFile << ir.seed << endl;
         MyFile << endl;
-        MyFile << "makespan" << "\t" << "tec" << endl;
+        MyFile << "makespan" << "\t" << "tec";
     }
 
     for (auto it=ir.non_dominated_set.begin(); it != ir.non_dominated_set.end();++it) {
-        MyFile << it->first << "\t" << it->second << endl;
+        MyFile << endl << it->first << "\t" << it->second;
     }
+
+    MyFile.close();
 }
