@@ -31,12 +31,12 @@ void GenerateOffspring2(GASolution parent1, GASolution parent2,
                        GASolution &offspring1, GASolution &offspring2);
 void GenerateOffspring3(GASolution parent1, GASolution parent2,
                        GASolution &offspring1, GASolution &offspring2);
-void MutationOperatorSwapInside(GASolution &individual);
-void MutationOperatorSwapOutside(GASolution &individual);
-void MutationOperatorInsertionInside(GASolution &individual);
-void MutationOperatorInsertionOutside(GASolution &individual);
-void MutationOperatorOperationMode(GASolution &individual);
-void MutationOperatorH(GASolution &individual);
+void MutationSwapInside(GASolution &individual);
+void MutationSwapOutside(GASolution &individual);
+void MutationInsertInside(GASolution &individual);
+void MutationInsertOutside(GASolution &individual);
+void MutationChangeOpMode(GASolution &individual);
+void MutationChangeH(GASolution &individual);
 void SolutionListToVector(GASolution s, vector<unsigned> &v_solution);
 
 void SortByMakespan(vector<GASolution> &population);

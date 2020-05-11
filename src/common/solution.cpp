@@ -583,7 +583,7 @@ unsigned Solution::FindJobBestPosMacTEC3(unsigned new_job, unsigned machine)
 
 }
 
-void Solution::ChangeModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op)
+void Solution::SelectBestModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op)
 {
     unsigned current_mode, job;
     unsigned pt_old, pt_new;
@@ -1071,11 +1071,130 @@ void Solution::InsertRandomPosition(unsigned new_job)
     scheduling[machine].insert(scheduling[machine].begin()+job_position, new_job);
 }
 
+/*
+ * Troca com uma máquina
+ */
 void Solution::SwapInside(unsigned machine, unsigned pos_job1, unsigned pos_job2)
 {
     unsigned aux;
     aux = this->scheduling[machine][pos_job1];
     this->scheduling[machine][pos_job1] = this->scheduling[machine][pos_job2];
     this->scheduling[machine][pos_job2] = aux;
+}
+
+/*
+ * Troca com duas máquinas
+ */
+void Solution::SwapInside(unsigned machine1, unsigned pos_job1, unsigned machine2, unsigned pos_job2)
+{
+    unsigned aux;
+    aux = this->scheduling[machine1][pos_job1];
+    this->scheduling[machine1][pos_job1] = this->scheduling[machine2][pos_job2];
+    this->scheduling[machine2][pos_job2] = aux;
+}
+
+/*
+ * Inserção com uma máquina
+ */
+void Solution::InsertInside(unsigned machine, unsigned pos1, unsigned pos2)
+{
+    //Criar um iterator para a primeira tarefa
+    auto it_job1 = this->scheduling[machine].begin() + pos1;
+
+    //Inserir a primeira tarefa em outra posição
+    this->scheduling[machine].insert(it_job1, pos2);
+
+    //Remover a primeira tarefa da sua antiga posição
+    this->scheduling[machine].erase(it_job1);
+}
+
+/*
+ * Inserção com duas máquinas
+ */
+void Solution::InsertOutside(unsigned machine1, unsigned pos1, unsigned machine2, unsigned pos2)
+{
+    //Criar um iterator para a primeira tarefa
+    auto it_job1 = this->scheduling[machine1].begin() + pos1;
+
+    //Inserir a primeira tarefa na outra máquina
+    this->scheduling[machine2].insert(it_job1, pos2);
+
+    //Remover a primeira tarefa da sua antiga posição
+    this->scheduling[machine1].erase(it_job1);
+}
+
+void Solution::ChangeModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op)
+{
+    unsigned current_mode, job;
+    unsigned pt_old, pt_new;
+    double diff_t;
+
+    job = scheduling[machine][position];
+
+    current_mode = job_mode_op[job];
+
+    pt_new = ceil(Instance::m_processing_time[machine][job]/
+            Instance::v_speed_factor[new_mode_op]);
+    pt_old = ceil(Instance::m_processing_time[machine][job]/
+                        Instance::v_speed_factor[current_mode]);
+
+    diff_t = (pt_new - pt_old);
+
+
+    unsigned start = job_start_time1[job];
+    unsigned previos;
+    if(position > 0){
+        previos = position-1;
+    }
+    else{
+        previos = 0;
+    }
+    for(unsigned j = position; j < scheduling.size(); j++){
+        job_start_time1[j] = start;
+        H1[j] = Instance::m_setup_time[machine][previos][j];
+        job_end_time1[j] = H1[j] + Instance::m_processing_time[machine][j];
+
+        previos = j;
+        start = job_end_time1[j];
+    }
+
+    job_mode_op[job] = new_mode_op;
+
+    machine_completion_time[machine] += diff_t;
+
+}
+
+/*
+ * Trocar o instante de início de uma tarefa
+ */
+void Solution::ChangeHJob(unsigned machine, unsigned position, unsigned add_h)
+{
+    unsigned job;
+
+    //Identificar a tarefa
+    job = scheduling[machine][position];
+
+    //Definir o instance de início
+    unsigned start = H1[job] + add_h;
+    //Identificar a tarefa anterior
+    unsigned previos;
+    if(position > 0){
+        previos = position-1;
+    }
+    else{
+        previos = 0;
+    }
+    //Alterar os instantes de início da tarefa e de suas sucessoras
+    for(unsigned j = position; j < scheduling.size(); j++){
+        //Atualizar os instantes de início e de término
+        job_start_time1[j] = start;
+        H1[j] = Instance::m_setup_time[machine][previos][j];
+        job_end_time1[j] = H1[j] + Instance::m_processing_time[machine][j];
+
+        //j passa a ser a tarefa anterior
+        previos = j;
+        //A próxima tarefa começa após a tarefa atual
+        start = job_end_time1[j] = H1[j];
+    }
 }
 

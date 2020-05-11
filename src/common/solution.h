@@ -64,7 +64,7 @@ public:
     unsigned FindJobBestPosMacTEC(unsigned new_job, unsigned machine, unsigned &best_op);
     unsigned FindJobBestPosMacTEC3(unsigned new_job, unsigned machine);
 
-    void ChangeModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op);
+    void SelectBestModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op);
 
     //Solução inicial
     void AddJobGreedyMakespan(unsigned new_job, unsigned mode_op);
@@ -81,6 +81,11 @@ public:
     void InsertRandomPosition(unsigned new_job);
 
     void SwapInside(unsigned machine, unsigned job1, unsigned job2);
+    void SwapInside(unsigned machine1, unsigned pos_job1, unsigned machine2, unsigned pos_job2);
+    void InsertInside(unsigned machine, unsigned pos1, unsigned pos2);
+    void InsertOutside(unsigned machine1, unsigned pos1, unsigned machine2, unsigned pos2);
+    void ChangeModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op);
+    void ChangeHJob(unsigned machine, unsigned position, unsigned add_h);
 
     bool operator <(const Solution& s) {
             return (makeSpan < s.makeSpan && TEC < s.TEC)

@@ -122,7 +122,22 @@ void Mutation(vector<GASolution> &population, vector<GASolution> &new_population
 
             switch (op) {
                 case 0:
-                    MutationOperatorSwapInside(*individual);
+                    MutationSwapInside(*individual);
+                    break;
+                case 1:
+                    MutationSwapOutside(*individual);
+                    break;
+                case 2:
+                    MutationInsertInside(*individual);
+                    break;
+                case 3:
+                    MutationInsertOutside(*individual);
+                    break;
+                case 4:
+                    MutationChangeOpMode(*individual);
+                    break;
+                case 5:
+                    MutationChangeH(*individual);
                     break;
                 default:
                     break;
@@ -497,9 +512,10 @@ void SortByTEC(vector<GASolution> &population)
  * Método para realizar mutação em um indivíduo
  * A mutação consiste em trocar duas tarefas de posição na mesma máquina
  */
-void MutationOperatorSwapInside(GASolution &individual)
+void MutationSwapInside(GASolution &individual)
 {
     unsigned machine, pos_job1, pos_job2;
+
     //Escolher aleatoriamente a máquina na qual a troca será realizada
     machine = 1 + rand()%Instance::num_machine;
 
@@ -516,6 +532,175 @@ void MutationOperatorSwapInside(GASolution &individual)
     }while(pos_job1 != pos_job2);
 
     individual.SwapInside(machine, pos_job1, pos_job2);
+}
+
+/*
+ * Método para realizar mutação em um indivíduo
+ * A mutação consiste em trocar duas tarefas de posição em diferentes máquinas
+ */
+void MutationSwapOutside(GASolution &individual)
+{
+    unsigned machine1, machine2, pos_job1, pos_job2;
+
+    //Caso não tenha pelo menos duas máquinas, não deve realizar a mutação
+    if(Instance::num_machine < 2){
+        return;
+    }
+
+    //Escolher aleatoriamente a máquina na qual a troca será realizada
+    machine1 = 1 + rand()%Instance::num_machine;
+
+    //Caso não tenha pelo menos uma tarefa, não deve realizar a mutação
+    if(individual.scheduling[machine1].size() < 1){
+        return;
+    }
+
+    //Escolher aleatoriamente a segunda máquina, desde que seja diferente da primeira
+    do{
+        machine2 = 1 + rand()%Instance::num_machine;
+    }while(machine1 != machine2);
+
+    //Caso não tenha pelo menos uma tarefa, não deve realizar a mutação
+    if(individual.scheduling[machine2].size() < 1){
+        return;
+    }
+
+    //Escolher a primeira tarefa
+    pos_job1 = rand()%individual.scheduling[machine1].size();
+
+    //Escolher a segunda tarefa
+    pos_job2 = rand()%individual.scheduling[machine2].size();
+
+    //Realizar a troca
+    individual.SwapInside(machine1, pos_job1, machine2, pos_job2);
+}
+
+/*
+ * Método para realizar mutação em um indivíduo
+ * A mutação consiste em tirar uma tarefa de posição e inserí-la
+ * em outra posição da mesma máquina
+ */
+void MutationInsertInside(GASolution &individual)
+{
+    unsigned machine, pos1, pos2;
+
+    //Escolher aleatoriamente a máquina na qual a troca será realizada
+    machine = 1 + rand()%Instance::num_machine;
+
+    //Caso não tenha pelo menos duas tarefas, não deve realizar a mutação
+    if(individual.scheduling[machine].size() < 2){
+        return;
+    }
+
+    //Escolher a primeira posição, deve haver alguma tarefa nessa posição
+    pos1 = rand()%individual.scheduling[machine].size();
+    do{
+        //Escolher a segunda posição, que pode ser antes de qualquer tarefa ou após a última tarefa
+        pos2 = rand()%(individual.scheduling[machine].size()+1);
+
+    }while(pos1 != pos2);
+
+    //Realizar a inserção
+    individual.InsertInside(machine, pos1, pos2);
+}
+
+/*
+ * Método para realizar mutação em um indivíduo
+ * A mutação consiste em tirar uma tarefa de posição de uma maquina
+ * e inserí-la em alguma posição de outra máquina
+ */
+void MutationInsertOutside(GASolution &individual)
+{
+    unsigned machine1, machine2, pos1, pos2;
+
+    //Caso não tenha pelo menos duas máquinas, não deve realizar a mutação
+    if(Instance::num_machine < 2){
+        return;
+    }
+
+    //Escolher aleatoriamente a máquina na qual a troca será realizada
+    machine1 = 1 + rand()%Instance::num_machine;
+
+    //Caso não tenha pelo menos uma tarefa, não deve realizar a mutação
+    if(individual.scheduling[machine1].size() < 1){
+        return;
+    }
+
+    //Escolher aleatoriamente a segunda máquina, desde que seja diferente da primeira
+    do{
+        machine2 = 1 + rand()%Instance::num_machine;
+    }while(machine1 != machine2);
+
+    //Caso não tenha pelo menos uma tarefa, não deve realizar a mutação
+    if(individual.scheduling[machine2].size() < 1){
+        return;
+    }
+
+    //Escolher a primeira posição, deve haver alguma tarefa nessa posição
+    pos1 = rand()%individual.scheduling[machine1].size();
+
+    //Escolher a segunda posição, que pode ser antes de qualquer tarefa ou após a última tarefa
+    pos2 = rand()%(individual.scheduling[machine2].size()+1);
+
+    //Realizar a inserção
+    individual.InsertOutside(machine1, pos1, machine2, pos2);
+}
+
+/*
+ * Método para realizar mutação em um indivíduo
+ * A mutação consiste mudar o modo de operação de uma tarefa
+ */
+void MutationChangeOpMode(GASolution &individual)
+{
+    unsigned machine, pos_job, job, op_mode;
+
+    //Escolher aleatoriamente a máquina na qual a troca será realizada
+    machine = 1 + rand()%Instance::num_machine;
+
+    //Caso não tenha pelo menos duas tarefas, não deve realizar a mutação
+    if(individual.scheduling[machine].size() < 1){
+        return;
+    }
+
+    //Escolher a tarefa
+    pos_job = rand()%individual.scheduling[machine].size();
+
+    job = individual.scheduling[machine][pos_job];
+
+    do{
+        //Selecionar um novo modo de operação
+        op_mode = rand()%Instance::num_mode_op;
+
+    }while(op_mode != individual.job_mode_op[job]);
+
+    individual.ChangeModeOpJob(machine, pos_job, op_mode);
+}
+
+/*
+ * Método para realizar mutação em um indivíduo
+ * A mutação consiste mudar o instante de início de uma tarefa de uma tarefa
+ */
+void MutationChangeH(GASolution &individual)
+{
+    unsigned machine, pos_job, job, add_h;
+
+    //Escolher aleatoriamente a máquina na qual a troca será realizada
+    machine = 1 + rand()%Instance::num_machine;
+
+    //Caso não tenha pelo menos duas tarefas, não deve realizar a mutação
+    if(individual.scheduling[machine].size() < 1){
+        return;
+    }
+
+    //Escolher a tarefa
+    pos_job = rand()%individual.scheduling[machine].size();
+    job = individual.scheduling[machine][pos_job];
+
+    //O tempo adicional será no máximo o tamanho do horário de pico
+    add_h = rand()%(Instance::peak_end - Instance::peak_start);
+
+    //Realizar a mudança de h
+    individual.ChangeHJob(machine, pos_job, add_h);
 }
 
 void PopulationAddIndividual(vector<GASolution> &population, GASolution &individual)
@@ -551,3 +736,5 @@ void UnionPopulation(vector<GASolution> &R, vector<GASolution> P, vector<GASolut
         PopulationAddIndividual(R, *it);
     }
 }
+
+
