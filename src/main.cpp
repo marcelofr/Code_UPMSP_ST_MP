@@ -28,9 +28,9 @@ int main(int argc, char** argv)
         //Param.instance_folder = "../../Instances/";
         Param.instance_folder = "../../Instances/Debug/";
         //Param.instance_folder = "../../Instances/Large/";
-        //Param.instance_folder = "../../Instances/Small/";
-        //Param.instance_name = "I_6_2_S_1-9_1_rev1";
-        Param.instance_name = "8_2_143_3_S_1-9";
+        //Param.instadence_folder = "../../Instances/Small/";
+        //Param.inst ance_name = "I_6_2_S_1-9_1_rev1";
+        Param.instance_name = "6_2_143_3_S_1-9";
         //Param.instance_name = "250_30_143_5_S_1-124";
         Param.instance_extension = ".dat";
         Param.instance_file = Param.instance_folder + Param.instance_name + Param.instance_extension;

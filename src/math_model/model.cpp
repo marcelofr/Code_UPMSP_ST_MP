@@ -7,7 +7,7 @@ Model::Model()
 
 Model::~Model()
 {
-
+    delete model;
 }
 
 void Model::Create(GRBModel *model, double MaxTime)
