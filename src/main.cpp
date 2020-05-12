@@ -36,8 +36,8 @@ int main(int argc, char** argv)
         Param.instance_file = Param.instance_folder + Param.instance_name + Param.instance_extension;
         Param.seed = "1296910683";
         //Param.algorithm = "GENERATE_INSTANCES_SMALL";
-        //Param.algorithm = "GA";
-        Param.algorithm = "EXACT";
+        Param.algorithm = "GA";
+        //Param.algorithm = "EXACT";
         Param.max_time_factor = "1";
         Param.folder_solution = "../../Solutions/2020_05_06/";
         Param.file_solution = Param.folder_solution + Param.algorithm + "_"

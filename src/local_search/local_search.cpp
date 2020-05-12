@@ -29,7 +29,7 @@ void HillClimbing(vector<Solution> &non_dominated_set)
     GenInitialSet(cur_non_dominated_set);
 
    //Fazer busca local em cada solução do conjunto não-dominado
-    for(auto it_sol = cur_non_dominated_set.begin(); it_sol != cur_non_dominated_set.end();++it_sol){
+    for(auto it_sol = cur_non_dominated_set.begin(); it_sol != cur_non_dominated_set.end();){
 
         //Criar uma cópia de it_sol em cur_solution
         cur_solution = *it_sol;
@@ -49,7 +49,7 @@ void HillClimbing(vector<Solution> &non_dominated_set)
             //Se houve melhora
             if(SwapOutsideLS_FI(cur_solution, cur_non_dominated_set)){
                 //Continua a busca a partir da primeira solução do conjunto
-                it_sol = cur_non_dominated_set.begin()-1;
+                it_sol = cur_non_dominated_set.begin();
                 continue;
             }
 
@@ -80,10 +80,13 @@ void HillClimbing(vector<Solution> &non_dominated_set)
             //Se chegar até aqui, então marcar essa solução como visitada
             cur_solution.was_visited = true;
         }
-        else{
+
+        ++it_sol;
+
+        /*else{
             //Se a solução corrente já foi visitada, então vai pra próxima
             ++it_sol;
-        }
+        }*/
 
     }
 

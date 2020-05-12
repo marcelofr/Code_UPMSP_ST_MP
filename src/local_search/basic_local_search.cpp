@@ -281,11 +281,14 @@ bool AddSolution(LSSolution my_solution, vector<LSSolution> &non_dominated_set)
     }
 
     //Caso 3
-    for(auto it_sol = non_dominated_set.begin(); it_sol != non_dominated_set.end(); ++it_sol){
+    for(auto it_sol = non_dominated_set.begin(); it_sol != non_dominated_set.end();){
         //Se my_solution domina alguma solução do conjunto
         if(my_solution < *it_sol){
             //Remover essa solução do conjunto
-            non_dominated_set.erase(it_sol);
+            it_sol = non_dominated_set.erase(it_sol);
+        }
+        else{
+            ++it_sol;
         }
     }
     //Caso 2 e 3

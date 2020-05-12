@@ -89,12 +89,12 @@ public:
 
     bool operator <(const Solution& s) {
             return (makeSpan < s.makeSpan && TEC < s.TEC)
-                    || (makeSpan < s.makeSpan && abs(TEC - s.TEC)<EPS) ||
+                    || (makeSpan < s.makeSpan && abs(TEC - s.TEC) < EPS) ||
                     (makeSpan == s.makeSpan && TEC < s.TEC);
     }
 
     bool operator ==(const Solution& s) {
-            return (makeSpan == s.makeSpan && abs(TEC - s.TEC)<EPS);
+            return (makeSpan == s.makeSpan && abs(TEC - s.TEC) < EPS);
     }
 
 };
