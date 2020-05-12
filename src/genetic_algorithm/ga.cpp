@@ -578,7 +578,7 @@ void MutationSwapOutside(GASolution &individual)
     pos_job2 = rand()%individual.scheduling[machine2].size();
 
     //Realizar a troca
-    individual.SwapInside(machine1, pos_job1, machine2, pos_job2);
+    individual.SwapOutside(machine1, pos_job1, machine2, pos_job2);
 }
 
 /*

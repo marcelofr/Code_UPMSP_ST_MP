@@ -1085,7 +1085,7 @@ void Solution::SwapInside(unsigned machine, unsigned pos_job1, unsigned pos_job2
 /*
  * Troca com duas máquinas
  */
-void Solution::SwapInside(unsigned machine1, unsigned pos_job1, unsigned machine2, unsigned pos_job2)
+void Solution::SwapOutside(unsigned machine1, unsigned pos_job1, unsigned machine2, unsigned pos_job2)
 {
     unsigned aux;
     aux = this->scheduling[machine1][pos_job1];
@@ -1095,29 +1095,41 @@ void Solution::SwapInside(unsigned machine1, unsigned pos_job1, unsigned machine
 
 /*
  * Inserção com uma máquina
+ * A tarefa que está em pos1 será inserida em pos2
  */
 void Solution::InsertInside(unsigned machine, unsigned pos1, unsigned pos2)
 {
-    //Criar um iterator para a primeira tarefa
-    auto it_job1 = this->scheduling[machine].begin() + pos1;
 
-    //Inserir a primeira tarefa em outra posição
-    this->scheduling[machine].insert(it_job1, pos2);
-
-    //Remover a primeira tarefa da sua antiga posição
-    this->scheduling[machine].erase(it_job1);
+    unsigned aux;
+    aux = this->scheduling[machine][pos1];
+    if(pos1 < pos2){
+        unsigned i;
+        for(i = pos1; i < pos2; i++){
+            this->scheduling[machine][i] = this->scheduling[machine][i+1];
+        }
+        this->scheduling[machine][i] = aux;
+    }
+    else{
+        unsigned i;
+        for(i = pos1; i > pos2; i--){
+            this->scheduling[machine][i] = this->scheduling[machine][i-1];
+        }
+        this->scheduling[machine][i] = aux;
+    }
 }
 
 /*
  * Inserção com duas máquinas
+ * A tarefa que está em pos1 da máquina 1 será inserida em pos2 da máquina 2
  */
 void Solution::InsertOutside(unsigned machine1, unsigned pos1, unsigned machine2, unsigned pos2)
 {
     //Criar um iterator para a primeira tarefa
     auto it_job1 = this->scheduling[machine1].begin() + pos1;
+    auto it_job2 = this->scheduling[machine2].begin() + pos2;
 
     //Inserir a primeira tarefa na outra máquina
-    this->scheduling[machine2].insert(it_job1, pos2);
+    this->scheduling[machine2].insert(it_job2, *it_job1);
 
     //Remover a primeira tarefa da sua antiga posição
     this->scheduling[machine1].erase(it_job1);

@@ -81,7 +81,7 @@ public:
     void InsertRandomPosition(unsigned new_job);
 
     void SwapInside(unsigned machine, unsigned job1, unsigned job2);
-    void SwapInside(unsigned machine1, unsigned pos_job1, unsigned machine2, unsigned pos_job2);
+    void SwapOutside(unsigned machine1, unsigned pos_job1, unsigned machine2, unsigned pos_job2);
     void InsertInside(unsigned machine, unsigned pos1, unsigned pos2);
     void InsertOutside(unsigned machine1, unsigned pos1, unsigned machine2, unsigned pos2);
     void ChangeModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op);
@@ -91,6 +91,10 @@ public:
             return (makeSpan < s.makeSpan && TEC < s.TEC)
                     || (makeSpan < s.makeSpan && abs(TEC - s.TEC)<EPS) ||
                     (makeSpan == s.makeSpan && TEC < s.TEC);
+    }
+
+    bool operator ==(const Solution& s) {
+            return (makeSpan == s.makeSpan && abs(TEC - s.TEC)<EPS);
     }
 
 };

@@ -51,7 +51,7 @@ void ReadFile(string file_name, instance_result &ir)
 
     //Tempo
     file >> num;
-    ir.time = num;
+    ir.time_limit = num;
 
     //Instância
     file >> str;

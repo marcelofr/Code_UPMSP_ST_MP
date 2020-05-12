@@ -15,7 +15,7 @@ void RunAlgorithm(Parameters Param){
     srand(seed);
     //srand (time(NULL));
 
-    //Read instance
+    //Ler a instância
     //Instance::ReadJulioInstance(Param.instance_file);
     Instance::ReadMarceloInstance(Param.instance_file);
 
@@ -27,20 +27,24 @@ void RunAlgorithm(Parameters Param){
     vector<Solution> non_dominated_set;
     instance_result ir;
 
+    ir.is_optimal = false;
+
+    t1->start();
+
+
     if(Param.algorithm == "GA"){
+
         //Instance::PrintInstance1();
         nsga_ii(max_time, non_dominated_set);
+
     }
     else if(Param.algorithm == "EXACT"){
-
-        t1->start();
 
         //Set seed
         stringstream ss(Param.alpha);
         ss >> alpha;
 
-        /*Gerar uma população inicial*/
-        /*Gerar uma solução gulosa considerando o objetivo do makespan*/
+        //Gerar uma solução inicial gulosa considerando o objetivo do makespan
         my_solution = new Solution();
         my_solution->GreedyInitialSolutionMakespan();
 
@@ -48,30 +52,20 @@ void RunAlgorithm(Parameters Param){
 
         non_dominated_set.push_back(*my_solution);
 
-        t1->stop();
-
-    }
-
-    SalveSolution(non_dominated_set, Param, ir);
-
-    if(Param.algorithm == "EXACT"){
-        ofstream MyFile;
-        double time_s;
-        MyFile.open(Param.file_solution, ios_base::out | ios_base::in | ios_base::ate);  // will not create file
-        MyFile << "\t" << alpha;
         if(my_solution->is_optimal){
-            MyFile << "\t" << "*";
+            ir.is_optimal = true;
         }
-        time_s = t1->getElapsedTimeInMilliSec()/1000;
-        MyFile << "\t" << time_s;
-        MyFile.close();
-    }
-    else{
-        ofstream MyFile;
-        MyFile.open(Param.file_solution, ios_base::out | ios_base::in | ios_base::ate);  // will not create file
-        MyFile << "\t" << "END";
 
     }
+    else if(Param.algorithm == "LS"){
+        HillClimbing(non_dominated_set);
+    }
+
+    t1->stop();
+    ir.elapsed_time_sec = t1->getElapsedTimeInMilliSec()/1000;
+
+    //Salvar o conjunto não-dominado em arquivo
+    SalveSolution(non_dominated_set, Param, ir);
 
 }
 
@@ -88,7 +82,7 @@ void SalveSolution(vector<Solution> non_dominated_set, Parameters Param, instanc
     ir.algorithm_name = Param.algorithm;
     stringstream ss1(Param.max_time_factor);
     ss1 >> max_time_factor;
-    ir.time = max_time_factor*Instance::num_jobs;
+    ir.time_limit = max_time_factor*Instance::num_jobs;
     ir.instance_name = Param.instance_name;
     stringstream ss(Param.seed);
     ss >> ir.seed;
@@ -106,7 +100,7 @@ void SalveSolution(vector<Solution> non_dominated_set, Parameters Param, instanc
         MyFile.open(Param.file_solution, ios_base::out);  // will create if necessary
 
         MyFile << ir.algorithm_name << endl;
-        MyFile << ir.time << endl;
+        MyFile << ir.time_limit << endl;
         MyFile << ir.instance_name << endl;
         MyFile << ir.seed << endl;
         MyFile << endl;
@@ -115,6 +109,21 @@ void SalveSolution(vector<Solution> non_dominated_set, Parameters Param, instanc
 
     for (auto it=ir.non_dominated_set.begin(); it != ir.non_dominated_set.end();++it) {
         MyFile << endl << it->first << "\t" << it->second;
+    }
+
+    //Imprimir demarcação de final de arquivo
+    if(Param.algorithm == "EXACT"){
+        double alpha;
+        stringstream ss(Param.alpha);
+        ss >> alpha;
+        MyFile << "\t" << alpha;
+        if(ir.is_optimal){
+            MyFile << "\t" << "*";
+        }
+        MyFile << "\t" << ir.elapsed_time_sec;
+    }
+    else{
+        MyFile << "\t" << ir.elapsed_time_sec;
     }
 
     MyFile.close();

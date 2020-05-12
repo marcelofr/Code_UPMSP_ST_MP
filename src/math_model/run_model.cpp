@@ -26,30 +26,33 @@ void RunMathModel(unsigned max_time, double alpha, Solution * my_solution)
 
         if(model.get(GRB_IntAttr_Status) == GRB_OPTIMAL){
             my_solution->is_optimal = true;
+
+            string var;
+
+            var = "CMax";
+            d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
+            my_solution->makeSpan = d_num;
+            cout << endl << var << ": " << d_num << endl;
+
+            var = "PecOn";
+            d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
+            my_solution->TEC = d_num;
+            cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
+
+            var = "PecOff";
+            d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
+            my_solution->TEC += d_num;
+            cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
+            //Mymodel->get
+
+            Mymodel->PrintVars();
+
         }
         else{
             my_solution->is_optimal = false;
         }
 
-        string var;
 
-        var = "CMax";
-        d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
-        my_solution->makeSpan = d_num;
-        cout << endl << var << ": " << d_num << endl;
-
-        var = "PecOn";
-        d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
-        my_solution->TEC = d_num;
-        cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
-
-        var = "PecOff";
-        d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
-        my_solution->TEC += d_num;
-        cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
-        //Mymodel->get
-
-        Mymodel->PrintVars();
 
     } catch(GRBException e) {
         cout << "Error code = " << e.getErrorCode() << endl;

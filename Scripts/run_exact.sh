@@ -5,8 +5,8 @@ cd ..
 instance_folder="Instances/Small/";
 #instance_folder="Instances/Debug/";
 
-files="6_2_143_3_S_1-9"
-#files="*"
+#files="6_2_143_3_S_1-9"
+files="*"
 instance_extension=".dat"
 
 #Alpha
@@ -28,7 +28,7 @@ algorithm[1]="EXACT"
 #Pega quantos algoritmos serao executados
 size_algorithm=${#algorithm[@]}
 
-folder_solution="Solutions/2020_05_11/"
+folder_solution="Solutions/2020_05_12/"
 
 #tempo em segundos (valor sera multiplicado pela numero de tarefas da instancia)
 max_time_factor[1]=600
@@ -53,15 +53,16 @@ do
     do
 
         algorithm=${algorithm[$k]}
+        
+        #percorre todos os arquivos instance_extension
+        find $instance_folder -maxdepth 1 -name $files$instance_extension -type f -print0 | while read -d $'\0' full_path_file; do
 
-        #percorre os alphas
-        for((l=1;l<=$size_alpha;l++))
-        do
 
-            alpha=${alpha[$j]}
+            #percorre os alphas
+            for((l=1;l<=$size_alpha;l++))
+            do
 
-            #percorre todos os arquivos instance_extension
-            find $instance_folder -maxdepth 1 -name $files$instance_extension -type f -print0 | while read -d $'\0' full_path_file; do
+                alpha=${alpha[$l]}
 
                 filename="${full_path_file##*/}"
                 instance_name="${filename%.[^.]*}"
