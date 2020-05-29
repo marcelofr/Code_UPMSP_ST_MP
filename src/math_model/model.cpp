@@ -175,13 +175,13 @@ void Model::SetConstraint()
                         Instance::rate_on_peak/6;
 
                 aux2 = 0;
-                for (unsigned h = 0; h < Instance::peak_start; h++) {
+                for (unsigned h = 0; h < Instance::v_peak_start[0]; h++) {
                     pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
                     a = h + pt_round - 1;
-                    b = Instance::peak_end;
+                    b = Instance::v_peak_end[0];
                     c = min(a, b);
                     a = 0;
-                    b = c - (Instance::peak_start - 1);
+                    b = c - (Instance::v_peak_start[0] - 1);
                     c = max(a, b);
                     aux2 += X[i][j][h][l]*c;
 
@@ -189,10 +189,10 @@ void Model::SetConstraint()
                 }
 
                 aux3 = 0;
-                for (unsigned h = Instance::peak_start; h <= Instance::peak_end; h++) {
+                for (unsigned h = Instance::v_peak_start[0]; h <= Instance::v_peak_end[0]; h++) {
                     pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
                     a = h + pt_round;
-                    b = Instance::peak_end + 1;
+                    b = Instance::v_peak_end[0] + 1;
                     c = min(a, b);
                     c -= h;
                     aux3 += X[i][j][h][l]*c;
@@ -224,29 +224,29 @@ void Model::SetConstraint()
                         Instance::rate_off_peak/6;
 
                 aux2 = 0;
-                for (unsigned h = 0; h < Instance::peak_start; h++) {
+                for (unsigned h = 0; h < Instance::v_peak_start[0]; h++) {
                     a = h+ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
-                    b = Instance::peak_start;
+                    b = Instance::v_peak_start[0];
                     c = min(a, b);
                     c -= h;
                     a = 0;
                     b = h+ceil(Instance::m_processing_time[i][j]/
-                                   Instance::v_speed_factor[l])-Instance::peak_end-1;
+                                   Instance::v_speed_factor[l])-Instance::v_peak_end[0]-1;
                     c += max(a, b);
                     aux2 += X[i][j][h][l]*c;
                 }
 
                 aux3 = 0;
-                for (unsigned h = Instance::peak_start; h <= Instance::peak_end; h++) {
+                for (unsigned h = Instance::v_peak_start[0]; h <= Instance::v_peak_end[0]; h++) {
                     a = 0;
                     b = h+ceil(Instance::m_processing_time[i][j]/
-                                   Instance::v_speed_factor[l])-Instance::peak_end-1;
+                                   Instance::v_speed_factor[l])-Instance::v_peak_end[0]-1;
                     c = max(a, b);
                     aux3 += X[i][j][h][l]*c;
                 }
 
                 aux4 = 0;
-                for (unsigned h = Instance::peak_end+1; h <= Instance::num_planning_horizon; h++) {
+                for (unsigned h = Instance::v_peak_end[0]+1; h <= Instance::num_planning_horizon; h++) {
                     c = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
                     aux4 += X[i][j][h][l]*c;
                 }

@@ -37,7 +37,7 @@ void GenerateSmallInstances()
     range_potency.second = 200;
     ip.range_potency = range_potency;
 
-    ip.destination = "../../Instances/Small/";
+    ip.destination_folder = DESTINATION_FOLDER;
 
     ip.speed_factor.push_back(1.2);
     ip.speed_factor.push_back(1);
@@ -47,14 +47,14 @@ void GenerateSmallInstances()
     ip.consumption_factor.push_back(1);
     ip.consumption_factor.push_back(0.6);
 
-
-
     for(auto it_jobs : num_jobs){
         for(auto it_machines : num_machines){
             for (auto it_setup: v_range_setup) {
 
                 ip.num_jobs = it_jobs;
                 ip.num_machines = it_machines;
+
+                ip.num_days = 1;
 
                 ip.range_setup = it_setup;
 
@@ -68,194 +68,33 @@ void GenerateSmallInstances()
 void CreateNewIntance(InstanceParam ip)
 {
 
-    string file_name;
+    unsigned new_num_days;
 
-    file_name = itos(ip.num_jobs);
-    file_name += "_";
-    file_name += itos(ip.num_machines);
-    file_name += "_";
-    file_name += itos(PLAN_HORIZON_SIZE);
-    file_name += "_";
-    file_name += itos(ip.num_op_mode);
-    file_name += "_S_";
-    file_name += itos(ip.range_setup.first) + "-" + itos(ip.range_setup.second);
-    file_name += ".dat";
+    //Gerar dados da instância
+    GenerateInstanceData(ip);
 
-    string full_name_file;
+    Solution * my_solution = new Solution();
 
-    full_name_file = ip.destination+file_name;
+    //Gerar uma solução inicial gulosa considerando o objetivo do TEC
+    my_solution->GreedyInitialSolutionTEC3();
+    new_num_days = ceil(double(my_solution->makeSpan/(double)Instance::num_planning_horizon));
 
-    ofstream MyFile;
-    MyFile.open(full_name_file);
+    for(unsigned i=Instance::num_days; i<new_num_days; i++){
 
-    MyFile << "n " << ip.num_jobs << endl;
-    MyFile << "m " << ip.num_machines << endl;
-    MyFile << "hl " << PLAN_HORIZON_SIZE << endl;
-    MyFile << "o " << ip.num_op_mode << endl;
-    MyFile << "peak_start " << PEAK_START << endl;
-    MyFile << "peak_end " << PEAK_END << endl;
-    MyFile << "rate_in_peak " << RATE_IN_PEAK << endl;
-    MyFile << "rate_off_peak " << RATE_OFF_PEAK << endl;
-    MyFile << "max_cost " << MAX_COST << endl;
+        Instance::v_peak_start.push_back(PEAK_START + (PLAN_HORIZON_SIZE+1)*i);
 
-    MyFile << endl;
-
-    MyFile << "v" << endl;
-    for(unsigned i=0; i<ip.speed_factor.size(); i++){
-        //MyFile << i+1 << " " << ip.speed_factor[i] << endl;
-        MyFile << ip.speed_factor[i] << endl;
+        Instance::v_peak_end.push_back(PEAK_END + (PLAN_HORIZON_SIZE+1)*i);
     }
 
-    MyFile << endl;
+    Instance::num_days = new_num_days;
 
-    MyFile << "lambda" << endl;
-    for(unsigned i=0; i<ip.consumption_factor.size(); i++){
-        //MyFile << i+1 << " " << ip.consumption_factor[i] << endl;
-        MyFile << ip.consumption_factor[i] << endl;
-    }
+    //Gerar uma solução inicial gulosa considerando o objetivo do makespan
+    my_solution->GreedyInitialSolutionMakespan();
+    Instance::max_cost = ceil(my_solution->TEC);
 
-    MyFile << endl;
+    //Salvar dados da instância em arquivo
+    SaveInstanceDataToFile(ip);
 
-    MyFile << "pi" << endl;
-    ip.machine_potency.resize(ip.num_machines);
-    for(unsigned i=0; i<ip.machine_potency.size(); i++){
-        //MyFile << i+1 << " " << ip.machine_potency[i] << endl;
-        ip.machine_potency[i] = ip.range_potency.first + rand()%(ip.range_potency.second - ip.range_potency.first);
-        MyFile << ip.machine_potency[i] << endl;
-    }
-
-    MyFile << endl;
-
-    MyFile << "processing" << endl;
-    unsigned processing_time;
-    /*for(unsigned i=0; i<ip.num_machines; i++){
-        MyFile << "\t" << i+1;
-    }
-
-    MyFile << endl;*/
-
-    for(unsigned j=0; j<ip.num_jobs; j++){
-        //MyFile << j+1 << "\t";
-        for(unsigned i=0; i<ip.num_machines; i++){
-            //processing_time = MIN_PROCESSING_TIME + rand()%MAX_PROCESSING_TIME;
-            processing_time = ip.range_processing.first + rand()%(ip.range_processing.second-ip.range_processing.first);
-            MyFile << processing_time << "\t";
-        }
-        MyFile << endl;
-    }
-
-    MyFile << endl;
-
-    MyFile << "setup" << endl;
-    unsigned min, max;
-    vector<vector<vector<unsigned>>> setup (ip.num_machines+1,
-                                          vector<vector<unsigned>>(ip.num_jobs+1,
-                                              vector<unsigned>(ip.num_jobs+1)));
-
-    for(unsigned i=1; i<=ip.num_machines; i++){
-
-        for(unsigned j=1; j<=ip.num_jobs; j++){
-
-            for(unsigned k=1; k<=ip.num_jobs; k++){
-
-                if(j!=k){
-
-                    //Definir o intervalo padrão para geração dos tempos de preparação
-                    //min = MIN_SETUP_TIME;
-                    min = ip.range_setup.first;
-                    //max = MAX_SETUP_TIME;
-                    max = ip.range_setup.second;
-
-                    //Percorrer todas as outras tarefas
-                    for(unsigned l=1; l<=ip.num_jobs; l++){
-
-                        //Limitar apenas quando os tempos de preparação já foram definidos
-                        if(l!=j && l!=k && setup[i][j][l]>0 && setup[i][l][k]>0){
-
-                            //O valor gerado não pode ser inferior a diferença dos outros dois
-                            min = abs(int(setup[i][j][l]-setup[i][l][k]))+1;
-                            //if(min > MAX_SETUP_TIME){
-                            if(min > ip.range_setup.second){
-                                max = min + 1;
-                            }
-                            else{
-                                //O valor gerado não pode ser superior a soma dos outros dois
-                                max = setup[i][j][l]+setup[i][l][k] - 1;
-
-                                //MAX_SETUP_TIME é um outro limite para o valor gerado
-                                //if(max > MAX_SETUP_TIME){
-                                if(max > ip.range_setup.second){
-                                    //max = MAX_SETUP_TIME;
-                                    max = ip.range_setup.second;
-                                }
-                            }
-                        }
-                    }
-
-                }
-                else{
-
-                    //Definir o intervalo padrão para geração dos tempos de preparação
-                    //min = MIN_SETUP_TIME;
-                    //min = ip.range_setup.first;
-                    min = 0;
-                    //max = MAX_SETUP_TIME;
-                    //max = ip.range_setup.second;
-                    max = 0;
-
-                    /*//Percorrer todas as outras tarefas
-                    for(unsigned l=1; l<=ip.num_jobs; l++){
-
-                        //Limitar apenas quando os tempos de preparação já foram definidos
-                        if(l!=j && l!=k && setup[i][l][l]>0 && setup[i][l][k]>0){
-
-                            //O valor gerado não pode ser inferior a diferença dos outros dois
-                            min = abs(int(setup[i][l][l]-setup[i][l][k]))+1;
-                            //if(min > MAX_SETUP_TIME){
-                            if(min > ip.range_setup.second){
-                                max = min + 1;
-                            }
-                            else{
-                                //O valor gerado não pode ser superior a soma dos outros dois
-                                max = setup[i][l][l]+setup[i][l][k] - 1;
-
-                                //MAX_SETUP_TIME é um outro limite para o valor gerado
-                                //if(max > MAX_SETUP_TIME){
-                                if(max > ip.range_setup.second){
-                                    //max = MAX_SETUP_TIME;
-                                    max = ip.range_setup.second;
-                                }
-                            }
-                        }
-                    }*/
-
-                }
-
-                if(max != min){
-                    //Gerar um número entre min e max
-                    setup[i][j][k] = min + rand()%(max - min);
-                }
-                else{
-                    setup[i][j][k] = min;
-                }
-
-                //Salvar o número no arquivo
-                MyFile << setup[i][j][k] << "\t";
-
-                MyFile.flush();
-
-            }
-
-            MyFile << endl;
-
-        }
-
-        MyFile << endl;
-
-    }
-
-
-    MyFile.close();
 }
 
 void GenerateLargeInstances()
@@ -294,7 +133,7 @@ void GenerateLargeInstances()
     range_potency.second = 200;
     ip.range_potency = range_potency;
 
-    ip.destination = "../../Instances/New/";
+    ip.destination_folder = DESTINATION_FOLDER;
 
     ip.speed_factor.push_back(1.2);
     ip.speed_factor.push_back(1.1);
@@ -315,11 +154,219 @@ void GenerateLargeInstances()
                 ip.num_jobs = it_jobs;
                 ip.num_machines = it_machines;
 
+                ip.num_days = 1;
+
                 ip.range_setup = it_setup;
 
                 CreateNewIntance(ip);
-
             }
         }
     }
+}
+
+void GenerateInstanceData(InstanceParam ip){
+
+    Instance::num_jobs = ip.num_jobs;
+    Instance::num_machine = ip.num_machines;
+    Instance::num_days = ip.num_days;
+    Instance::num_planning_horizon = PLAN_HORIZON_SIZE;
+    Instance::num_mode_op = ip.num_op_mode;
+    Instance::rate_on_peak = RATE_IN_PEAK;
+    Instance::rate_off_peak = RATE_OFF_PEAK;
+    Instance::max_cost = MAX_COST;
+
+    Instance::Init();
+
+    //Gerar o início do horário de pico para cada dia i
+    Instance::v_peak_start.clear();
+    for(unsigned i=0; i<ip.num_days; i++){
+        Instance::v_peak_start.push_back(PEAK_START + PLAN_HORIZON_SIZE*i);
+    }
+
+    Instance::v_peak_end.clear();
+    for(unsigned i=0; i<ip.num_days; i++){
+        Instance::v_peak_end.push_back(PEAK_END + PLAN_HORIZON_SIZE*i);
+    }
+
+    for(unsigned i=1; i<=ip.num_op_mode; i++){
+        Instance::v_speed_factor[i] = ip.speed_factor[i-1];
+    }
+
+    for(unsigned i=1; i<=ip.num_op_mode; i++){
+        Instance::v_consumption_factor[i] = ip.consumption_factor[i-1];
+    }
+
+    for(unsigned i=1; i<=ip.num_machines; i++){
+        Instance::v_machine_potency[i] = ip.range_potency.first + rand()%(ip.range_potency.second - ip.range_potency.first);
+    }
+
+    for(unsigned j=1; j<=ip.num_jobs; j++){
+        for(unsigned i=1; i<=ip.num_machines; i++){
+            Instance::m_processing_time[i][j] = ip.range_processing.first + rand()%(ip.range_processing.second-ip.range_processing.first);
+        }
+    }
+
+    unsigned min, max;
+    for(unsigned i=1; i<=ip.num_machines; i++){
+        for(unsigned j=1; j<=ip.num_jobs; j++){
+            for(unsigned k=1; k<=ip.num_jobs; k++){
+
+                if(j!=k){
+
+                    min = ip.range_setup.first;
+                    max = ip.range_setup.second;
+
+                    //Percorrer todas as outras tarefas
+                    for(unsigned l=1; l<=ip.num_jobs; l++){
+
+                        //Limitar apenas quando os tempos de preparação já foram definidos
+                        if(l!=j && l!=k && Instance::m_setup_time[i][j][l]>0 && Instance::m_setup_time[i][l][k]>0){
+
+                            //O valor gerado não pode ser inferior a diferença dos outros dois
+                            min = abs(int(Instance::m_setup_time[i][j][l]-Instance::m_setup_time[i][l][k]))+1;
+
+                            if(min > ip.range_setup.second){
+                                max = min + 1;
+                            }
+                            else{
+                                //O valor gerado não pode ser superior a soma dos outros dois
+                                max = Instance::m_setup_time[i][j][l]+Instance::m_setup_time[i][l][k] - 1;
+
+                                if(max > ip.range_setup.second){
+                                    max = ip.range_setup.second;
+                                }
+                            }
+                        }
+                    }
+
+                }
+                else{
+
+                    //O tempo de preparação de uma tarefa para ela mesma é zero
+                    min = 0;
+                    max = 0;
+
+                }
+
+                if(max != min){
+                    //Gerar um número entre min e max
+                    Instance::m_setup_time[i][j][k] = min + rand()%(max - min);
+                }
+                else{
+                    Instance::m_setup_time[i][j][k] = min;
+                }
+            }
+        }
+    }
+}
+
+void SaveInstanceDataToFile(InstanceParam ip){
+
+    string file_name;
+
+    //Definir o nome do arquivo
+    file_name = itos(Instance::num_jobs);
+    file_name += "_";
+    file_name += itos(Instance::num_machine);
+    file_name += "_";
+    file_name += itos(PLAN_HORIZON_SIZE);
+    file_name += "_";
+    file_name += itos(Instance::num_mode_op);
+    file_name += "_S_";
+    file_name += itos(ip.range_setup.first) + "-" + itos(ip.range_setup.second);
+    file_name += ".dat";
+
+    string full_name_file;
+
+    full_name_file = ip.destination_folder+file_name;
+
+    filesystem::path dir(ip.destination_folder);
+
+    if(!(filesystem::exists(dir))){
+        cout<< "A pasta " << ip.destination_folder << " NÃO existe!" << endl;
+
+        if (filesystem::create_directory(dir))
+            cout<< "A pasta " << ip.destination_folder << " foi CRIADA com sucesso!" << endl;
+    }
+
+    ofstream MyFile;
+    MyFile.open(full_name_file);
+
+    MyFile << "n " << Instance::num_jobs << endl;
+    MyFile << "m " << Instance::num_machine << endl;
+    MyFile << "n_day " << Instance::num_days << endl;
+    MyFile << "hl " << PLAN_HORIZON_SIZE << endl;
+    MyFile << "o " << Instance::num_mode_op << endl;
+    MyFile << "rate_in_peak " << RATE_IN_PEAK << endl;
+    MyFile << "rate_off_peak " << RATE_OFF_PEAK << endl;
+    MyFile << "max_cost " << Instance::max_cost << endl;
+
+    MyFile << endl;
+
+    MyFile << "peak_start" << endl;
+    for(unsigned i=0; i<Instance::num_days; i++){
+
+        MyFile << Instance::v_peak_start[i] << endl;
+
+    }
+    MyFile << endl;
+
+    MyFile << "peak_end" << endl;
+    for(unsigned i=0; i<Instance::num_days; i++){
+
+        MyFile << Instance::v_peak_end[i] << endl;
+
+    }
+    MyFile << endl;
+
+
+    MyFile << "v" << endl;
+    for(unsigned i=1; i<=Instance::num_mode_op; i++){
+
+        MyFile << Instance::v_speed_factor[i] << endl;
+
+    }
+    MyFile << endl;
+
+    MyFile << "lambda" << endl;
+    for(unsigned i=1; i<=Instance::num_mode_op; i++){
+
+        MyFile << Instance::v_consumption_factor[i] << endl;
+
+    }
+
+    MyFile << endl;
+
+    MyFile << "pi" << endl;
+    for(unsigned i=1; i<=Instance::num_machine; i++){
+        MyFile << Instance::v_machine_potency[i] << endl;
+    }
+    MyFile << endl;
+
+    MyFile << "processing" << endl;
+    for(unsigned j=1; j<=Instance::num_jobs; j++){
+        for(unsigned i=1; i<=Instance::num_machine; i++){
+            MyFile << Instance::m_processing_time[i][j] << "\t";
+        }
+        MyFile << endl;
+    }
+    MyFile << endl;
+
+    MyFile << "setup" << endl;
+
+    for(unsigned i=1; i<=Instance::num_machine; i++){
+        for(unsigned j=1; j<=Instance::num_jobs; j++){
+            for(unsigned k=1; k<=Instance::num_jobs; k++){
+
+                //Salvar o número no arquivo
+                MyFile << Instance::m_setup_time[i][j][k] << "\t";
+                MyFile.flush();
+
+            }
+            MyFile << endl;
+        }
+        MyFile << endl;
+    }
+
+    MyFile.close();
 }

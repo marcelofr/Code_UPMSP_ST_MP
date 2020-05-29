@@ -57,16 +57,15 @@ do
         #percorre todos os arquivos instance_extension
         find $instance_folder -maxdepth 1 -name $files$instance_extension -type f -print0 | while read -d $'\0' full_path_file; do
 
+            filename="${full_path_file##*/}"
+            instance_name="${filename%.[^.]*}"
+            #echo "Nome da instância "$instance_name
 
             #percorre os alphas
             for((l=1;l<=$size_alpha;l++))
             do
 
                 alpha=${alpha[$l]}
-
-                filename="${full_path_file##*/}"
-                instance_name="${filename%.[^.]*}"
-                #echo "Nome da instância "$instance_name
 
                 #Arquivo para salvar o logs de erros
                 file_log_error="log/error/"$algorithm".log"

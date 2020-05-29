@@ -48,8 +48,8 @@ public:
     void DummyInitialSolution();
     void RandomInitialSolution();
     void GreedyInitialSolutionMakespan();
-    void GreedyInitialSolutionTEC();
-    void GreedyInitialSolutionTEC2();
+    //void GreedyInitialSolutionTEC();
+    //void GreedyInitialSolutionTEC2();
     void GreedyInitialSolutionTEC3();
 
     void CalculateShorterTimeHorizon();
@@ -87,10 +87,35 @@ public:
     void ChangeModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op);
     void ChangeHJob(unsigned machine, unsigned position, unsigned add_h);
 
-    bool operator <(const Solution& s) {
-            return (makeSpan < s.makeSpan && TEC < s.TEC)
-                    || (makeSpan < s.makeSpan && abs(TEC - s.TEC) < EPS) ||
-                    (makeSpan == s.makeSpan && TEC < s.TEC);
+    Solution& operator=(Solution *s){
+        if( s != this ) {
+
+            if(s){
+                this->makeSpan = s->makeSpan;
+                this->TEC = s->TEC;
+                this->is_optimal = s->is_optimal;
+            }
+
+            for(unsigned i = 0; i < this->scheduling.size(); i++){
+                this->scheduling[i].clear();
+            }
+
+            this->scheduling.clear();
+            this->H1.clear();
+            this->job_end_time1.clear();
+            this->job_start_time1.clear();
+            this->job_mode_op.clear();
+            this->machine_completion_time.clear();
+            this->machine_TEC.clear();
+
+        }
+        return *this;
+    }
+
+    bool operator <(const Solution* s) {
+            return (this->makeSpan < s->makeSpan && this->TEC < s->TEC)
+                    || (this->makeSpan < s->makeSpan && abs(this->TEC - s->TEC) < EPS) ||
+                    (this->makeSpan == s->makeSpan && this->TEC < s->TEC);
     }
 
     bool operator ==(const Solution& s) {

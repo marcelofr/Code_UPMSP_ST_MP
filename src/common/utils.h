@@ -32,4 +32,6 @@ int Find( int uf[], int x ) ;
 /* Union of sets containing x and y */
 void Union( int uf[],int x, int y ) ;
 
+//int myrandom (int i);
+
 #endif // UTILS_H

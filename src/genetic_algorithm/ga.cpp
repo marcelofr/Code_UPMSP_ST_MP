@@ -5,39 +5,46 @@ using namespace std;
 /*
  * Método para gerar a população inicial com tamanho POPULATION_SIZE
  */
-void GenerateInitialPopulation(vector<GASolution> &population)
+void GenerateInitialPopulation(vector<GASolution*> &population)
 {
-    GASolution * my_solution;
+    //GASolution * my_solution;
 
     /*Gerar uma população inicial*/
     /*Gerar uma solução gulosa considerando o objetivo do makespan*/
-    my_solution = new GASolution();
-    my_solution->GreedyInitialSolutionMakespan();
+    //my_solution = new GASolution();
+    //my_solution->GreedyInitialSolutionMakespan();
+    population.push_back(new GASolution());
+    population.back()->GreedyInitialSolutionMakespan();
     //population.push_back(*my_solution);
-    PopulationAddIndividual(population, *my_solution);
-
+    //PopulationAddIndividual(population, *my_solution);
 
     /*Gerar uma solução gulosa considerando o objetivo do TEC*/
-    my_solution = new GASolution();
-    my_solution->GreedyInitialSolutionTEC3();
-    population.push_back(*my_solution);
+    //my_solution = new GASolution();
+    //my_solution->GreedyInitialSolutionTEC3();
+    //population.push_back(*my_solution);
+    population.push_back(new GASolution());
+    population.back()->GreedyInitialSolutionTEC3();
 
     /*Gerar o restante dos indivíduos aleatoriamente*/
     for (int i = 0; i < POPULATION_SIZE-2; ++i) {
-        my_solution = new GASolution();
+        /*my_solution = new GASolution();
         //my_solution->DummyInitialSolution();
         my_solution->RandomInitialSolution();
-        population.push_back(*my_solution);
+        population.push_back(*my_solution);*/
+
+        population.push_back(new GASolution());
+        population.back()->RandomInitialSolution();
+
     }
 }
 
 /*
  * Método para imprimir um vetor de soluções
  */
-void PrintPopulation(vector<GASolution> &population)
+void PrintPopulation(vector<GASolution*> &population)
 {
     for(auto it = population.begin(); it != population.end(); ++it){
-        (*it).Print();
+        (*it)->Print();
     }
 }
 
@@ -45,7 +52,7 @@ void PrintPopulation(vector<GASolution> &population)
  * Cruzamento para gerar TAM_CROSSOVER indivíduos
  * Uso de torneio binário para selecionar os indivíduos para o cruzamento
  */
-void Crossover(vector<GASolution> &population, vector<GASolution> &new_population, vector<vector<GASolution>> F)
+void Crossover(vector<GASolution*> &population, vector<GASolution*> &new_population)
 {
     GASolution *parent1, *parent2, *offspring1, *offspring2;
     unsigned ind1, ind2;
@@ -54,7 +61,7 @@ void Crossover(vector<GASolution> &population, vector<GASolution> &new_populatio
     new_population.clear();
 
     //Gerar novos indivíduos com o cruzamento
-    for (unsigned i = 0; i < TAM_CROSSOVER/2; ++i) {
+    for (unsigned i = 0; i < NEW_POPULATION_SIZE/2; ++i) {
 
         //Seleção de indivíduos por torneio binário
 
@@ -63,10 +70,10 @@ void Crossover(vector<GASolution> &population, vector<GASolution> &new_populatio
         ind2 = rand()%size;
         //Escolher o melhor indivíduo para ser o pai 1
         if(population[ind1] < population[ind2]){
-            parent1 = &population[ind1];
+            parent1 = population[ind1];
         }
         else{
-            parent1 = &population[ind2];
+            parent1 = population[ind2];
         }
 
         //Escolher dois indivíduos aleatoriamente
@@ -74,20 +81,20 @@ void Crossover(vector<GASolution> &population, vector<GASolution> &new_populatio
         ind2 = rand()%size;
         //Escolher o melhor indivíduo para ser o pai 2
         if(population[ind1] < population[ind2]){
-            parent2 = &population[ind1];
+            parent2 = population[ind1];
         }
         else{
-            parent2 = &population[ind2];
+            parent2 = population[ind2];
         }
 
         //Realizar o cruzamento
         offspring1 = new GASolution();
         offspring2 = new GASolution();
-        GenerateOffspring3(*parent1, *parent2, *offspring1, *offspring2);
+        GenerateOffspring3(parent1, parent2, offspring1, offspring2);
 
         //Adicionar os filhos gerados à nova população
-        new_population.push_back(*offspring1);
-        new_population.push_back(*offspring2);
+        new_population.push_back(offspring1);
+        new_population.push_back(offspring2);
 
     }
 
@@ -96,7 +103,7 @@ void Crossover(vector<GASolution> &population, vector<GASolution> &new_populatio
 /*
  * Método para adicionar nova solução gerada a partir de uma mutação
  */
-void Mutation(vector<GASolution> &population, vector<GASolution> &new_population)
+void Mutation(vector<GASolution*> &population, vector<GASolution*> &new_population)
 {
     GASolution *individual;
     size_t ind1;
@@ -114,8 +121,10 @@ void Mutation(vector<GASolution> &population, vector<GASolution> &new_population
 
             //Escolher o indivídua para fazer a mutação
             ind1 = rand()%POPULATION_SIZE;
-            individual = new GASolution();
-            *individual = population[ind1];
+            //individual = new GASolution();
+            //Fazer uma cópia do indivíduo em outro lugar
+            //*individual = nullptr;
+            *individual = *population[ind1];
 
             //Escolher um tipo de mutação
             op = rand()%1;
@@ -149,7 +158,7 @@ void Mutation(vector<GASolution> &population, vector<GASolution> &new_population
 
             individual->CalculateObjective();
 
-            new_population.push_back(*individual);
+            new_population.push_back(individual);
 
         }
     }
@@ -348,8 +357,8 @@ void GenerateOffspring2(GASolution parent1, GASolution parent2,
 /*
  * Gerar filhos usando o método do Ruiz
  */
-void GenerateOffspring3(GASolution parent1, GASolution parent2,
-                        GASolution &offspring1, GASolution &offspring2)
+void GenerateOffspring3(GASolution *parent1, GASolution *parent2,
+                        GASolution *offspring1, GASolution *offspring2)
 {
 
     //Vetores para os filhos
@@ -363,25 +372,25 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
     //A segunda parte é herdada pelo filho 2
     for (unsigned i = 1; i <= Instance::num_machine; ++i) {
 
-        if(parent1.scheduling[i].size() > 0){
+        if(parent1->scheduling[i].size() > 0){
             //O filho 1 herda a primeira parte das tarefas do pai 1, na máquina i
-            size = rand()%parent1.scheduling[i].size();
-            for(auto it = parent1.scheduling[i].begin(); it != parent1.scheduling[i].begin()+size; ++it){
-                offspring1.scheduling[i].push_back(*it);
+            size = rand()%parent1->scheduling[i].size();
+            for(auto it = parent1->scheduling[i].begin(); it != parent1->scheduling[i].begin()+size; ++it){
+                offspring1->scheduling[i].push_back(*it);
                 o1[*it] = true;
 
                 //O filho 1 herda o modo de operação do pai 1
-                offspring1.job_mode_op[*it] = parent1.job_mode_op[*it];
+                offspring1->job_mode_op[*it] = parent1->job_mode_op[*it];
             }
 
             //O filho 2 herda a segunda parte das tarefas do pai 1, na máquina i
-            size = parent1.scheduling[i].size() - size;
-            for(auto it = parent1.scheduling[i].begin(); it != parent1.scheduling[i].begin()+size; ++it){
-                offspring2.scheduling[i].push_back(*it);
+            size = parent1->scheduling[i].size() - size;
+            for(auto it = parent1->scheduling[i].begin(); it != parent1->scheduling[i].begin()+size; ++it){
+                offspring2->scheduling[i].push_back(*it);
                 o2[*it] = true;
 
                 //O filho 2 herda o modo de operação do pai 1
-                offspring2.job_mode_op[*it] = parent1.job_mode_op[*it];
+                offspring2->job_mode_op[*it] = parent1->job_mode_op[*it];
             }
         }
 
@@ -389,7 +398,7 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
 
     //As tarefas restantes dos filhos 1 e 2 são herdadas de acordo com característica do pai 2
     for (unsigned i = 1; i <= Instance::num_machine; ++i) {
-        for(auto it = parent2.scheduling[i].begin(); it != parent2.scheduling[i].end(); ++it){
+        for(auto it = parent2->scheduling[i].begin(); it != parent2->scheduling[i].end(); ++it){
 
             //Se a tarefa it ainda não está no filho 1, então ela deve ser adicionada
             if(!o1[*it]){
@@ -401,11 +410,11 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
                 if(op == 0){
                 //if(true){
                     //offspring1.scheduling[i].push_back(*it);
-                    offspring1.AddJobGreedyMakespanMachine(i, *it, parent2.job_mode_op[*it]);
+                    offspring1->AddJobGreedyMakespanMachine(i, *it, parent2->job_mode_op[*it]);
                 }
                 else{
                     //offspring1.AddJobGreedyTECMachine(i, *it, parent2.job_mode_op[*it]);
-                    offspring1.AddJobGreedyTECMachine3(i, *it, parent2.job_mode_op[*it]);
+                    offspring1->AddJobGreedyTECMachine3(i, *it, parent2->job_mode_op[*it]);
                 }
 
             }
@@ -420,11 +429,11 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
                 if(op == 0){
                 //if(true){
                     //offspring2.scheduling[i].push_back(*it);
-                    offspring2.AddJobGreedyMakespanMachine(i, *it, parent2.job_mode_op[*it]);
+                    offspring2->AddJobGreedyMakespanMachine(i, *it, parent2->job_mode_op[*it]);
                 }
                 else{
                     //offspring2.AddJobGreedyTECMachine(i, *it, parent2.job_mode_op[*it]);
-                    offspring2.AddJobGreedyTECMachine3(i, *it, parent2.job_mode_op[*it]);
+                    offspring2->AddJobGreedyTECMachine3(i, *it, parent2->job_mode_op[*it]);
                 }
 
             }
@@ -434,20 +443,23 @@ void GenerateOffspring3(GASolution parent1, GASolution parent2,
     if(op == 0){
         //Definir o instance inicial de cada tarefa presente na sequência
         //considerando o menor valor para o tempo de término em cada máquina
-        offspring1.CalculateShorterTimeHorizon();
-        offspring2.CalculateShorterTimeHorizon();
+        offspring1->CalculateShorterTimeHorizon();
+        offspring2->CalculateShorterTimeHorizon();
     }
     else{
         //Definir o instance inicial de cada tarefa presente na sequência
         //considerando o menor valor para o custo de energia
-        offspring1.CalculateHorizonAvoidingPeak();
-        offspring2.CalculateHorizonAvoidingPeak();
+        offspring1->CalculateHorizonAvoidingPeak();
+        offspring2->CalculateHorizonAvoidingPeak();
     }
 
 
     //Calcular a função objetivo
-    offspring1.CalculateObjective();
-    offspring2.CalculateObjective();
+    offspring1->CalculateObjective();
+    offspring2->CalculateObjective();
+
+    o1.clear();
+    o2.clear();
 
 }
 
@@ -466,16 +478,16 @@ void SolutionListToVector(GASolution s, vector<unsigned> &v_solution)
     }
 }
 
-bool CompareMakespan(GASolution & l, GASolution & r) //(2)
+bool CompareMakespan(GASolution * l, GASolution * r) //(2)
 {
-    if(l.makeSpan < r.makeSpan){
+    if(l->makeSpan < r->makeSpan){
         return true;
     }
-    else if (l.makeSpan > r.makeSpan){
+    else if (l->makeSpan > r->makeSpan){
         return false;
     }
     else{
-        if(l.TEC < r.TEC){
+        if(l->TEC < r->TEC){
             return true;
         }
         else{
@@ -485,16 +497,16 @@ bool CompareMakespan(GASolution & l, GASolution & r) //(2)
 
 }
 
-bool CompareTEC(GASolution & l, GASolution & r) //(2)
+bool CompareTEC(GASolution * l, GASolution * r) //(2)
 {
-    if(l.TEC < r.TEC){
+    if(l->TEC < r->TEC){
         return true;
     }
-    else if (l.TEC > r.TEC){
+    else if (l->TEC > r->TEC){
         return false;
     }
     else{
-        if(l.makeSpan < r.makeSpan){
+        if(l->makeSpan < r->makeSpan){
             return true;
         }
         else{
@@ -504,12 +516,13 @@ bool CompareTEC(GASolution & l, GASolution & r) //(2)
 
 }
 
-void SortByMakespan(vector<GASolution> &population)
+void SortByMakespan(vector<GASolution*> &population)
 {
+
     sort(population.begin(), population.end(), CompareMakespan);
 }
 
-void SortByTEC(vector<GASolution> &population)
+void SortByTEC(vector<GASolution*> &population)
 {
     sort(population.begin(), population.end(), CompareTEC);
 }
@@ -702,19 +715,21 @@ void MutationChangeH(GASolution &individual)
     pos_job = rand()%individual.scheduling[machine].size();
     job = individual.scheduling[machine][pos_job];
 
+    unsigned h_day = floor(individual.H1[job]/(double)Instance::num_planning_horizon);
+
     //O tempo adicional será no máximo o tamanho do horário de pico
-    add_h = rand()%(Instance::peak_end - Instance::peak_start);
+    add_h = rand()%(Instance::v_peak_end[h_day] - Instance::v_peak_start[h_day]);
 
     //Realizar a mudança de h
     individual.ChangeHJob(machine, pos_job, add_h);
 }
 
-void PopulationAddIndividual(vector<GASolution> &population, GASolution &individual)
+void PopulationAddIndividual(vector<GASolution*> &population, GASolution *individual)
 {
     bool add = true;
     for(auto it = population.begin(); it != population.end(); ++it){
         //Se já tem um indivíduo igual na população
-        if(individual.makeSpan == it->makeSpan && abs(individual.TEC - it->TEC) < EPS){
+        if(individual->makeSpan == (*it)->makeSpan && abs(individual->TEC - (*it)->TEC) < EPS){
             //Não adicionar
             add = false;
             break;
@@ -729,7 +744,7 @@ void PopulationAddIndividual(vector<GASolution> &population, GASolution &individ
 /*
  * População @R recebe a união entre @P e @Q
  */
-void UnionPopulation(vector<GASolution> &R, vector<GASolution> P, vector<GASolution> Q)
+void UnionPopulation(vector<GASolution*> &R, vector<GASolution*> &P, vector<GASolution*> &Q)
 {
 
     R.clear();
@@ -738,9 +753,13 @@ void UnionPopulation(vector<GASolution> &R, vector<GASolution> P, vector<GASolut
         PopulationAddIndividual(R, *it);
     }
 
+    P.clear();
+
     for(auto it = Q.begin(); it != Q.end(); ++it){
         PopulationAddIndividual(R, *it);
     }
+
+    Q.clear();
 }
 
 

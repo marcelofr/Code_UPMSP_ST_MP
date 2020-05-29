@@ -2,7 +2,7 @@
 
 cd ..
 
-instance_folder="Instances/";
+instance_folder="Instances/Large/";
 #instance_folder="Instances/Debug/";
 
 #files="I_50_10_S_1-9_1"
@@ -19,10 +19,10 @@ algorithm[1]="GA"
 #Pega quantos algoritmos serao executados
 size_algorithm=${#algorithm[@]}
 
-folder_solution="Solutions/2020-04-28/"
+folder_solution="Solutions/2020_05_14/"
 
 #tempo em milisegundos (valor sera multiplicado pela numero de tarefas da instancia)
-max_time_factor[1]=10
+max_time_factor[1]=1000
 #Pega quantos tempos serao executados
 size_max_time_factor=${#max_time_factor[@]}
 
@@ -45,18 +45,19 @@ do
 
         algorithm=${algorithm[$k]}
 
-        #percorre as sementes
-        for((l=1;l<=$size_seed;l++))
-        do
 
-            seed=${seed[$j]}
+        #percorre todos os arquivos instance_extension
+        find $instance_folder -maxdepth 1 -name $files$instance_extension -type f -print0 | while read -d $'\0' full_path_file; do
 
-            #percorre todos os arquivos instance_extension
-            find $instance_folder -maxdepth 1 -name $files$instance_extension -type f -print0 | while read -d $'\0' full_path_file; do
+            filename="${full_path_file##*/}"
+            instance_name="${filename%.[^.]*}"
+            #echo "Nome da instância "$instance_name
 
-                filename="${full_path_file##*/}"
-                instance_name="${filename%.[^.]*}"
-                #echo "Nome da instância "$instance_name
+            #percorre as sementes
+            for((l=1;l<=$size_seed;l++))
+            do
+
+                seed=${seed[$l]}
 
                 #Arquivo para salvar o logs de erros
                 file_log_error="log/error/"$algorithm".log"
@@ -98,7 +99,7 @@ do
                     echo "  max_time_factor: "$max_time_factor
                     echo "  folder_solution: "$folder_solution
 
-                     ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $max_time_factor $folder_solution
+                     ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $max_time_factor $folder_solution "1"
 
                     echo "End: $(date)"
                     #date

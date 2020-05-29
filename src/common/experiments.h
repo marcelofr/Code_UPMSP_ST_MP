@@ -10,6 +10,7 @@
 #include "math_model/run_model.h"
 #include "common/solution.h"
 #include "local_search/local_search.h"
+#include "common/set_solution.h"
 
 using namespace std;
 

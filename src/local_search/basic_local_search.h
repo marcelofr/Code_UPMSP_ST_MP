@@ -17,6 +17,6 @@ bool InsertOutsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominate
 bool ChangeOpModeLS(LSSolution my_solution, vector<LSSolution> &non_dominated_set);
 bool ChangeHLS(LSSolution my_solution, vector<LSSolution> &non_dominated_set);
 
-bool AddSolution(LSSolution my_solution, vector<LSSolution> &non_dominated_set);
+bool AddSolution(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set);
 
 #endif // BASIC_LOCAL_SEARCH_H

@@ -1,6 +1,4 @@
-
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    src \
-    test
+    unit

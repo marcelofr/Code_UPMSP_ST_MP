@@ -6,18 +6,18 @@
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool SwapInsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_set)
+bool SwapInsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
 {
     unsigned num_job_maq;
 
-    LSSolution neighbor_sol;
+    LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
-    neighbor_sol = my_solution;
+    *neighbor_sol = *my_solution;
 
     //Para cada máquina i de 1 à n
     for (unsigned i = 1; i <= Instance::num_machine; i++) {
-        num_job_maq = neighbor_sol.scheduling[i].size();
+        num_job_maq = neighbor_sol->scheduling[i].size();
 
         //Para cada tarefa j da máquina i
         for (unsigned j = 0; j < num_job_maq; j++) {
@@ -26,10 +26,10 @@ bool SwapInsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_s
             for (unsigned k = j+1; k < num_job_maq; ++k) {
 
                 //Gerar vizinho com a troca de tarefas em uma máquina
-                neighbor_sol.SwapInside(i, j, k);
+                neighbor_sol->SwapInside(i, j, k);
 
-                neighbor_sol.CalculateShorterTimeHorizon();
-                neighbor_sol.CalculateObjective();
+                neighbor_sol->CalculateShorterTimeHorizon();
+                neighbor_sol->CalculateObjective();
 
                 //Tentar adicionar o vizinho gerado no conjunto não-dominado
                 //Se conseguiu, então retorna true
@@ -43,6 +43,9 @@ bool SwapInsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_s
             }
         }
     }
+
+    delete neighbor_sol;
+
     //Retorna falso, caso não consiga encontrar um vizinho melhor
     return false;
 }
@@ -53,22 +56,22 @@ bool SwapInsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_s
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool SwapOutsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_set)
+bool SwapOutsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominated_set)
 {
     unsigned num_job_maq1, num_job_maq2;
 
-    LSSolution neighbor_sol;
+    LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
-    neighbor_sol = my_solution;
+    *neighbor_sol = *my_solution;
 
     //Para cada máquina i1 de 1 à n
     for (unsigned i1 = 1; i1 <= Instance::num_machine; i1++) {
-        num_job_maq1 = neighbor_sol.scheduling[i1].size();
+        num_job_maq1 = neighbor_sol->scheduling[i1].size();
 
         //Para cada máquina i2 de i1+1 à n
         for (unsigned i2 = i1+1; i2 <= Instance::num_machine; i2++) {
-            num_job_maq2 = neighbor_sol.scheduling[i2].size();
+            num_job_maq2 = neighbor_sol->scheduling[i2].size();
 
             //Para cada tarefa j da máquina i1
             for (unsigned j = 0; j < num_job_maq1; j++) {
@@ -77,10 +80,10 @@ bool SwapOutsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_
                 for (unsigned k = 0; k < num_job_maq2; ++k) {
 
                     //Gerar vizinho com a troca de tarefas entre máquinas
-                    neighbor_sol.SwapOutside(i1, j, i2, k);
+                    neighbor_sol->SwapOutside(i1, j, i2, k);
 
-                    neighbor_sol.CalculateShorterTimeHorizon();
-                    neighbor_sol.CalculateObjective();
+                    neighbor_sol->CalculateShorterTimeHorizon();
+                    neighbor_sol->CalculateObjective();
 
                     //Tentar adicionar o vizinho gerado no conjunto não-dominado
                     //Se conseguiu, então retorna true
@@ -96,6 +99,8 @@ bool SwapOutsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_
             }
         }
     }
+
+    delete neighbor_sol;
     //Retorna falso, caso não consiga encontrar um vizinho melhor
     return false;
 }
@@ -106,18 +111,18 @@ bool SwapOutsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool InsertInsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_set)
+bool InsertInsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominated_set)
 {
     unsigned num_job_maq;
 
-    LSSolution neighbor_sol;
+    LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
-    neighbor_sol = my_solution;
+    *neighbor_sol = *my_solution;
 
     //Para cada máquina i de 1 à n
     for (unsigned i = 1; i <= Instance::num_machine; i++) {
-        num_job_maq = neighbor_sol.scheduling[i].size();
+        num_job_maq = neighbor_sol->scheduling[i].size();
 
         //Para cada tarefa j da máquina i
         for (unsigned j = 0; j < num_job_maq; j++) {
@@ -127,10 +132,10 @@ bool InsertInsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated
 
                 if(j != k){
                     //Realizar a inserção
-                    neighbor_sol.InsertInside(i, j, k);
+                    neighbor_sol->InsertInside(i, j, k);
 
-                    neighbor_sol.CalculateShorterTimeHorizon();
-                    neighbor_sol.CalculateObjective();
+                    neighbor_sol->CalculateShorterTimeHorizon();
+                    neighbor_sol->CalculateObjective();
 
                     //Tentar adicionar o vizinho gerado no conjunto não-dominado
                     //Se conseguiu, então retorna true
@@ -146,6 +151,9 @@ bool InsertInsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated
             }
         }
     }
+
+    delete neighbor_sol;
+
     //Retorna falso, caso não consiga encontrar um vizinho melhor
     return false;
 }
@@ -156,22 +164,22 @@ bool InsertInsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool InsertOutsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominated_set)
+bool InsertOutsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
 {
     unsigned num_job_maq1, num_job_maq2;
 
-    LSSolution neighbor_sol;
+    LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
-    neighbor_sol = my_solution;
+    *neighbor_sol = *my_solution;
 
     //Para cada máquina i1 de 1 à n
     for (unsigned i1 = 1; i1 <= Instance::num_machine; i1++) {
-        num_job_maq1 = neighbor_sol.scheduling[i1].size();
+        num_job_maq1 = neighbor_sol->scheduling[i1].size();
 
         //Para cada máquina i2 de i1+1 à n
         for (unsigned i2 = 1; i2 <= Instance::num_machine; i2++) {
-            num_job_maq2 = neighbor_sol.scheduling[i2].size();
+            num_job_maq2 = neighbor_sol->scheduling[i2].size();
 
             if(i1 != i2){
                 //Para cada tarefa j da máquina i1
@@ -181,10 +189,10 @@ bool InsertOutsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominate
                     for (unsigned k = 0; k <= num_job_maq2; ++k) {
 
                         //Realizar a troca
-                        neighbor_sol.InsertOutside(i1, j, i2, k);
+                        neighbor_sol->InsertOutside(i1, j, i2, k);
 
-                        neighbor_sol.CalculateShorterTimeHorizon();
-                        neighbor_sol.CalculateObjective();
+                        neighbor_sol->CalculateShorterTimeHorizon();
+                        neighbor_sol->CalculateObjective();
 
                         //Tentar adicionar o vizinho gerado no conjunto não-dominado
                         //Se conseguiu, então retorna true
@@ -200,6 +208,9 @@ bool InsertOutsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominate
             }
         }
     }
+
+    delete neighbor_sol;
+
     //Retorna falso, caso não consiga encontrar um vizinho melhor
     return false;
 }
@@ -210,33 +221,33 @@ bool InsertOutsideLS_FI(LSSolution my_solution, vector<LSSolution> &non_dominate
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool ChangeOpModeLS(LSSolution my_solution, vector<LSSolution> &non_dominated_set)
+bool ChangeOpModeLS(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
 {
     unsigned num_job_maq, job;
 
-    LSSolution neighbor_sol;
+    LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
-    neighbor_sol = my_solution;
+    *neighbor_sol = *my_solution;
 
     //Para cada máquina i de 1 à n
     for (unsigned i = 1; i <= Instance::num_machine; i++) {
-        num_job_maq = neighbor_sol.scheduling[i].size();
+        num_job_maq = neighbor_sol->scheduling[i].size();
 
         //Para cada tarefa j da máquina i
         for (unsigned j = 0; j < num_job_maq; j++) {
 
-            job = neighbor_sol.scheduling[i][j];
+            job = neighbor_sol->scheduling[i][j];
 
             //Para cada tarefa k da máquina i
             for (unsigned k = 1; k <= Instance::num_mode_op; ++k) {
 
-                if(neighbor_sol.job_mode_op[job] != k){
+                if(neighbor_sol->job_mode_op[job] != k){
 
-                    neighbor_sol.ChangeModeOpJob(i, j, k);
+                    neighbor_sol->ChangeModeOpJob(i, j, k);
 
-                    neighbor_sol.CalculateShorterTimeHorizon();
-                    neighbor_sol.CalculateObjective();
+                    neighbor_sol->CalculateShorterTimeHorizon();
+                    neighbor_sol->CalculateObjective();
 
                     //Tentar adicionar o vizinho gerado no conjunto não-dominado
                     //Se conseguiu, então retorna true
@@ -245,13 +256,16 @@ bool ChangeOpModeLS(LSSolution my_solution, vector<LSSolution> &non_dominated_se
                         return true;
                     }
                     else{
-                        neighbor_sol = my_solution;
+                        *neighbor_sol = *my_solution;
                     }
                 }
 
             }
         }
     }
+
+    delete neighbor_sol;
+
     //Retorna falso, caso não consiga encontrar um vizinho melhor
     return false;
 }
@@ -268,7 +282,7 @@ bool ChangeHLS(LSSolution my_solution, vector<LSSolution> &non_dominated_set)
  * 3 - A solução domina então ela será adicionada e as outras serão removidas
  * Se conseguiu adicionar my_solution, então retorna verdadeiro
  */
-bool AddSolution(LSSolution my_solution, vector<LSSolution> &non_dominated_set)
+bool AddSolution(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
 {
 
     //caso 1

@@ -3,13 +3,15 @@
 unsigned Instance::num_jobs = 0;
 unsigned Instance::num_machine = 0;
 unsigned Instance::num_planning_horizon = 0;
+unsigned Instance::num_days = 0;
 unsigned Instance::num_mode_op = 0;
-unsigned Instance::peak_start = 0;
-unsigned Instance::peak_end = 0;
 double Instance::rate_on_peak = 0;
 double Instance::rate_off_peak = 0;
 unsigned Instance::max_cost = 0;
+unsigned Instance::seed = 0;
 
+vector<unsigned> Instance::v_peak_start;
+vector<unsigned> Instance::v_peak_end;
 vector<vector<unsigned>> Instance::m_processing_time;
 vector<vector<vector<unsigned>>> Instance::m_setup_time;
 vector<double> Instance::v_speed_factor;
@@ -72,12 +74,12 @@ void Instance::ReadJulioInstance(string instanceFile)
     //Leitura do início do horário de pico
     getline(arqEntrada, next);
     aux = next.substr(16,next.size()-17);
-    Instance::peak_start = size_t(stoi(aux));
+    Instance::v_peak_start.push_back(size_t(stoi(aux)));
 
     //Leitura do final do horário de pico
     getline(arqEntrada, next);
     aux = next.substr(16,next.size()-17);
-    Instance::peak_end = size_t(stoi(aux));
+    Instance::v_peak_end.push_back(size_t(stoi(aux)));
 
     //Leitura da tarifa dentro do horário de pico
     getline(arqEntrada, next);
@@ -198,6 +200,11 @@ void Instance::ReadMarceloInstance(string instance_file_name)
     arqEntrada >> u_num;
     Instance::num_machine = u_num;
 
+    //Leitura do número de dias
+    arqEntrada >> next;
+    arqEntrada >> u_num;
+    Instance::num_days = u_num;
+
     //Leitura da quantidade de horizonte de planejamentos
     arqEntrada >> next;
     arqEntrada >> u_num;
@@ -207,16 +214,6 @@ void Instance::ReadMarceloInstance(string instance_file_name)
     arqEntrada >> next;
     arqEntrada >> u_num;
     Instance::num_mode_op = u_num;
-
-    //Leitura do início do horário de pico
-    arqEntrada >> next;
-    arqEntrada >> u_num;
-    Instance::peak_start = u_num;
-
-    //Leitura do final do horário de pico
-    arqEntrada >> next;
-    arqEntrada >> u_num;
-    Instance::peak_end = u_num;
 
     //Leitura da tarifa dentro do horário de pico
     arqEntrada >> next;
@@ -234,6 +231,26 @@ void Instance::ReadMarceloInstance(string instance_file_name)
     Instance::max_cost = u_num;
 
     Instance::Init();
+
+    arqEntrada >> next;
+
+    //Leitura do início do horário de pico
+    for (unsigned i = 0; i < Instance::num_days; i++) {
+        //Leitura do início do horário de pico
+        //arqEntrada >> next;
+        arqEntrada >> u_num;
+        Instance::v_peak_start.push_back(u_num);
+    }
+
+    arqEntrada >> next;
+
+    //Leitura do fim do horário de pico
+    for (unsigned i = 0; i < Instance::num_days; i++) {
+        //Leitura do final do horário de pico
+        //arqEntrada >> next;
+        arqEntrada >> u_num;
+        Instance::v_peak_end.push_back(u_num);
+    }
 
     arqEntrada >> next;
 
@@ -293,11 +310,14 @@ void Instance::PrintInstance1()
     cout << "Número de tarefas: " << Instance::num_jobs << endl;
     cout << "Número de horizontes de planejamentos: " << Instance::num_planning_horizon << endl;
     cout << "Número de modos de operação: " << Instance::num_mode_op << endl;
-    cout << "Início do horário de pico: " << Instance::peak_start << endl;
-    cout << "Final do horário de pico: " << Instance::peak_end << endl;
     cout << "Tarifa dentro do horário de pico: " << Instance::rate_on_peak << endl;
     cout << "Tarifa fora do horário de pico: " << Instance::rate_off_peak << endl;
     cout << "Custo máximo: " << Instance::max_cost << endl;
+
+    cout << "Horário de pico" << endl;
+    for (size_t i = 0; i <= Instance::num_days; i++) {
+        cout << Instance::v_peak_start[i] << "\t" << Instance::v_peak_end[i] << endl;
+    }
 
     cout << "Fator de velocidade " << endl;
     for (size_t i = 1; i <= Instance::num_mode_op; i++) {

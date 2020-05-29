@@ -8,6 +8,7 @@ SOURCES += \
         common/experiments.cpp \
         common/generate_intances.cpp \
         common/instance.cpp \
+        common/set_solution.cpp \
         common/solution.cpp \
         common/utils.cpp \
         genetic_algorithm/ga.cpp \
@@ -25,6 +26,7 @@ HEADERS += \
     common/experiments.h \
     common/generate_intances.h \
     common/instance.h \
+    common/set_solution.h \
     common/solution.h \
     common/utils.h \
     genetic_algorithm/ga.h \

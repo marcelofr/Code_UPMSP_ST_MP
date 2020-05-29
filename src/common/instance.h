@@ -18,14 +18,20 @@ public:
     //fatorVelocidade => v_l
     //fatorPotencia => lambda_l
     //horizontePlanej => H
-    static unsigned num_jobs, num_machine, num_planning_horizon;
-    static unsigned num_mode_op, peak_start, peak_end, max_cost;
+    static unsigned num_jobs, num_machine, num_planning_horizon, num_days;
+    static unsigned num_mode_op, max_cost;
     static double rate_on_peak, rate_off_peak;
+    static unsigned seed;
+
+    //Um horário de pico para cada dia
+    static vector<unsigned> v_peak_start, v_peak_end;
 
     //Um fator de velocidade para cada modo de operação (v_l)
     static vector<double> v_speed_factor;
 
-    //Um fator de consumo para cada modo de operação (lambda_l)
+    /*
+     * Um fator de consumo para cada modo de operação (lambda_l)
+     */
     static vector<double> v_consumption_factor;
 
     //Uma potência para cada maquina (pi_i)

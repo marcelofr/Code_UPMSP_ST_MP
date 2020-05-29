@@ -19,12 +19,14 @@ void RunAlgorithm(Parameters Param){
     //Instance::ReadJulioInstance(Param.instance_file);
     Instance::ReadMarceloInstance(Param.instance_file);
 
+    Instance::seed = seed;
+
     //Critério de parada baseado no artigo do Luciano, Swarm 2019
     stringstream ss1(Param.max_time_factor);
     ss1 >> max_time_factor;
-    max_time = max_time_factor * Instance::num_jobs;
 
-    vector<Solution> non_dominated_set;
+
+    vector<Solution*> non_dominated_set;
     instance_result ir;
 
     ir.is_optimal = false;
@@ -34,11 +36,15 @@ void RunAlgorithm(Parameters Param){
 
     if(Param.algorithm == "GA"){
 
+        max_time = max_time_factor * Instance::num_jobs;
+
         //Instance::PrintInstance1();
         nsga_ii(max_time, non_dominated_set);
 
     }
     else if(Param.algorithm == "EXACT"){
+
+        max_time = (max_time_factor*6/10)*Instance::num_jobs;
 
         //Set seed
         stringstream ss(Param.alpha);
@@ -50,7 +56,7 @@ void RunAlgorithm(Parameters Param){
 
         RunMathModel(max_time, alpha, my_solution);
 
-        non_dominated_set.push_back(*my_solution);
+        non_dominated_set.push_back(my_solution);
 
         if(my_solution->is_optimal){
             ir.is_optimal = true;
@@ -65,14 +71,15 @@ void RunAlgorithm(Parameters Param){
     ir.elapsed_time_sec = t1->getElapsedTimeInMilliSec()/1000;
 
     //Salvar o conjunto não-dominado em arquivo
-    SalveSolution(non_dominated_set, Param, ir);
+    //SortByMakespan(non_dominated_set);
+    //SalveSolution(non_dominated_set, Param, ir);
 
 }
 
 /*
  * Método para salvar em arquivo a solução encontrada por um algoritmo
  */
-void SalveSolution(vector<Solution> non_dominated_set, Parameters Param, instance_result ir){
+void SalveSolution(vector<Solution*> non_dominated_set, Parameters Param, instance_result ir){
 
     unsigned max_time_factor;
 
@@ -88,8 +95,8 @@ void SalveSolution(vector<Solution> non_dominated_set, Parameters Param, instanc
     ss >> ir.seed;
     pair<unsigned, double> p;
     for (auto it = non_dominated_set.begin(); it != non_dominated_set.end(); ++it) {
-        p.first = it->makeSpan;
-        p.second = it->TEC;
+        p.first = (*it)->makeSpan;
+        p.second = (*it)->TEC;
         ir.non_dominated_set.push_back(p);
     }
 

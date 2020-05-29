@@ -77,3 +77,9 @@ int Find( int uf[], int x ) {
 
     return r;
 }
+
+// random generator function:
+/*int myrandom (int i)
+{
+    return rand()%i;
+}*/

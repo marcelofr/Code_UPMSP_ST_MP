@@ -28,6 +28,17 @@ Solution::Solution()
 Solution::~Solution()
 {
 
+    for(unsigned i = 0; i < this->scheduling.size(); i++){
+        this->scheduling[i].clear();
+    }
+
+    scheduling.clear();
+    H1.clear();
+    job_start_time1.clear();
+    job_end_time1.clear();
+    machine_completion_time.clear();
+    machine_TEC.clear();
+    job_mode_op.clear();
 }
 
 void Solution::Print()
@@ -112,6 +123,7 @@ void Solution::GreedyInitialSolutionMakespan()
     }
 
     //Gerar um vetor com números aleatórios
+    srand(Instance::seed);
     random_shuffle(jobs.begin()+1, jobs.end());
 
     //Selecionar o modo de operação, mais rápido
@@ -144,7 +156,7 @@ void Solution::GreedyInitialSolutionMakespan()
  * Método para gerar uma solução inicial gulosa,
  * considerando o objetivo do TEC
  */
-void Solution::GreedyInitialSolutionTEC2()
+/*void Solution::GreedyInitialSolutionTEC2()
 {
     vector<unsigned> jobs(Instance::num_jobs+1);
 
@@ -189,7 +201,7 @@ void Solution::GreedyInitialSolutionTEC2()
 #ifdef DEBUG
     Check();
 #endif
-}
+}*/
 
 /*
  * Método para gerar uma solução inicial gulosa,
@@ -204,6 +216,7 @@ void Solution::GreedyInitialSolutionTEC3()
     }
 
     //Gerar um vetor com números aleatórios
+    srand(Instance::seed);
     random_shuffle(jobs.begin()+1, jobs.end());
 
     //Selecionar o modo de operação que executa mais rápido
@@ -249,7 +262,6 @@ void Solution::CalculateShorterTimeHorizon()
 
         //Percorrer as tarefas de cada máquina
         for(auto j = scheduling[i].begin(); j != scheduling[i].end(); ++j){
-
 
             job_start_time1[*j] = start;
 
@@ -313,11 +325,13 @@ void Solution::CalculateHorizonAvoidingPeak()
 
             total_time_job = setup_time + processing_time;
 
+            unsigned end_day = floor(job_end_time1[*j]/(double)Instance::num_planning_horizon);
+
             //Condição para evitar o horário de pico
-            if(job_end_time1[previous_job] < Instance::peak_start
-                    && job_end_time1[previous_job] + total_time_job > Instance::peak_start){
+            if(job_end_time1[previous_job] < Instance::v_peak_start[end_day]
+                    && job_end_time1[previous_job] + total_time_job > Instance::v_peak_start[end_day]){
                 //Atualizar o instante de início
-                job_start_time1[*j] = max(Instance::peak_end - setup_time, job_end_time1[previous_job]);
+                job_start_time1[*j] = max(Instance::v_peak_end[end_day] - setup_time, job_end_time1[previous_job]);
                 H1[*j] = job_start_time1[*j] + setup_time;
                 job_end_time1[*j] = H1[*j] + processing_time;
             }
@@ -384,45 +398,47 @@ double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h)
 
     end = h + pt;
 
+    unsigned h_day = floor(h/(double)Instance::num_planning_horizon);
+
     //Se a tarefa começa antes do pico
-    if(h < Instance::peak_start){
+    if(h < Instance::v_peak_start[h_day]){
 
         //Se a tarefa termina antes do pico
-        if(end < Instance::peak_start){
+        if(end < Instance::v_peak_start[h_day]){
 
             PEC_off = pt;
 
             PEC_on = 0;
         }
         //Se a tarefa termina dentro do pico
-        else if(end < Instance::peak_end){
+        else if(end < Instance::v_peak_end[h_day]){
 
-            PEC_off = Instance::peak_start - h;
+            PEC_off = Instance::v_peak_start[h_day] - h;
 
-            PEC_on = end - Instance::peak_start;
+            PEC_on = end - Instance::v_peak_start[h_day];
 
         }
         else{
 
-            PEC_off = Instance::peak_start - h;
-            PEC_off += end - Instance::peak_end;
+            PEC_off = Instance::v_peak_start[h_day] - h;
+            PEC_off += end - Instance::v_peak_end[h_day];
 
-            PEC_on = Instance::peak_end - Instance::peak_start;
+            PEC_on = Instance::v_peak_end[h_day] - Instance::v_peak_start[h_day];
 
         }
     }
     //Se a tarefa começa dentro do horário de pico
-    else if(h < Instance::peak_end){
+    else if(h < Instance::v_peak_end[h_day]){
         //Se a tarefa termina dentro do pico
-        if(end < Instance::peak_end){
+        if(end < Instance::v_peak_end[h_day]){
             PEC_off = 0;
 
             PEC_on = pt;
         }
         else{
-            PEC_on = Instance::peak_end - h;
+            PEC_on = Instance::v_peak_end[h_day] - h;
 
-            PEC_off = end - Instance::peak_end;
+            PEC_off = end - Instance::v_peak_end[h_day];
         }
     }
     else{
@@ -431,8 +447,8 @@ double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h)
         PEC_on = 0;
     }
 
-    PEC_off = (PEC_off*Instance::rate_off_peak*Instance::v_consumption_factor[job_mode_op[job]]*Instance::v_machine_potency[machine]/6);
-    PEC_on = (PEC_on*Instance::rate_on_peak*Instance::v_consumption_factor[job_mode_op[job]]*Instance::v_machine_potency[machine]/6);
+    PEC_off = (PEC_off*Instance::rate_off_peak*Instance::v_consumption_factor[job_mode_op[job]]*Instance::v_machine_potency[machine]/60);
+    PEC_on = (PEC_on*Instance::rate_on_peak*Instance::v_consumption_factor[job_mode_op[job]]*Instance::v_machine_potency[machine]/60);
 
     PEC = PEC_off + PEC_on;
 
