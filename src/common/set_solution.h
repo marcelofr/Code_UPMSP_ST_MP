@@ -2,10 +2,12 @@
 #define SET_SOLUTION_H
 
 #include "solution.h"
+#include "genetic_algorithm/ga.h"
 
-bool CompareMakespan(Solution & l, Solution & r);
-bool CompareTEC(Solution & l, Solution & r);
-void SortByMakespan(vector<Solution> &set_solution);
-void SortByTEC(vector<Solution> &set_solution);
+void SortByMakespan(vector<Solution*> &set_solution);
+void SortByTEC(vector<Solution*> &set_solution);
+
+void SortByMakespan(vector<GASolution*> &set_solution);
+void SortByTEC(vector<GASolution*> &set_solution);
 
 #endif // SET_SOLUTION_H

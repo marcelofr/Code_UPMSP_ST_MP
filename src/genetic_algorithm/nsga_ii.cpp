@@ -102,11 +102,7 @@ void nsga_ii(unsigned time_limit, vector<Solution*> &non_dominated_set){
 #endif
 
     non_dominated_set.clear();
-    for(auto it = F[0].begin(); it != F[0].end(); ++it){
-        non_dominated_set.push_back(*it);
-    }
-
-    //(vector<GASolution>)set_solution_dominated = F[0];
+    copy(F[0].begin(), F[0].end(), non_dominated_set.begin());
 
 }
 
@@ -137,11 +133,11 @@ void FastNonDominatedSort(vector<vector<GASolution*> > &F, vector<GASolution*> &
             //Se p e q são soluções diferentes
             if(!((**p) == (**q))){
                 //Se p domina q
-                if((*p) < (*q)){
+                if((**p) < (**q)){
                     //Adicionar q no conjunto de soluções dominadas por p
                     (*p)->set_solution_dominated.push_back(*q);
                 }
-                else if ((*q) < (*p)){
+                else if ((**q) < (**p)){
                     //Incrementtar o contador de soluções não-dominadas por p
                     (*p)->counter_solution_non_dominated++;
                 }
@@ -189,7 +185,7 @@ void FastNonDominatedSort(vector<vector<GASolution*> > &F, vector<GASolution*> &
         P[i]->set_solution_dominated.clear();
     }
 
-    P.clear();
+    //P.clear();
     Q.clear();
 
 }

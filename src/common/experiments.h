@@ -29,6 +29,7 @@ struct Parameters{
 
 void RunAlgorithm(Parameters Param);
 
-void SalveSolution(vector<Solution> non_dominated_set, Parameters Param, instance_result ir);
+void SalveSolution(vector<Solution*> non_dominated_set, Parameters Param, instance_result ir);
+void SelectOnlyValidSolutions(vector<Solution*> non_dominated_set);
 
 #endif // EXPERIMENTS_H

@@ -70,9 +70,11 @@ void RunAlgorithm(Parameters Param){
     t1->stop();
     ir.elapsed_time_sec = t1->getElapsedTimeInMilliSec()/1000;
 
+    SelectOnlyValidSolutions(non_dominated_set);
+
     //Salvar o conjunto não-dominado em arquivo
-    //SortByMakespan(non_dominated_set);
-    //SalveSolution(non_dominated_set, Param, ir);
+    SortByMakespan(non_dominated_set);
+    SalveSolution(non_dominated_set, Param, ir);
 
 }
 
@@ -134,4 +136,20 @@ void SalveSolution(vector<Solution*> non_dominated_set, Parameters Param, instan
     }
 
     MyFile.close();
+}
+
+/*
+ * Função para selecionar apenas solução válidas que estão no conjunto não-dominado
+ */
+void SelectOnlyValidSolutions(vector<Solution*> non_dominated_set){
+    for(auto it_sol = non_dominated_set.begin(); it_sol != non_dominated_set.end();){
+        //Se o makespan é maior que o horizonte de planejamento
+        if((*it_sol)->makeSpan > (Instance::num_planning_horizon)*Instance::num_days){
+            //Remover essa solução do conjunto
+            it_sol = non_dominated_set.erase(it_sol);
+        }
+        else{
+            ++it_sol;
+        }
+    }
 }

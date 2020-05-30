@@ -27,11 +27,11 @@ int main(int argc, char** argv)
 
         //Param.instance_folder = "../../Instances/";
         //Param.instance_folder = "../../Instances/Debug/";
-        Param.instance_folder = "../../Instances/LARGE/";
-        //Param.instance_folder = "../../Instances/SMALL/";
+        //Param.instance_folder = "../../Instances/LARGE/";
+        Param.instance_folder = "../../Instances/SMALL/";
         //Param.inst ance_name = "I_6_2_S_1-9_1_rev1";
-        //Param.instance_name = "6_2_1439_3_S_1-9";
-        Param.instance_name = "250_10_1439_5_S_1-124";
+        Param.instance_name = "6_2_1439_3_S_1-9";
+        //Param.instance_name = "250_10_1439_5_S_1-124";
         Param.instance_extension = ".dat";
         Param.instance_file = Param.instance_folder + Param.instance_name + Param.instance_extension;
         Param.seed = "10683";

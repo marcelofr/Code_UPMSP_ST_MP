@@ -2,6 +2,7 @@
 #define NSGA_II_H
 
 #include "common/solution.h"
+#include "common/set_solution.h"
 #include "ga.h"
 #include "common/Timer.h"
 #include <limits>

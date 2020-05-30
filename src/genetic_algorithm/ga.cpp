@@ -111,6 +111,9 @@ void Mutation(vector<GASolution*> &population, vector<GASolution*> &new_populati
 
     unsigned prob;
 
+    individual = nullptr;
+
+
     for (unsigned i = 0; i < population.size(); ++i) {
 
         //Gerar um número entre zero e cem
@@ -119,12 +122,14 @@ void Mutation(vector<GASolution*> &population, vector<GASolution*> &new_populati
         //Se o número gerado é menor que a probabilidade definida, fazer a mutação
         if(prob < PROBABILITY_MUTATION){
 
+            individual = new GASolution;
+
             //Escolher o indivídua para fazer a mutação
             ind1 = rand()%POPULATION_SIZE;
             //individual = new GASolution();
             //Fazer uma cópia do indivíduo em outro lugar
             //*individual = nullptr;
-            *individual = *population[ind1];
+            (*individual) = *(population[ind1]);
 
             //Escolher um tipo de mutação
             op = rand()%1;
@@ -478,26 +483,13 @@ void SolutionListToVector(GASolution s, vector<unsigned> &v_solution)
     }
 }
 
-bool CompareMakespan(GASolution * l, GASolution * r) //(2)
+/*bool CompareMakespanGA(GASolution * l, GASolution * r) //(2)
 {
-    if(l->makeSpan < r->makeSpan){
-        return true;
-    }
-    else if (l->makeSpan > r->makeSpan){
-        return false;
-    }
-    else{
-        if(l->TEC < r->TEC){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
+    //CompareMakespan()
 
 }
 
-bool CompareTEC(GASolution * l, GASolution * r) //(2)
+bool CompareTECGA(GASolution * l, GASolution * r) //(2)
 {
     if(l->TEC < r->TEC){
         return true;
@@ -519,13 +511,13 @@ bool CompareTEC(GASolution * l, GASolution * r) //(2)
 void SortByMakespan(vector<GASolution*> &population)
 {
 
-    sort(population.begin(), population.end(), CompareMakespan);
+    sort(population.begin(), population.end(), CompareMakespanGA);
 }
 
 void SortByTEC(vector<GASolution*> &population)
 {
-    sort(population.begin(), population.end(), CompareTEC);
-}
+    sort(population.begin(), population.end(), CompareTECGA);
+}*/
 
 /*
  * Método para realizar mutação em um indivíduo

@@ -25,10 +25,17 @@ public:
 
     GASolution& operator=(GASolution &s){
 
-        Solution::operator =(s);
+        this->crowding_distance = s.crowding_distance;
+        this->rank = s.rank;
+        this->counter_solution_non_dominated = s.counter_solution_non_dominated;
+
+        this->set_solution_dominated.clear();
+        copy(s.set_solution_dominated.begin(), s.set_solution_dominated.end(), back_inserter(this->set_solution_dominated));
+
+        return (GASolution&)(Solution::operator =(s));
     }
 
-    bool operator <(const Solution* s) {
+    bool operator <(const Solution& s) {
 
         return Solution::operator <(s);
     }
@@ -59,8 +66,8 @@ void MutationChangeOpMode(GASolution &individual);
 void MutationChangeH(GASolution &individual);
 void SolutionListToVector(GASolution s, vector<unsigned> &v_solution);
 
-void SortByMakespan(vector<GASolution*> &population);
-void SortByTEC(vector<GASolution*> &population);
+/*void SortByMakespan(vector<GASolution*> &population);
+void SortByTEC(vector<GASolution*> &population);*/
 
 void UnionPopulation(vector<GASolution*> &R, vector<GASolution*> &P, vector<GASolution*> &Q);
 
