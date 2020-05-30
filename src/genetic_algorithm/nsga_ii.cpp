@@ -102,7 +102,7 @@ void nsga_ii(unsigned time_limit, vector<Solution*> &non_dominated_set){
 #endif
 
     non_dominated_set.clear();
-    copy(F[0].begin(), F[0].end(), non_dominated_set.begin());
+    non_dominated_set.assign(F[0].begin(), F[0].end());
 
 }
 

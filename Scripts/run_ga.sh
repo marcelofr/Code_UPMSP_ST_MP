@@ -2,7 +2,7 @@
 
 cd ..
 
-instance_folder="Instances/Large/";
+instance_folder="Instances/LARGE/";
 #instance_folder="Instances/Debug/";
 
 #files="I_50_10_S_1-9_1"
@@ -10,7 +10,37 @@ files="*"
 instance_extension=".dat"
 
 #Sementes
-seed[1]=1296910683
+seed[1]=60543
+seed[2]=16086
+seed[3]=60048
+seed[4]=10217
+seed[5]=37451
+seed[6]=7451
+seed[7]=9330
+seed[8]=55717
+seed[9]=19025
+seed[10]=40822
+seed[11]=423
+seed[12]=6241
+seed[13]=26170
+seed[14]=45433
+seed[15]=27367
+seed[16]=56890
+seed[17]=54006
+seed[18]=10667
+seed[19]=61471
+seed[20]=43978
+seed[21]=42123
+seed[22]=9653
+seed[23]=55074
+seed[24]=50396
+seed[25]=44145
+seed[26]=21001
+seed[27]=34238
+seed[28]=16792
+seed[29]=31167
+seed[30]=19162
+
 #Pega quantas sementes serao executadas
 size_seed=${#seed[@]}
 
@@ -19,7 +49,7 @@ algorithm[1]="GA"
 #Pega quantos algoritmos serao executados
 size_algorithm=${#algorithm[@]}
 
-folder_solution="Solutions/2020_05_14/"
+folder_solution="Solutions/2020_05_30/"
 
 #tempo em milisegundos (valor sera multiplicado pela numero de tarefas da instancia)
 max_time_factor[1]=1000
@@ -34,16 +64,16 @@ fi
 
 
 #percorre os tempos size_max_time_factor
-for((j=1;j<=$size_max_time_factor;j++))
+for((i=1;i<=$size_max_time_factor;i++))
 do
 
-    max_time_factor=${max_time_factor[$j]}
+    max_time_factor=${max_time_factor[$i]}
 
     #percorre os algoritmos
-    for((k=1;k<=$size_algorithm;k++))
+    for((j=1;j<=$size_algorithm;j++))
     do
 
-        algorithm=${algorithm[$k]}
+        algorithm=${algorithm[$j]}
 
 
         #percorre todos os arquivos instance_extension
@@ -54,10 +84,10 @@ do
             #echo "Nome da instância "$instance_name
 
             #percorre as sementes
-            for((l=1;l<=$size_seed;l++))
+            for((k=1;k<=$size_seed;k++))
             do
 
-                seed=${seed[$l]}
+                seed=${seed[$k]}
 
                 #Arquivo para salvar o logs de erros
                 file_log_error="log/error/"$algorithm".log"
@@ -93,17 +123,14 @@ do
                 then
                     echo "Start: $(date)"
                     echo "  instance_folder: "$instance_folder
-                    echo "  instance: "$instance_name$instance_extension
+                    echo "  instance: "$instance_name
+                    echo "  extensao: "$instance_extension
                     echo "  seed: "$seed
                     echo "  algorithm: "$algorithm
                     echo "  max_time_factor: "$max_time_factor
                     echo "  folder_solution: "$folder_solution
 
-                     ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $max_time_factor $folder_solution "1"
-
-                    echo "End: $(date)"
-                    #date
-                    echo ""
+                    ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $max_time_factor $folder_solution "1"
 
                     #Se o comando falhou salva a hora
                     if [ $? -gt 0 ];
@@ -113,6 +140,10 @@ do
                         #Se nao falhou escreve em outro log
                         date "+%d/%m/%Y %H:%M:%S Arquivo "$file_solution" Salvo com sucesso." >> $file_log
                     fi
+
+                    echo "End: $(date)"
+                    #date
+                    echo ""
                 elif [ "$1" == "restart" ]
                 then
                     FileName=$(echo $file | cut -d '/' -f 7)
