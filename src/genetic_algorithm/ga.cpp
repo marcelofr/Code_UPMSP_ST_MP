@@ -61,7 +61,7 @@ void Crossover(vector<GASolution*> &population, vector<GASolution*> &new_populat
     new_population.clear();
 
     //Gerar novos indivíduos com o cruzamento
-    for (unsigned i = 0; i < NEW_POPULATION_SIZE/2; ++i) {
+    for (unsigned i = 0; i < population.size()/2; ++i) {
 
         //Seleção de indivíduos por torneio binário
 
@@ -103,7 +103,7 @@ void Crossover(vector<GASolution*> &population, vector<GASolution*> &new_populat
 /*
  * Método para adicionar nova solução gerada a partir de uma mutação
  */
-void Mutation(vector<GASolution*> &population, vector<GASolution*> &new_population)
+void Mutation(vector<GASolution*> &population, vector<GASolution*> &new_population, double prob_mutation)
 {
     GASolution *individual;
     size_t ind1;
@@ -120,12 +120,12 @@ void Mutation(vector<GASolution*> &population, vector<GASolution*> &new_populati
         prob = rand()%100;
 
         //Se o número gerado é menor que a probabilidade definida, fazer a mutação
-        if(prob < PROBABILITY_MUTATION){
+        if(prob < prob_mutation){
 
             individual = new GASolution;
 
             //Escolher o indivídua para fazer a mutação
-            ind1 = rand()%POPULATION_SIZE;
+            ind1 = rand()%population.size();
             //individual = new GASolution();
             //Fazer uma cópia do indivíduo em outro lugar
             //*individual = nullptr;

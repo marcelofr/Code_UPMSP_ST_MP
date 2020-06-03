@@ -1,6 +1,6 @@
 ﻿#include "nsga_ii.h"
 
-void nsga_ii(unsigned time_limit, vector<Solution*> &non_dominated_set){
+void nsga_ii(ParametersGA param, vector<Solution*> &non_dominated_set){
 
     vector<GASolution*> P;
 
@@ -24,7 +24,7 @@ void nsga_ii(unsigned time_limit, vector<Solution*> &non_dominated_set){
     j = 0;
 
 
-    while (t1->getElapsedTimeInMilliSec() < time_limit) {
+    while (t1->getElapsedTimeInMilliSec() < param.time_limit) {
 
         //R_t <- P_t U Q_t
         UnionPopulation(R, P, Q);
@@ -35,7 +35,7 @@ void nsga_ii(unsigned time_limit, vector<Solution*> &non_dominated_set){
         i = 0;
 
         P.clear();
-        while (P.size() + F[i].size() < POPULATION_SIZE) {
+        while (P.size() + F[i].size() < param.tam_population) {
 
             //Calcular crowding distance para a frente i
             ComputeCrowdingDistance(F[i]);
@@ -59,7 +59,7 @@ void nsga_ii(unsigned time_limit, vector<Solution*> &non_dominated_set){
 
             //P_{t+1} <- P_{t+1} U F[j][1:(N - |P|)]
             //P.resize(POPULATION_SIZE);
-            tam = POPULATION_SIZE-P.size();
+            tam = param.tam_population-P.size();
             move(F[i].begin(), F[i].begin()+tam, back_inserter(P));
         }
 
@@ -79,7 +79,7 @@ void nsga_ii(unsigned time_limit, vector<Solution*> &non_dominated_set){
 
         //Criar um população Q_{t+1} de tamanho N
         Crossover(P, Q);
-        Mutation(P, Q);
+        Mutation(P, Q, param.prob_mutation);
 
         //Registar a contagem do tempo
         t1->stop();

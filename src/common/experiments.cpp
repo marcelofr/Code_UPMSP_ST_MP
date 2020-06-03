@@ -1,8 +1,8 @@
 #include "experiments.h"
 
 void RunAlgorithm(Parameters Param){
-    unsigned seed, max_time, max_time_factor;
-    double alpha;
+    unsigned seed, max_time_factor;
+    double max_time, alpha;
     Solution * my_solution;
     Timer *t1 = new Timer();
 
@@ -10,9 +10,7 @@ void RunAlgorithm(Parameters Param){
     MakeTrace();
 
     //Set seed
-    stringstream ss(Param.seed);
-    ss >> seed;
-    srand(seed);
+    seed = atoi(Param.seed.c_str());
     //srand (time(NULL));
 
     //Ler a instância
@@ -22,8 +20,7 @@ void RunAlgorithm(Parameters Param){
     Instance::seed = seed;
 
     //Critério de parada baseado no artigo do Luciano, Swarm 2019
-    stringstream ss1(Param.max_time_factor);
-    ss1 >> max_time_factor;
+    max_time_factor = atof(Param.max_time_factor.c_str());
 
 
     vector<Solution*> non_dominated_set;
@@ -36,10 +33,14 @@ void RunAlgorithm(Parameters Param){
 
     if(Param.algorithm == "GA"){
 
-        max_time = max_time_factor * Instance::num_jobs;
+        ParametersGA ParamGA;
+
+        ParamGA.time_limit = max_time_factor * Instance::num_jobs;
+        ParamGA.tam_population = atoi(Param.tam_population.c_str());
+        ParamGA.prob_mutation = atof(Param.prob_mutation.c_str());
 
         //Instance::PrintInstance1();
-        nsga_ii(max_time, non_dominated_set);
+        nsga_ii(ParamGA, non_dominated_set);
 
     }
     else if(Param.algorithm == "EXACT"){
@@ -47,8 +48,7 @@ void RunAlgorithm(Parameters Param){
         max_time = (max_time_factor*6/10)*Instance::num_jobs;
 
         //Set seed
-        stringstream ss(Param.alpha);
-        ss >> alpha;
+        alpha = atof(Param.alpha.c_str());
 
         //Gerar uma solução inicial gulosa considerando o objetivo do makespan
         my_solution = new Solution();
@@ -75,6 +75,19 @@ void RunAlgorithm(Parameters Param){
     //Salvar o conjunto não-dominado em arquivo
     SortByMakespan(non_dominated_set);
     SalveSolution(non_dominated_set, Param, ir);
+
+#ifdef IRACE
+    pair<unsigned, double> reference_point, aux;
+    double hv;
+    vector<pair<unsigned, double>>point_non_dominated_set;
+    for(auto it:non_dominated_set){
+        aux.first = it->makeSpan;
+        aux.second = it->TEC;
+        point_non_dominated_set.push_back(aux);
+    }
+    hv = CalculateHypervolume(point_non_dominated_set, reference_point);
+    cout << ir.elapsed_time_sec << "\t" << hv << endl;
+#endif
 
 }
 

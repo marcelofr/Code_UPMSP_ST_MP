@@ -7,7 +7,13 @@
 #include "common/Timer.h"
 #include <limits>
 
-void nsga_ii(unsigned time_limit, vector<Solution*> &non_dominated_set);
+struct ParametersGA{
+    double time_limit;
+    unsigned tam_population;
+    double prob_mutation;
+};
+
+void nsga_ii(ParametersGA param, vector<Solution*> &non_dominated_set);
 void FastNonDominatedSort(vector<vector<GASolution*>> &F, vector<GASolution*> &P);
 void ComputeCrowdingDistance(vector<GASolution*> &F_i);
 void Sort(vector<GASolution*> F_i);

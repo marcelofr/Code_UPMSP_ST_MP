@@ -24,6 +24,6 @@ struct instance_result{
 void CalculateMetric(string folder_solution);
 
 void ReadFilesInFolder(string folder_solution, vector<string> &files);
-void ReadFile(string file_name, instance_result &ir);
+void ReadFile(string file_name, instance_result &ir, vector<vector<pair<unsigned, double>>>&non_dominated_sets);
 
 #endif // METRIC_H

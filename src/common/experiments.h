@@ -11,6 +11,7 @@
 #include "common/solution.h"
 #include "local_search/local_search.h"
 #include "common/set_solution.h"
+#include "metric/hypervolume.h"
 
 using namespace std;
 
@@ -25,6 +26,8 @@ struct Parameters{
     string folder_solution;
     string max_time_factor;
     string alpha;
+    string prob_mutation;
+    string tam_population;
 };
 
 void RunAlgorithm(Parameters Param);

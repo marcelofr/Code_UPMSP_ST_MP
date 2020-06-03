@@ -2,20 +2,26 @@
 
 void CalculateMetric(string folder_solution)
 {
-    vector<string> files;
-    ReadFilesInFolder(folder_solution, files);
     double hv;
-
+    vector<string> files;
+    vector<vector<pair<unsigned, double>>>non_dominated_sets;
     instance_result ir;
-    pair<unsigned, double> r;
-    r.first = r.second = 0;
+    pair<unsigned, double> reference_point;
+
+    ReadFilesInFolder(folder_solution, files);
+    sort(files.begin(), files.end());
+
+    reference_point.first = reference_point.second = 0;
     //Ler cada arquivo de solução
     for(auto it : files){
-        ReadFile(it, ir);
-        hv = CalculateHypervolume(ir.non_dominated_set, r);
-        cout << hv << endl;
+        non_dominated_sets.clear();
+        ReadFile(it, ir, non_dominated_sets);
+        cout << "Instância: " << ir.instance_name << endl;
+        for(unsigned i = 0; i<non_dominated_sets.size(); i++){
+            hv = CalculateHypervolume(non_dominated_sets[i], reference_point);
+            cout << hv << endl;
+        }
     }
-
 }
 
 /*
@@ -29,18 +35,18 @@ void ReadFilesInFolder(string folder_solution, vector<string> &files)
     for (auto entry : filesystem::directory_iterator(folder_solution)){
         files.push_back(entry.path());
     }
-
 }
 
 /*
  * Método para ler um arquivo com um conjunto de soluções não-dominadas e
  * salvar os dados na estrutura ir
  */
-void ReadFile(string file_name, instance_result &ir)
+void ReadFile(string file_name, instance_result &ir, vector<vector<pair<unsigned, double>>>&non_dominated_sets)
 {
     fstream file;
     string str;
     unsigned num;
+    double d_num;
     pair<unsigned, double> p;
 
     file.open(file_name);
@@ -70,6 +76,18 @@ void ReadFile(string file_name, instance_result &ir)
     while (file >> p.first >> p.second)
     {
         ir.non_dominated_set.push_back(p);
+        //Se tem espaço
+        if(file.peek() == '\t'){
+            //Ler o tempo
+            file >> d_num;
+            non_dominated_sets.push_back(ir.non_dominated_set);
+            ir.non_dominated_set.clear();
+        }
+        //Se final do arquivo
+        if(file.peek() == EOF){
+            return;
+        }
+
     }
 
     file.close();
