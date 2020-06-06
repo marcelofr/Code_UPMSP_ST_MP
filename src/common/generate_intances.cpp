@@ -103,12 +103,15 @@ void GenerateLargeInstances()
     InstanceParam ip;
 
     vector<unsigned> num_jobs;
-    for(unsigned i=1; i<=5; i++){
+    /*for(unsigned i=1; i<=5; i++){
         num_jobs.push_back(i*50);
-    }
+    }*/
+    num_jobs.push_back(50);
+    num_jobs.push_back(250);
+    num_jobs.push_back(750);
 
     vector<unsigned> num_machines;
-    for(unsigned i=1; i<=3; i++){
+    for(unsigned i=1; i<=2; i++){
         num_machines.push_back(i*10);
     }
 

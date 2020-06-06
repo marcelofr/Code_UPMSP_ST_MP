@@ -20,7 +20,7 @@ void RunAlgorithm(Parameters Param){
     Instance::seed = seed;
 
     //Critério de parada baseado no artigo do Luciano, Swarm 2019
-    max_time_factor = atof(Param.max_time_factor.c_str());
+    max_time_factor = atoi(Param.max_time_factor.c_str());
 
 
     vector<Solution*> non_dominated_set;
@@ -35,9 +35,9 @@ void RunAlgorithm(Parameters Param){
 
         ParametersGA ParamGA;
 
-        ParamGA.time_limit = max_time_factor * Instance::num_jobs;
+        ParamGA.time_limit = max_time_factor * Instance::num_jobs * log(Instance::num_machine);
         ParamGA.tam_population = atoi(Param.tam_population.c_str());
-        ParamGA.prob_mutation = atof(Param.prob_mutation.c_str());
+        ParamGA.prob_mutation = atoi(Param.prob_mutation.c_str());
 
         //Instance::PrintInstance1();
         nsga_ii(ParamGA, non_dominated_set);
@@ -45,7 +45,7 @@ void RunAlgorithm(Parameters Param){
     }
     else if(Param.algorithm == "EXACT"){
 
-        max_time = (max_time_factor*6/10)*Instance::num_jobs;
+        max_time = (max_time_factor*6/10)* Instance::num_jobs * log(Instance::num_machine);
 
         //Set seed
         alpha = atof(Param.alpha.c_str());

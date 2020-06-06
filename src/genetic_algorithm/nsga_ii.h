@@ -10,7 +10,7 @@
 struct ParametersGA{
     double time_limit;
     unsigned tam_population;
-    double prob_mutation;
+    unsigned prob_mutation;
 };
 
 void nsga_ii(ParametersGA param, vector<Solution*> &non_dominated_set);

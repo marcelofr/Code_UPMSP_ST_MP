@@ -18,7 +18,7 @@
 #define RATE_OFF_PEAK 0.32282
 #define PLAN_HORIZON_SIZE 1439
 #define MAX_COST 999
-#define DESTINATION_FOLDER "../../Instances/LARGE_2020_05_21/"
+#define DESTINATION_FOLDER "../../Instances/LARGE_2020_06_06/"
 
 
 

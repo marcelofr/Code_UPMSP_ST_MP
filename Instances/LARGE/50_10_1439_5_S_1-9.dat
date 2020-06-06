@@ -5,7 +5,7 @@ hl 1439
 o 5
 rate_in_peak 0.47753
 rate_off_peak 0.32282
-max_cost 1114
+max_cost 1160
 
 peak_start
 1080

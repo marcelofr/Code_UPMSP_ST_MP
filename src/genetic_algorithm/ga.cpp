@@ -103,7 +103,7 @@ void Crossover(vector<GASolution*> &population, vector<GASolution*> &new_populat
 /*
  * Método para adicionar nova solução gerada a partir de uma mutação
  */
-void Mutation(vector<GASolution*> &population, vector<GASolution*> &new_population, double prob_mutation)
+void Mutation(vector<GASolution*> &population, vector<GASolution*> &new_population, unsigned prob_mutation)
 {
     GASolution *individual;
     size_t ind1;
