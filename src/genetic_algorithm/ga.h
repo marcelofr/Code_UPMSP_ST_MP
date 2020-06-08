@@ -4,11 +4,11 @@
 #include "common/solution.h"
 #include <algorithm>    // std::sort
 
-#define POPULATION_SIZE 100
-#define NEW_POPULATION_SIZE 100
+//#define POPULATION_SIZE 100
+//#define NEW_POPULATION_SIZE 100
 //#define PROBABILITY_CROSSOVER 80
 //#define TAM_CROSSOVER 98
-#define PROBABILITY_MUTATION 5
+//#define PROBABILITY_MUTATION 5
 
 class GASolution : public Solution{
 public:
@@ -46,7 +46,7 @@ public:
     }
 };
 
-void GenerateInitialPopulation(vector<GASolution*> &population);
+void GenerateInitialPopulation(vector<GASolution*> &population, unsigned tam_population);
 void PopulationAddIndividual(vector<GASolution> &population, GASolution &individual);
 void PrintPopulation(vector<GASolution*> &population);
 void Crossover(vector<GASolution*> &population, vector<GASolution*> &new_population);

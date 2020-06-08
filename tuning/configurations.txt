@@ -11,5 +11,8 @@
 ## parameter conditions (NA should be used for those parameters that
 ## are not enabled for a given configuration) and, if given, the
 ## constraints that describe forbidden configurations.
-param1 param2 mode   real mutation
-5        NA    "x2"   2.0   "low"
+##param1 param2 mode   real mutation
+##5        NA    "x2"   2.0   "low"
+
+tam_population  prob_mutation
+100 5

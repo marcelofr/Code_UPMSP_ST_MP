@@ -5,7 +5,7 @@ using namespace std;
 /*
  * Método para gerar a população inicial com tamanho POPULATION_SIZE
  */
-void GenerateInitialPopulation(vector<GASolution*> &population)
+void GenerateInitialPopulation(vector<GASolution*> &population, unsigned tam_population)
 {
     //GASolution * my_solution;
 
@@ -26,7 +26,7 @@ void GenerateInitialPopulation(vector<GASolution*> &population)
     population.back()->GreedyInitialSolutionTEC3();
 
     /*Gerar o restante dos indivíduos aleatoriamente*/
-    for (int i = 0; i < POPULATION_SIZE-2; ++i) {
+    for (unsigned i = 0; i < tam_population-2; ++i) {
         /*my_solution = new GASolution();
         //my_solution->DummyInitialSolution();
         my_solution->RandomInitialSolution();

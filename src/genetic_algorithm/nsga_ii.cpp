@@ -4,7 +4,7 @@ void nsga_ii(ParametersGA param, vector<Solution*> &non_dominated_set){
 
     vector<GASolution*> P;
 
-    GenerateInitialPopulation(P);
+    GenerateInitialPopulation(P, param.tam_population);
 
 #ifdef DEBUG
     cout << "====População Inicial========" << endl;
@@ -35,7 +35,7 @@ void nsga_ii(ParametersGA param, vector<Solution*> &non_dominated_set){
         i = 0;
 
         P.clear();
-        while (P.size() + F[i].size() < param.tam_population) {
+        while (P.size() + F[i].size() < param.tam_population && i < F.size()) {
 
             //Calcular crowding distance para a frente i
             ComputeCrowdingDistance(F[i]);
@@ -50,7 +50,7 @@ void nsga_ii(ParametersGA param, vector<Solution*> &non_dominated_set){
         unsigned tam = 0;
 
         //Se F[i] não está vazia
-        if(i <= F.size()){
+        if(i < F.size()){
             //Calcular crowding distance para a frente i
             ComputeCrowdingDistance(F[i]);
 
@@ -59,7 +59,7 @@ void nsga_ii(ParametersGA param, vector<Solution*> &non_dominated_set){
 
             //P_{t+1} <- P_{t+1} U F[j][1:(N - |P|)]
             //P.resize(POPULATION_SIZE);
-            tam = param.tam_population-P.size();
+            tam = param.tam_population-unsigned(P.size());
             move(F[i].begin(), F[i].begin()+tam, back_inserter(P));
         }
 

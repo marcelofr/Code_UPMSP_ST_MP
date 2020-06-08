@@ -10,7 +10,7 @@ void RunAlgorithm(Parameters Param){
     MakeTrace();
 
     //Set seed
-    seed = atoi(Param.seed.c_str());
+    seed = unsigned(atoi(Param.seed.c_str()));
     //srand (time(NULL));
 
     //Ler a instância
@@ -20,7 +20,7 @@ void RunAlgorithm(Parameters Param){
     Instance::seed = seed;
 
     //Critério de parada baseado no artigo do Luciano, Swarm 2019
-    max_time_factor = atoi(Param.max_time_factor.c_str());
+    max_time_factor = unsigned(atoi(Param.max_time_factor.c_str()));
 
 
     vector<Solution*> non_dominated_set;
@@ -36,8 +36,8 @@ void RunAlgorithm(Parameters Param){
         ParametersGA ParamGA;
 
         ParamGA.time_limit = max_time_factor * Instance::num_jobs * log(Instance::num_machine);
-        ParamGA.tam_population = atoi(Param.tam_population.c_str());
-        ParamGA.prob_mutation = atoi(Param.prob_mutation.c_str());
+        ParamGA.tam_population = unsigned(atoi(Param.tam_population.c_str()));
+        ParamGA.prob_mutation = unsigned(atoi(Param.prob_mutation.c_str()));
 
         //Instance::PrintInstance1();
         nsga_ii(ParamGA, non_dominated_set);
@@ -72,9 +72,16 @@ void RunAlgorithm(Parameters Param){
 
     SelectOnlyValidSolutions(non_dominated_set);
 
-    //Salvar o conjunto não-dominado em arquivo
     SortByMakespan(non_dominated_set);
+
+#ifndef IRACE
+
+    //Salvar o conjunto não-dominado em arquivo
     SalveSolution(non_dominated_set, Param, ir);
+
+#endif
+
+
 
 #ifdef IRACE
     pair<unsigned, double> reference_point, aux;
@@ -85,8 +92,11 @@ void RunAlgorithm(Parameters Param){
         aux.second = it->TEC;
         point_non_dominated_set.push_back(aux);
     }
+    reference_point.first = 0;
+    reference_point.second = 0;
     hv = CalculateHypervolume(point_non_dominated_set, reference_point);
-    cout << ir.elapsed_time_sec << "\t" << hv << endl;
+    //cout << hv << " " << ir.elapsed_time_sec << endl;
+    cout << hv << endl;
 #endif
 
 }

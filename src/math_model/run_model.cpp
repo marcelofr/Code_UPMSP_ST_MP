@@ -1,7 +1,7 @@
 #include "run_model.h"
 
 
-void RunMathModel(unsigned max_time, double alpha, Solution * my_solution)
+void RunMathModel(double max_time, double alpha, Solution * my_solution)
 {
 
     //Instance::ReadJulioInstance(instance_file);

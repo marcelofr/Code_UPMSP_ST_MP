@@ -39,9 +39,11 @@ HEADERS += \
     metric/metric.h
 
 # INCLUDEPATH += $$PWD/../gurobi702/linux64/include
-INCLUDEPATH += /home/marcelo/gurobi702/linux64/include
+INCLUDEPATH += /opt/gurobi752/linux64/include
+# INCLUDEPATH += /home/marcelo/gurobi702/linux64/include
 # INCLUDEPATH += /home/marcone/gurobi/gurobi900/linux64/include
 
+LIBS += -L /opt/gurobi752/linux64/lib/ -lgurobi_g++5.2 -lgurobi75
 # LIBS += -L$$PWD/../gurobi702/linux64/lib/ -lgurobi_g++5.2 -lgurobi70
-LIBS += -L /home/marcelo/gurobi702/linux64/lib/ -lgurobi_g++5.2 -lgurobi70
+# LIBS += -L /home/marcelo/gurobi702/linux64/lib/ -lgurobi_g++5.2 -lgurobi70
 # LIBS += -L /home/marcone/gurobi/gurobi900/linux64/lib/ -lgurobi_g++5.2 -lgurobi90

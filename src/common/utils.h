@@ -8,8 +8,8 @@
 #include <vector>
 
 //#define RELEASE
-#define DEBUG
-//#define IRACE
+//#define DEBUG
+#define IRACE
 
 
 #define EPS 0.01
