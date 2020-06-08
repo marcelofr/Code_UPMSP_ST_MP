@@ -19,7 +19,7 @@ void CalculateMetric(string folder_solution)
         cout << "Instância: " << ir.instance_name << endl;
         for(unsigned i = 0; i<non_dominated_sets.size(); i++){
             hv = CalculateHypervolume(non_dominated_sets[i], reference_point);
-            cout << hv << endl;
+            cout << "Hipervolume: " << hv << endl;
         }
     }
 }
@@ -51,21 +51,42 @@ void ReadFile(string file_name, instance_result &ir, vector<vector<pair<unsigned
 
     file.open(file_name);
 
+    //Instância
+    file >> str;
+    file >> str;
+    ir.instance_name = str;
+
     //Nome do algoritmo
+    file >> str;
     file >> str;
     ir.algorithm_name = str;
 
     //Tempo
-    file >> num;
-    ir.time_limit = num;
-
-    //Instância
     file >> str;
-    ir.instance_name = str;
+    file >> d_num;
+    ir.time_limit = d_num;
 
     //Semente
+    file >> str;
     file >> num;
     ir.seed = num;
+
+    //Tempo passado
+    file >> str;
+    file >> d_num;
+    ir.elapsed_time_sec = d_num;
+
+    //Alpha
+    file >> str;
+    file >> d_num;
+
+    //Tamanho da população
+    file >> str;
+    file >> num;
+
+    //Probabilidade de mutação
+    file >> str;
+    file >> num;
 
     //Pular o nome dos objetivos
     file >> str;
@@ -78,10 +99,50 @@ void ReadFile(string file_name, instance_result &ir, vector<vector<pair<unsigned
         ir.non_dominated_set.push_back(p);
         //Se tem espaço
         if(file.peek() == '\t'){
-            //Ler o tempo
-            file >> d_num;
+            //Ler a string END
+            file >> str;
             non_dominated_sets.push_back(ir.non_dominated_set);
             ir.non_dominated_set.clear();
+
+            if(file.peek() != EOF){
+                //Instância
+                file >> str;
+                file >> str;
+
+                //Nome do algoritmo
+                file >> str;
+                file >> str;
+
+                //Tempo
+                file >> str;
+                file >> num;
+
+                //Semente
+                file >> str;
+                file >> num;
+                ir.seed = num;
+
+                //Semente
+                file >> str;
+                file >> num;
+
+                //Alpha
+                file >> str;
+                file >> num;
+
+                //Tamanho da população
+                file >> str;
+                file >> num;
+
+                //Probabilidade de mutação
+                file >> str;
+                file >> num;
+
+                //Pular o nome dos objetivos
+                file >> str;
+                file >> str;
+            }
+
         }
         //Se final do arquivo
         if(file.peek() == EOF){

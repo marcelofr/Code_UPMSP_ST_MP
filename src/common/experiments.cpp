@@ -139,12 +139,12 @@ void SalveSolution(vector<Solution*> non_dominated_set, Parameters Param, instan
 
     MyFile << "Instance: " << ir.instance_name << endl;
     MyFile << "Algorithm: " << ir.algorithm_name << endl;
-    MyFile << "Time limit: "<< ir.time_limit << endl;
+    MyFile << "Time_limit: "<< ir.time_limit << endl;
     MyFile << "Seed: "<< ir.seed << endl;
-    MyFile << "Elapsed time: " << ir.elapsed_time_sec << endl;
+    MyFile << "Elapsed_time: " << ir.elapsed_time_sec << endl;
     MyFile << "Alpha: " << Param.alpha << endl;
-    MyFile << "Population size: " << Param.tam_population << endl;
-    MyFile << "Probability of mutation: " << Param.prob_mutation << endl;
+    MyFile << "Population_size: " << Param.tam_population << endl;
+    MyFile << "Probability_of_mutation: " << Param.prob_mutation << endl;
 
     MyFile << endl;
 
@@ -153,7 +153,7 @@ void SalveSolution(vector<Solution*> non_dominated_set, Parameters Param, instan
     for (auto it=ir.non_dominated_set.begin(); it != ir.non_dominated_set.end();++it) {
         MyFile << endl << it->first << "\t" << it->second;
     }
-    MyFile << endl << "END";
+    MyFile << "\t" << "END";
 
     //Imprimir demarcação de final de arquivo
     if(Param.algorithm == "EXACT"){
