@@ -12,7 +12,7 @@ using namespace std;
 
 struct instance_result{
     string algorithm_name;
-    unsigned time_limit;
+    double time_limit;
     double elapsed_time_sec;
     string instance_name;
     unsigned seed;

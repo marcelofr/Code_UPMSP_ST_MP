@@ -7,9 +7,9 @@
 #include <sstream>
 #include <vector>
 
-//#define RELEASE
+#define RELEASE
 //#define DEBUG
-#define IRACE
+//#define IRACE
 
 
 #define EPS 0.01

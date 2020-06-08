@@ -49,7 +49,7 @@ algorithm[1]="GA"
 #Pega quantos algoritmos serao executados
 size_algorithm=${#algorithm[@]}
 
-folder_solution="Solutions/2020_06_06/"
+folder_solution="Solutions/2020_06_08_09_40/"
 
 #tempo em milisegundos (valor sera multiplicado pela numero de tarefas da instancia)
 max_time_factor[1]=1000
@@ -84,7 +84,8 @@ do
             #echo "Nome da instância "$instance_name
 
             #percorre as sementes
-            for((k=1;k<=$size_seed;k++))
+            #for((k=1;k<=$size_seed;k++))
+            for((k=1;k<=3;k++))
             do
 
                 seed=${seed[$k]}
@@ -130,7 +131,15 @@ do
                     echo "  max_time_factor: "$max_time_factor
                     echo "  folder_solution: "$folder_solution
 
-                    ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $max_time_factor $folder_solution "1"
+                    alpha=0.1
+                    tam_population=110
+                    prob_mutation=5
+
+                    echo "  alpha: "$alpha
+                    echo "  tam_population: "$tam_population
+                    echo "  prob_mutation: "$prob_mutation
+                    
+                    ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $folder_solution $alpha $tam_population $prob_mutation $max_time_factor
 
                     #Se o comando falhou salva a hora
                     if [ $? -gt 0 ];

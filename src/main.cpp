@@ -35,7 +35,6 @@ int main(int argc, char** argv)
         Param.tam_population = argv[8];
         Param.prob_mutation = argv[9];
         Param.max_time_factor = argv[10];
-        //Param.max_time_factor = "1000";
 
     }
     else{
@@ -53,9 +52,9 @@ int main(int argc, char** argv)
         Param.algorithm = "GA";
         //Param.algorithm = "EXACT";
         Param.max_time_factor = "100";
-        Param.folder_solution = "../../Solutions/2020_06_06/";
+        Param.folder_solution = "../../Solutions/2020_06_08/";
         Param.file_solution = Param.folder_solution + Param.algorithm + "_"
-                + Param.instance_name + "_" + Param.seed + "_" + Param.max_time_factor +  ".sol";
+                + Param.instance_name + "_" + Param.seed +  ".sol";
         Param.alpha = "0.1";
         Param.tam_population = "100";
         Param.prob_mutation = "5";

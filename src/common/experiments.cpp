@@ -112,12 +112,10 @@ void SalveSolution(vector<Solution*> non_dominated_set, Parameters Param, instan
 
     //Salvar o conjunto não-dominado, em um arquivo
     ir.algorithm_name = Param.algorithm;
-    stringstream ss1(Param.max_time_factor);
-    ss1 >> max_time_factor;
-    ir.time_limit = max_time_factor*Instance::num_jobs;
+    max_time_factor = unsigned(stoi(Param.max_time_factor));
+    ir.time_limit = max_time_factor*Instance::num_jobs*log(Instance::num_machine);
     ir.instance_name = Param.instance_name;
-    stringstream ss(Param.seed);
-    ss >> ir.seed;
+    ir.seed = unsigned(stoi(Param.seed));
     pair<unsigned, double> p;
     for (auto it = non_dominated_set.begin(); it != non_dominated_set.end(); ++it) {
         p.first = (*it)->makeSpan;
@@ -125,23 +123,37 @@ void SalveSolution(vector<Solution*> non_dominated_set, Parameters Param, instan
         ir.non_dominated_set.push_back(p);
     }
 
+    //Tentar abrir um arquivo existente
     MyFile.open(Param.file_solution, ios_base::out | ios_base::in | ios_base::ate);  // will not create file
+
+    //Se o arquivo não existe então criar um novo
     if (!MyFile.is_open())
     {
         MyFile.clear();
         MyFile.open(Param.file_solution, ios_base::out);  // will create if necessary
 
-        MyFile << ir.algorithm_name << endl;
-        MyFile << ir.time_limit << endl;
-        MyFile << ir.instance_name << endl;
-        MyFile << ir.seed << endl;
-        MyFile << endl;
-        MyFile << "makespan" << "\t" << "tec";
     }
+    else{
+        MyFile << endl << endl;
+    }
+
+    MyFile << "Instance: " << ir.instance_name << endl;
+    MyFile << "Algorithm: " << ir.algorithm_name << endl;
+    MyFile << "Time limit: "<< ir.time_limit << endl;
+    MyFile << "Seed: "<< ir.seed << endl;
+    MyFile << "Elapsed time: " << ir.elapsed_time_sec << endl;
+    MyFile << "Alpha: " << Param.alpha << endl;
+    MyFile << "Population size: " << Param.tam_population << endl;
+    MyFile << "Probability of mutation: " << Param.prob_mutation << endl;
+
+    MyFile << endl;
+
+    MyFile << "Makespan" << "\t" << "TEC";
 
     for (auto it=ir.non_dominated_set.begin(); it != ir.non_dominated_set.end();++it) {
         MyFile << endl << it->first << "\t" << it->second;
     }
+    MyFile << endl << "END";
 
     //Imprimir demarcação de final de arquivo
     if(Param.algorithm == "EXACT"){
@@ -152,10 +164,9 @@ void SalveSolution(vector<Solution*> non_dominated_set, Parameters Param, instan
         if(ir.is_optimal){
             MyFile << "\t" << "*";
         }
-        MyFile << "\t" << ir.elapsed_time_sec;
-    }
-    else{
-        MyFile << "\t" << ir.elapsed_time_sec;
+        else{
+            MyFile << "\t" << "-";
+        }
     }
 
     MyFile.close();
