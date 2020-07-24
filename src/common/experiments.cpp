@@ -214,7 +214,7 @@ void CalculateMetric(string folder_solution)
     //Calcular a diferença de hipervolume para todas as instâncias em sets
     for(auto instance : hypervolume){
         for(auto seed : instance.second){
-            hypervolume[instance.first].insert({seed.first+"_diif", hypervolume[instance.first]["ref"]-seed.second});
+            hypervolume[instance.first].insert({seed.first+"_diff", hypervolume[instance.first]["ref"]-seed.second});
         }
     }
 

@@ -31,7 +31,8 @@ int main(int argc, char** argv)
         Param.algorithm = argv[5];
         Param.folder_solution = argv[6];
         Param.alpha = argv[7];
-        Param.file_solution = Param.folder_solution + Param.algorithm + "_" + Param.instance_name + ".sol";
+        //Param.file_solution = Param.folder_solution + Param.algorithm + "_" + Param.instance_name + ".sol";
+        Param.file_solution = Param.folder_solution + Param.algorithm + "_" + Param.instance_name + "_" + Param.seed + ".sol";
         Param.tam_population = argv[8];
         Param.prob_mutation = argv[9];
         Param.max_time_factor = argv[10];
@@ -48,11 +49,11 @@ int main(int argc, char** argv)
 
         Param.seed = "123456";
         //Param.algorithm = "GENERATE_INSTANCES_SMALL";
-        //Param.algorithm = "RUN_METRIC";
-        Param.algorithm = "GA";
+        Param.algorithm = "RUN_METRIC";
+        //Param.algorithm = "GA";
         //Param.algorithm = "EXACT";
         Param.max_time_factor = "1000";
-        Param.folder_solution = "../../Solutions/2020_07_24/";
+        Param.folder_solution = "../../Solutions/2020_07_24_17_16/";
         //Param.folder_solution = "../../Solutions/Test/";
         Param.file_solution = Param.folder_solution + Param.algorithm + "_"
                 + Param.instance_name + "_" + Param.seed +  ".sol";

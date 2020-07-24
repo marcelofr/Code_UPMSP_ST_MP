@@ -2,7 +2,7 @@
 
 cd ..
 
-instance_folder="Instances/LARGE/";
+instance_folder="Instances/SMALL/";
 #instance_folder="Instances/Debug/";
 
 #files="I_50_10_S_1-9_1"
@@ -49,7 +49,7 @@ algorithm[1]="GA"
 #Pega quantos algoritmos serao executados
 size_algorithm=${#algorithm[@]}
 
-folder_solution="Solutions/2020_06_08_09_40/"
+folder_solution="Solutions/2020_07_24_17_16/"
 
 #tempo em milisegundos (valor sera multiplicado pela numero de tarefas da instancia)
 max_time_factor[1]=1000
@@ -84,8 +84,9 @@ do
             #echo "Nome da instância "$instance_name
 
             #percorre as sementes
-            #for((k=1;k<=$size_seed;k++))
-            for((k=1;k<=3;k++))
+            for((k=1;k<=$size_seed;k++))
+            #for((k=1;k<=3;k++))
+            #for((k=4;k<=$size_seed;k++))
             do
 
                 seed=${seed[$k]}
