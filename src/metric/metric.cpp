@@ -1,155 +1,132 @@
 #include "metric.h"
 
-void CalculateMetric(string folder_solution)
+void CalculateHypervolume(map<string, map<string, vector<pair<unsigned, double>>>> sets,
+                          map<string, map<string, double>> &hypervolume,
+                          map<string, pair<unsigned, double>> reference_points)
 {
-    double hv;
-    vector<string> files;
-    vector<vector<pair<unsigned, double>>>non_dominated_sets;
-    instance_result ir;
-    pair<unsigned, double> reference_point;
 
-    ReadFilesInFolder(folder_solution, files);
+    solution_data sd;
+    double hv;
+
+    //cout << setprecision(10);
+
+    //pair<unsigned, double> reference;
+
+
+    //string ref = "ref";
+
+    //Para cada instância
+    for(auto instance: sets){
+
+        for(auto seed : instance.second){
+
+            //Calcular o hipervolume para cada solução e armazenar
+            //SortByMakespan(sd.non_dominated_set);
+            hv = CalculateHypervolumeMin(seed.second, reference_points[instance.first]);
+            hypervolume[instance.first].insert({seed.first, hv});
+
+        }
+
+    }
+
+}
+
+void ReadFiles(vector<string> files, map<string, map<string, vector<pair<unsigned, double>>>> &sets){
+
+    solution_data sd;
+
+    //Ordenar o vetor de arquivos
     sort(files.begin(), files.end());
 
-    reference_point.first = reference_point.second = 0;
     //Ler cada arquivo de solução
     for(auto it : files){
-        non_dominated_sets.clear();
-        ReadFile(it, ir, non_dominated_sets);
-        cout << "Instância: " << ir.instance_name << endl;
-        for(unsigned i = 0; i<non_dominated_sets.size(); i++){
-            hv = CalculateHypervolume(non_dominated_sets[i], reference_point);
-            cout << "Hipervolume: " << hv << endl;
-        }
+        sd.file_solution = it;
+        sd.non_dominated_set.clear();
+        ReadFile(sd);
+
+        //Montar a estrutura com todas as instâncias e seus conjunto de soluções
+        sets[sd.instance_name].insert({to_string(sd.seed), sd.non_dominated_set});
+
     }
 }
 
-/*
- * Método para identificar os arquivos presentes em uma pasta e
- * salvar seus nomes em um vetor
- */
-void ReadFilesInFolder(string folder_solution, vector<string> &files)
-{
+void GenerateReferenceSet(string folder_solution,
+                          map<string, map<string, vector<pair<unsigned, double>>>> &sets,
+                          map<string, map<string, double>> &hypervolume,
+                          map<string, pair<unsigned, double>> &reference_points){
 
-    //Criar um vetor com o nome de todos os arquivos do diretório
-    for (auto entry : filesystem::directory_iterator(folder_solution)){
-        files.push_back(entry.path());
-    }
-}
+    double hv;
+    vector<pair<unsigned, double>> non_dominated_set;
 
-/*
- * Método para ler um arquivo com um conjunto de soluções não-dominadas e
- * salvar os dados na estrutura ir
- */
-void ReadFile(string file_name, instance_result &ir, vector<vector<pair<unsigned, double>>>&non_dominated_sets)
-{
-    fstream file;
-    string str;
-    unsigned num;
-    double d_num;
-    pair<unsigned, double> p;
+    pair<unsigned, double> reference_point;
 
-    file.open(file_name);
 
-    //Instância
-    file >> str;
-    file >> str;
-    ir.instance_name = str;
+    for(auto instance: sets){
 
-    //Nome do algoritmo
-    file >> str;
-    file >> str;
-    ir.algorithm_name = str;
+        //cout << instance.first << "\t";
 
-    //Tempo
-    file >> str;
-    file >> d_num;
-    ir.time_limit = d_num;
+        //Iniciar o ponto de referência com zero, mas ele precisa ser atualizado
+        reference_point.first = reference_point.second = 0;
+        non_dominated_set.clear();
 
-    //Semente
-    file >> str;
-    file >> num;
-    ir.seed = num;
+        for(auto seed : instance.second){
+            for(auto point : seed.second){
+                //cout << point.first << "\t" << point.second << endl;
+                AddPoint(point, non_dominated_set);
 
-    //Tempo passado
-    file >> str;
-    file >> d_num;
-    ir.elapsed_time_sec = d_num;
-
-    //Alpha
-    file >> str;
-    file >> d_num;
-
-    //Tamanho da população
-    file >> str;
-    file >> num;
-
-    //Probabilidade de mutação
-    file >> str;
-    file >> num;
-
-    //Pular o nome dos objetivos
-    file >> str;
-    file >> str;
-
-    ir.non_dominated_set.clear();
-    //Ler o conjunto não-dominado
-    while (file >> p.first >> p.second)
-    {
-        ir.non_dominated_set.push_back(p);
-        //Se tem espaço
-        if(file.peek() == '\t'){
-            //Ler a string END
-            file >> str;
-            non_dominated_sets.push_back(ir.non_dominated_set);
-            ir.non_dominated_set.clear();
-
-            if(file.peek() != EOF){
-                //Instância
-                file >> str;
-                file >> str;
-
-                //Nome do algoritmo
-                file >> str;
-                file >> str;
-
-                //Tempo
-                file >> str;
-                file >> num;
-
-                //Semente
-                file >> str;
-                file >> num;
-                ir.seed = num;
-
-                //Semente
-                file >> str;
-                file >> num;
-
-                //Alpha
-                file >> str;
-                file >> num;
-
-                //Tamanho da população
-                file >> str;
-                file >> num;
-
-                //Probabilidade de mutação
-                file >> str;
-                file >> num;
-
-                //Pular o nome dos objetivos
-                file >> str;
-                file >> str;
+                if(point.first > reference_point.first){
+                    reference_point.first = point.first;
+                }
+                if(point.second > reference_point.second){
+                    reference_point.second = point.second;
+                }
             }
+        }
 
-        }
-        //Se final do arquivo
-        if(file.peek() == EOF){
-            return;
-        }
+        SortByMakespan(non_dominated_set);
+        SalveReferenceSolution(non_dominated_set, folder_solution, instance.first, "GA", reference_point);
+
+        //Inserir o conjunto de referência em sets
+        sets[instance.first].insert({"ref", non_dominated_set});
+
+        //Inserir o ponto de referência em reference_points
+        reference_points.insert({instance.first, reference_point});
+
+        hv = CalculateHypervolumeMin(non_dominated_set, reference_point);
+        //cout << "Hipervolume reference: " << hv << endl;
+
+        hypervolume[instance.first].insert({"ref", hv});
 
     }
 
-    file.close();
+}
+
+void SalveReferenceSolution(vector<pair<unsigned, double>> non_dominated_set,
+                            string folder_solution, string instance_name, string algorithm_name,
+                            pair<unsigned, double> reference_point){
+
+    ofstream MyFile;
+
+    string file_name;
+
+    file_name = folder_solution + algorithm_name + "_" + instance_name + ".ref";
+
+    //Abrir o arquivo
+    MyFile.open(file_name);
+
+    MyFile << "Instance: " << instance_name << endl;
+    MyFile << "Algorithm: " << algorithm_name << endl;
+    MyFile << "Max_makespan: " << reference_point.first << endl;
+    MyFile << "Max_PEP: " << reference_point.second << endl;
+
+    MyFile << endl;
+
+    MyFile << "Makespan" << "\t" << "TEC";
+
+    for (auto it=non_dominated_set.begin(); it != non_dominated_set.end();++it) {
+        MyFile << endl << it->first << "\t" << it->second;
+    }
+    MyFile << "\t" << "END";
+
+    MyFile.close();
 }

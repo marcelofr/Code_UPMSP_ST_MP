@@ -1,30 +1,31 @@
 #include "hypervolume.h"
 
 /*
- * Método para calcular o hipervolume para problemas com dois objetivos
+ * Método para calcular o hipervolume para problemas de minimização com dois objetivos
+ * Considera que o conjunto está ordenado pelo makespan, crescente
  */
-double CalculateHypervolume(vector<pair<unsigned, double>> set_solution, pair<unsigned, double> reference)
+double CalculateHypervolumeMin(vector<pair<unsigned, double>> set_solution, pair<unsigned, double> reference)
 {
 
-    double hypervolume, b, h, b_last;
+    double hypervolume, b, h, h_last;
 
     auto it = set_solution.begin();
 
-    b = it->first - reference.first;
-    h = it->second - reference.second;
+    b = reference.first - it->first;
+    h = reference.second - it->second;
 
     hypervolume = b * h;
 
-    b_last = it->first;
+    h_last = it->second;
 
     for (++it; it != set_solution.end();++it) {
 
-        b = it->first - b_last;
-        h = it->second - reference.second;
+        b = reference.first - it->first;
+        h = h_last - it->second;
 
         hypervolume += b * h;
 
-        b_last = it->first;
+        h_last = it->second;
     }
 
     return hypervolume;

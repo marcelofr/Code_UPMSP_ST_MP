@@ -64,9 +64,9 @@ void Model::AddVar()
 void Model::SetInitialSolutionToMathModel(Solution *MySolutionLS)
 {
     string str;
-    unsigned size;
+    //unsigned size;
     for (unsigned i = 1; i <= Instance::num_machine; i++) {
-        size = MySolutionLS->scheduling[i].size();
+        //size = MySolutionLS->scheduling[i].size();
         //Demais tarefas
         for (auto j = MySolutionLS->scheduling[i].begin(); j != MySolutionLS->scheduling[i].end(); ++j) {
             //str = "x[" + itos(i) + "][" + itos(MySolutionLS.scheduling[i][j-1]) + "][" + itos(MySolutionLS.scheduling[i][j]) + "]";
@@ -88,6 +88,28 @@ void Model::SetObjective(double alpha)
     //GRBLinExpr aux = PecOn;
     //GRBLinExpr aux = PecOff;
     model->setObjective(aux, GRB_MINIMIZE);
+}
+
+/*
+ * Definir TEP como o objetivo para o problema epsilon restrito
+ */
+void Model::SetObjectiveTEP()
+{
+
+    GRBLinExpr aux = PecOn+PecOff;
+    model->setObjective(aux, GRB_MINIMIZE);
+
+}
+
+/*
+ * Definir Makespan como o objetivo para o problema epsilon restrito
+ */
+void Model::SetObjectiveMakespan()
+{
+
+    GRBLinExpr aux = CMax;
+    model->setObjective(aux, GRB_MINIMIZE);
+
 }
 
 void Model::SetConstraint()
@@ -260,6 +282,21 @@ void Model::SetConstraint()
     //l(1:" + itos(Instance::numModeOp) + "), h(0:" + itos(Instance::numPlanningHorizon) + ")";
     model->addConstr(PecOff, GRB_GREATER_EQUAL, resultado, str);
 
+}
+
+void Model::SetConstraintWithMakespan(unsigned makespan)
+{
+    this->SetConstraint();
+    model->addConstr(CMax, GRB_LESS_EQUAL, makespan);
+}
+
+void Model::SetConstraintWithTEP(double TEP)
+{
+
+    GRBLinExpr aux = PecOn+PecOff;
+
+    this->SetConstraint();
+    model->addConstr(aux, GRB_LESS_EQUAL, TEP);
 }
 
 void Model::Optimize()

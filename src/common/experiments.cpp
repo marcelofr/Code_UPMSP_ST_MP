@@ -24,9 +24,9 @@ void RunAlgorithm(Parameters Param){
 
 
     vector<Solution*> non_dominated_set;
-    instance_result ir;
+    solution_data sd;
 
-    ir.is_optimal = false;
+    sd.is_optimal = false;
 
     t1->start();
 
@@ -45,6 +45,13 @@ void RunAlgorithm(Parameters Param){
     }
     else if(Param.algorithm == "EXACT"){
 
+        /*Fazer a discretização do tempo*/
+        Instance::num_planning_horizon = ((Instance::num_planning_horizon+1)/10)-1;
+        for(unsigned i=0; i<Instance::num_days; i++){
+            Instance::v_peak_start[i] = Instance::v_peak_start[i]/10;
+            Instance::v_peak_end[i] = ((Instance::v_peak_end[i]+1)/10)-1;
+        }
+
         max_time = (max_time_factor*6/10)* Instance::num_jobs * log(Instance::num_machine);
 
         //Set seed
@@ -54,12 +61,14 @@ void RunAlgorithm(Parameters Param){
         my_solution = new Solution();
         my_solution->GreedyInitialSolutionMakespan();
 
-        RunMathModel(max_time, alpha, my_solution);
+        //RunWeightedMathModel(max_time, alpha, my_solution);
+        //RunEpsilonMathModel(max_time, 0, my_solution->TEC, my_solution);
+        RunEpsilonMathModel(max_time, my_solution->makeSpan, 0, my_solution);
 
         non_dominated_set.push_back(my_solution);
 
         if(my_solution->is_optimal){
-            ir.is_optimal = true;
+            sd.is_optimal = true;
         }
 
     }
@@ -68,33 +77,40 @@ void RunAlgorithm(Parameters Param){
     }
 
     t1->stop();
-    ir.elapsed_time_sec = t1->getElapsedTimeInMilliSec()/1000;
 
     SelectOnlyValidSolutions(non_dominated_set);
 
     SortByMakespan(non_dominated_set);
 
-#ifndef IRACE
-
     //Salvar o conjunto não-dominado em arquivo
-    SalveSolution(non_dominated_set, Param, ir);
-
-#endif
-
-
-
-#ifdef IRACE
-    pair<unsigned, double> reference_point, aux;
-    double hv;
-    vector<pair<unsigned, double>>point_non_dominated_set;
+    sd.instance_name  = Param.instance_name;
+    sd.algorithm_name = Param.algorithm;
+    sd.time_limit = max_time_factor * Instance::num_jobs * log(Instance::num_machine);
+    sd.seed = seed;
+    sd.elapsed_time_sec = t1->getElapsedTimeInMilliSec();
+    sd.alpha = atof(Param.alpha.c_str());
+    sd.population_size = unsigned(atoi(Param.tam_population.c_str()));
+    sd.prob_mutation = unsigned(atoi(Param.prob_mutation.c_str()));
+    sd.non_dominated_set.clear();
+    //copy(non_dominated_set.begin(), non_dominated_set.end(), sd.non_dominated_set.begin());
+    pair<unsigned, double> aux;
     for(auto it:non_dominated_set){
         aux.first = it->makeSpan;
         aux.second = it->TEC;
-        point_non_dominated_set.push_back(aux);
+        sd.non_dominated_set.push_back(aux);
     }
-    reference_point.first = 0;
-    reference_point.second = 0;
-    hv = CalculateHypervolume(point_non_dominated_set, reference_point);
+    sd.file_solution = Param.file_solution;
+
+#ifndef IRACE
+    SalveFileSolution(sd);
+#endif
+
+#ifdef IRACE
+    pair<unsigned, double> reference_point;
+    double hv;
+    reference_point.first = sd.non_dominated_set.back().first;
+    reference_point.second = sd.non_dominated_set.front().second;
+    hv = CalculateHypervolumeMin(sd.non_dominated_set, reference_point);
     //cout << hv << " " << ir.elapsed_time_sec << endl;
     cout << hv << endl;
 #endif
@@ -104,70 +120,53 @@ void RunAlgorithm(Parameters Param){
 /*
  * Método para salvar em arquivo a solução encontrada por um algoritmo
  */
-void SalveSolution(vector<Solution*> non_dominated_set, Parameters Param, instance_result ir){
-
-    unsigned max_time_factor;
+void SalveFileSolution(solution_data sd){
 
     ofstream MyFile;
 
-    //Salvar o conjunto não-dominado, em um arquivo
-    ir.algorithm_name = Param.algorithm;
-    max_time_factor = unsigned(stoi(Param.max_time_factor));
-    ir.time_limit = max_time_factor*Instance::num_jobs*log(Instance::num_machine);
-    ir.instance_name = Param.instance_name;
-    ir.seed = unsigned(stoi(Param.seed));
-    pair<unsigned, double> p;
-    for (auto it = non_dominated_set.begin(); it != non_dominated_set.end(); ++it) {
-        p.first = (*it)->makeSpan;
-        p.second = (*it)->TEC;
-        ir.non_dominated_set.push_back(p);
-    }
-
     //Tentar abrir um arquivo existente
-    MyFile.open(Param.file_solution, ios_base::out | ios_base::in | ios_base::ate);  // will not create file
+    MyFile.open(sd.file_solution, ios_base::out | ios_base::in | ios_base::ate);  // will not create file
 
     //Se o arquivo não existe então criar um novo
     if (!MyFile.is_open())
     {
         MyFile.clear();
-        MyFile.open(Param.file_solution, ios_base::out);  // will create if necessary
+        MyFile.open(sd.file_solution, ios_base::out);  // will create if necessary
 
     }
     else{
         MyFile << endl << endl;
     }
 
-    MyFile << "Instance: " << ir.instance_name << endl;
-    MyFile << "Algorithm: " << ir.algorithm_name << endl;
-    MyFile << "Time_limit: "<< ir.time_limit << endl;
-    MyFile << "Seed: "<< ir.seed << endl;
-    MyFile << "Elapsed_time: " << ir.elapsed_time_sec << endl;
-    MyFile << "Alpha: " << Param.alpha << endl;
-    MyFile << "Population_size: " << Param.tam_population << endl;
-    MyFile << "Probability_of_mutation: " << Param.prob_mutation << endl;
+    MyFile << "Instance: " << sd.instance_name << endl;
+    MyFile << "Algorithm: " << sd.algorithm_name << endl;
+    MyFile << "Time_limit: "<< sd.time_limit << endl;
+    MyFile << "Seed: "<< sd.seed << endl;
+    MyFile << "Elapsed_time: " << sd.elapsed_time_sec << endl;
+    MyFile << "Alpha: " << sd.alpha << endl;
+    MyFile << "Population_size: " << sd.population_size << endl;
+    MyFile << "Probability_of_mutation: " << sd.prob_mutation << endl;
 
     MyFile << endl;
 
     MyFile << "Makespan" << "\t" << "TEC";
 
-    for (auto it=ir.non_dominated_set.begin(); it != ir.non_dominated_set.end();++it) {
+    for (auto it=sd.non_dominated_set.begin(); it != sd.non_dominated_set.end();++it) {
         MyFile << endl << it->first << "\t" << it->second;
     }
-    MyFile << "\t" << "END";
 
     //Imprimir demarcação de final de arquivo
-    if(Param.algorithm == "EXACT"){
-        double alpha;
-        stringstream ss(Param.alpha);
-        ss >> alpha;
-        MyFile << "\t" << alpha;
-        if(ir.is_optimal){
+    if(sd.algorithm_name == "EXACT"){
+
+        if(sd.is_optimal){
             MyFile << "\t" << "*";
         }
         else{
             MyFile << "\t" << "-";
         }
     }
+
+    MyFile << "\t" << "END";
 
     MyFile.close();
 }
@@ -187,3 +186,73 @@ void SelectOnlyValidSolutions(vector<Solution*> non_dominated_set){
         }
     }
 }
+
+void CalculateMetric(string folder_solution)
+{
+
+    vector<string> files;
+    map<string, map<string, vector<pair<unsigned, double>>>> sets;
+    map<string, map<string, double>> hypervolume;
+
+    //Encontrar todos os arquivos que estão na pasta de soluções
+    FindFilesInFolder(folder_solution, files);
+
+    //Ler o conteúdo de cada arquivo de solução e guardar em sets
+    ReadFiles(files, sets);
+
+    map<string, pair<unsigned, double>> reference_points;
+
+    //Gerar o conjunto de referência
+    //Calcular seu hipervolume
+    //Salvá-lo em um arquivo
+    //Identificar os pontos de referência
+    GenerateReferenceSet(folder_solution, sets, hypervolume, reference_points);
+
+    //Calcular o hipervolume para todas as instâncias em sets
+    CalculateHypervolume(sets, hypervolume, reference_points);
+
+    //Calcular a diferença de hipervolume para todas as instâncias em sets
+    for(auto instance : hypervolume){
+        for(auto seed : instance.second){
+            hypervolume[instance.first].insert({seed.first+"_diif", hypervolume[instance.first]["ref"]-seed.second});
+        }
+    }
+
+    cout << setprecision(10);
+
+    //Imprimir os resultados
+    unsigned header = false;
+    for(auto instance : hypervolume){
+
+        if(!header){
+            cout << "Instance ";
+
+            for(auto seed : instance.second){
+                cout << seed.first << " ";
+            }
+
+            cout << "Max_makespan ";
+            cout << "Max_PEP ";
+
+            cout << endl;
+
+            header = true;
+        }
+
+        cout << instance.first << " " ;
+
+        for(auto seed : instance.second){
+            cout << seed.second << " ";
+        }
+        //cout << seed.first << ": " << seed.second << "\t";
+
+        cout << reference_points[instance.first].first << " ";
+        cout << reference_points[instance.first].second << " ";
+
+
+        cout << endl;
+    }
+
+}
+
+

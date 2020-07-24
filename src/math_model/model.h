@@ -27,7 +27,11 @@ public:
     void AddVar();
     void SetInitialSolutionToMathModel(Solution *MySolutionLS);
     void SetObjective(double alpha);
+    void SetObjectiveTEP();
+    void SetObjectiveMakespan();
     void SetConstraint();
+    void SetConstraintWithMakespan(unsigned makespan);
+    void SetConstraintWithTEP(double TEP);
     void Optimize();
     //void GetFinalSolutionFromModel(Solution &MySolution);
     void PrintVars();

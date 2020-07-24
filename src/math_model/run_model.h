@@ -8,6 +8,8 @@
 
 using namespace std;
 
-void RunMathModel(double max_time, double alpha, Solution * my_solution);
+void RunWeightedMathModel(double max_time, double alpha, Solution * my_solution);
+
+void RunEpsilonMathModel(double max_time, unsigned makespan, double TEP, Solution * my_solution);
 
 #endif // RUN_MODEL_H

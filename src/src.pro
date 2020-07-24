@@ -6,6 +6,7 @@ QMAKE_CXXFLAGS += -std=gnu++1z
 
 SOURCES += \
         common/experiments.cpp \
+        common/file_solution.cpp \
         common/generate_intances.cpp \
         common/instance.cpp \
         common/set_solution.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
 HEADERS += \
     common/Timer.h \
     common/experiments.h \
+    common/file_solution.h \
     common/generate_intances.h \
     common/instance.h \
     common/set_solution.h \

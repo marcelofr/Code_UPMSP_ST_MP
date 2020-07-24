@@ -6,14 +6,15 @@
 #include <iomanip>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
-#define RELEASE
-//#define DEBUG
+//#define RELEASE
+#define DEBUG
 //#define IRACE
 
 
-#define EPS 0.01
-#define F_ZERO 1e-6
+#define EPS 1e-6
+//#define F_ZERO 1e-6
 
 using namespace std;
 
@@ -33,5 +34,8 @@ int Find( int uf[], int x ) ;
 void Union( int uf[],int x, int y ) ;
 
 //int myrandom (int i);
+
+bool AddPoint(pair<unsigned, double> point, vector<pair<unsigned, double>> &non_dominated_set);
+void SortByMakespan(vector<pair<unsigned, double>> &set_solution);
 
 #endif // UTILS_H

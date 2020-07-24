@@ -39,20 +39,21 @@ int main(int argc, char** argv)
     }
     else{
 
-        //Param.instance_folder = "../../Instances/SMALL/";
-        Param.instance_folder = "../../Instances/LARGE/";
+        Param.instance_folder = "../../Instances/SMALL/";
+        //Param.instance_folder = "../../Instances/LARGE/";
         //Param.instance_name = "6_2_1439_3_S_1-9";
-        Param.instance_name = "50_20_1439_5_S_1-9";
+        Param.instance_name = "6_2_1439_3_S_1-9";
         Param.instance_extension = ".dat";
         Param.instance_file = Param.instance_folder + Param.instance_name + Param.instance_extension;
 
         Param.seed = "123456";
-        //Param.algorithm = "GENERATE_INSTANCES_LARGE";
+        //Param.algorithm = "GENERATE_INSTANCES_SMALL";
         //Param.algorithm = "RUN_METRIC";
         Param.algorithm = "GA";
         //Param.algorithm = "EXACT";
-        Param.max_time_factor = "100";
-        Param.folder_solution = "../../Solutions/2020_06_08/";
+        Param.max_time_factor = "1000";
+        Param.folder_solution = "../../Solutions/2020_07_24/";
+        //Param.folder_solution = "../../Solutions/Test/";
         Param.file_solution = Param.folder_solution + Param.algorithm + "_"
                 + Param.instance_name + "_" + Param.seed +  ".sol";
         Param.alpha = "0.1";

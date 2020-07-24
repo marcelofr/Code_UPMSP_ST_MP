@@ -1,29 +1,19 @@
 #ifndef METRIC_H
 #define METRIC_H
 
-#include "hypervolume.h"
-#include <string>
-#include <filesystem>
 #include <vector>
+#include <string>
+#include <map>
+#include <algorithm>
 #include <iostream>
-#include <fstream>      // std::fstream
+#include "common/file_solution.h"
+#include "hypervolume.h"
 
 using namespace std;
 
-struct instance_result{
-    string algorithm_name;
-    double time_limit;
-    double elapsed_time_sec;
-    string instance_name;
-    unsigned seed;
-    vector<pair<unsigned, double>>non_dominated_set;
-    bool is_optimal;
-};
-
-
-void CalculateMetric(string folder_solution);
-
-void ReadFilesInFolder(string folder_solution, vector<string> &files);
-void ReadFile(string file_name, instance_result &ir, vector<vector<pair<unsigned, double>>>&non_dominated_sets);
+void CalculateHypervolume(map<string, map<string, vector<pair<unsigned, double>>>> sets, map<string, map<string, double>> &hypervolume, map<string, pair<unsigned, double>> reference_points);
+void GenerateReferenceSet(string folder_solution, map<string, map<string, vector<pair<unsigned, double>>>> &sets, map<string, map<string, double>> &hypervolume, map<string, pair<unsigned, double>> &reference_points);
+void SalveReferenceSolution(vector<pair<unsigned, double>> non_dominated_set, string folder_solution, string instance_name, string algorithm_name, pair<unsigned, double> reference_point);
+void ReadFiles(vector<string> files, map<string, map<string, vector<pair<unsigned, double>>>> &sets);
 
 #endif // METRIC_H
