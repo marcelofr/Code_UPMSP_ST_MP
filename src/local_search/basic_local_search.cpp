@@ -8,11 +8,12 @@
  */
 bool SwapInsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
 {
-    unsigned num_job_maq;
+    unsigned long num_job_maq;
 
     LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
+    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i de 1 à n
@@ -58,11 +59,12 @@ bool SwapInsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_dominated
  */
 bool SwapOutsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominated_set)
 {
-    unsigned num_job_maq1, num_job_maq2;
+    unsigned long num_job_maq1, num_job_maq2;
 
     LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
+    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i1 de 1 à n
@@ -113,11 +115,12 @@ bool SwapOutsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominate
  */
 bool InsertInsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominated_set)
 {
-    unsigned num_job_maq;
+    unsigned long num_job_maq;
 
     LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
+    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i de 1 à n
@@ -166,11 +169,12 @@ bool InsertInsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominat
  */
 bool InsertOutsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
 {
-    unsigned num_job_maq1, num_job_maq2;
+    unsigned long num_job_maq1, num_job_maq2;
 
     LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
+    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i1 de 1 à n
@@ -223,11 +227,12 @@ bool InsertOutsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_domina
  */
 bool ChangeOpModeLS(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
 {
-    unsigned num_job_maq, job;
+    unsigned long num_job_maq, job;
 
     LSSolution *neighbor_sol;
 
     //Criar uma cópia da solução
+    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i de 1 à n
@@ -272,7 +277,7 @@ bool ChangeOpModeLS(LSSolution *my_solution, vector<LSSolution*> &non_dominated_
 
 bool ChangeHLS(LSSolution my_solution, vector<LSSolution> &non_dominated_set)
 {
-
+    return false;
 }
 
 /*

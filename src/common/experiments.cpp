@@ -1,108 +1,80 @@
 #include "experiments.h"
 
-void RunAlgorithm(Parameters Param){
-    unsigned seed, max_time_factor;
-    double max_time, alpha;
+void RunAlgorithm(algorithm_data alg_data){
+
     Solution * my_solution;
     Timer *t1 = new Timer();
 
     //Make trace log in file (.trace.log)
     MakeTrace();
 
-    //Set seed
-    seed = unsigned(atoi(Param.seed.c_str()));
-    //srand (time(NULL));
-
     //Ler a instância
     //Instance::ReadJulioInstance(Param.instance_file);
-    Instance::ReadMarceloInstance(Param.instance_file);
-
-    Instance::seed = seed;
-
-    //Critério de parada baseado no artigo do Luciano, Swarm 2019
-    max_time_factor = unsigned(atoi(Param.max_time_factor.c_str()));
-
+    Instance::ReadMarceloInstance(alg_data.param.instance_file);
 
     vector<Solution*> non_dominated_set;
-    solution_data sd;
 
-    sd.is_optimal = false;
+    alg_data.is_optimal = false;
 
     t1->start();
 
+    //Definir o tempo limite de execução
+    alg_data.time_limit = alg_data.param.u_max_time_factor * Instance::num_jobs * log(Instance::num_machine);
+#ifdef DEBUG
+    cout << "Tempo limite: " << alg_data.time_limit << endl;
+#endif
 
-    if(Param.algorithm == "GA"){
-
-        ParametersGA ParamGA;
-
-        ParamGA.time_limit = max_time_factor * Instance::num_jobs * log(Instance::num_machine);
-        ParamGA.tam_population = unsigned(atoi(Param.tam_population.c_str()));
-        ParamGA.prob_mutation = unsigned(atoi(Param.prob_mutation.c_str()));
+    if(alg_data.param.algorithm_name == "GA"){
 
         //Instance::PrintInstance1();
-        nsga_ii(ParamGA, non_dominated_set);
+        nsga_ii(alg_data, non_dominated_set);
 
     }
-    else if(Param.algorithm == "EXACT"){
-
-        /*Fazer a discretização do tempo*/
-        Instance::num_planning_horizon = ((Instance::num_planning_horizon+1)/10)-1;
-        for(unsigned i=0; i<Instance::num_days; i++){
-            Instance::v_peak_start[i] = Instance::v_peak_start[i]/10;
-            Instance::v_peak_end[i] = ((Instance::v_peak_end[i]+1)/10)-1;
-        }
-
-        max_time = (max_time_factor*6/10)* Instance::num_jobs * log(Instance::num_machine);
-
-        //Set seed
-        alpha = atof(Param.alpha.c_str());
+    else if(alg_data.param.algorithm_name == "EXACT"){
 
         //Gerar uma solução inicial gulosa considerando o objetivo do makespan
         my_solution = new Solution();
         my_solution->GreedyInitialSolutionMakespan();
 
-        //RunWeightedMathModel(max_time, alpha, my_solution);
+        //Modelo ponderado
+        RunWeightedMathModel(alg_data.time_limit, alg_data.param.d_alpha, my_solution);
+        //Modelo espsilon-restrito
         //RunEpsilonMathModel(max_time, 0, my_solution->TEC, my_solution);
-        RunEpsilonMathModel(max_time, my_solution->makeSpan, 0, my_solution);
+        //RunEpsilonMathModel(max_time, my_solution->makeSpan, 0, my_solution);
 
         non_dominated_set.push_back(my_solution);
 
         if(my_solution->is_optimal){
-            sd.is_optimal = true;
+            alg_data.is_optimal = true;
         }
 
+        alg_data.param.file_solution = alg_data.param.folder_solution + alg_data.param.algorithm_name + "_" + alg_data.param.instance_name + "_" + alg_data.param.s_alpha + ".sol";
+
     }
-    else if(Param.algorithm == "LS"){
+    else if(alg_data.param.algorithm_name == "LS"){
         HillClimbing(non_dominated_set);
     }
 
     t1->stop();
 
+    //Eliminar soluções que estão fora do horizonte de planejamento
     SelectOnlyValidSolutions(non_dominated_set);
 
+    //Ordenar os pontos
     SortByMakespan(non_dominated_set);
 
-    //Salvar o conjunto não-dominado em arquivo
-    sd.instance_name  = Param.instance_name;
-    sd.algorithm_name = Param.algorithm;
-    sd.time_limit = max_time_factor * Instance::num_jobs * log(Instance::num_machine);
-    sd.seed = seed;
-    sd.elapsed_time_sec = t1->getElapsedTimeInMilliSec();
-    sd.alpha = atof(Param.alpha.c_str());
-    sd.population_size = unsigned(atoi(Param.tam_population.c_str()));
-    sd.prob_mutation = unsigned(atoi(Param.prob_mutation.c_str()));
-    sd.non_dominated_set.clear();
-    //copy(non_dominated_set.begin(), non_dominated_set.end(), sd.non_dominated_set.begin());
+    alg_data.elapsed_time_sec = t1->getElapsedTimeInMilliSec();
+    alg_data.non_dominated_set.clear();
     pair<unsigned, double> aux;
     for(auto it:non_dominated_set){
         aux.first = it->makeSpan;
         aux.second = it->TEC;
-        sd.non_dominated_set.push_back(aux);
+        alg_data.non_dominated_set.push_back(aux);
     }
-    sd.file_solution = Param.file_solution;
 
 #ifndef IRACE
-    SalveFileSolution(sd);
+    //Salvar o conjunto não-dominado em arquivo
+    SalveFileSolution(alg_data);
 #endif
 
 #ifdef IRACE
@@ -120,45 +92,45 @@ void RunAlgorithm(Parameters Param){
 /*
  * Método para salvar em arquivo a solução encontrada por um algoritmo
  */
-void SalveFileSolution(solution_data sd){
+void SalveFileSolution(algorithm_data alg_data){
 
     ofstream MyFile;
 
     //Tentar abrir um arquivo existente
-    MyFile.open(sd.file_solution, ios_base::out | ios_base::in | ios_base::ate);  // will not create file
+    MyFile.open(alg_data.param.file_solution, ios_base::out | ios_base::in | ios_base::ate);  // will not create file
 
     //Se o arquivo não existe então criar um novo
     if (!MyFile.is_open())
     {
         MyFile.clear();
-        MyFile.open(sd.file_solution, ios_base::out);  // will create if necessary
+        MyFile.open(alg_data.param.file_solution, ios_base::out);  // will create if necessary
 
     }
     else{
         MyFile << endl << endl;
     }
 
-    MyFile << "Instance: " << sd.instance_name << endl;
-    MyFile << "Algorithm: " << sd.algorithm_name << endl;
-    MyFile << "Time_limit: "<< sd.time_limit << endl;
-    MyFile << "Seed: "<< sd.seed << endl;
-    MyFile << "Elapsed_time: " << sd.elapsed_time_sec << endl;
-    MyFile << "Alpha: " << sd.alpha << endl;
-    MyFile << "Population_size: " << sd.population_size << endl;
-    MyFile << "Probability_of_mutation: " << sd.prob_mutation << endl;
+    MyFile << "Instance: " << alg_data.param.instance_name << endl;
+    MyFile << "Algorithm: " << alg_data.param.algorithm_name << endl;
+    MyFile << "Time_limit: "<< alg_data.time_limit << endl;
+    MyFile << "Seed: "<< alg_data.param.s_seed << endl;
+    MyFile << "Elapsed_time: " << alg_data.elapsed_time_sec << endl;
+    MyFile << "Alpha: " << alg_data.param.s_alpha << endl;
+    MyFile << "Population_size: " << alg_data.param.s_population_size << endl;
+    MyFile << "Probability_of_mutation: " << alg_data.param.s_prob_mutation << endl;
 
     MyFile << endl;
 
     MyFile << "Makespan" << "\t" << "TEC";
 
-    for (auto it=sd.non_dominated_set.begin(); it != sd.non_dominated_set.end();++it) {
-        MyFile << endl << it->first << "\t" << it->second;
+    for (auto it=alg_data.non_dominated_set.begin(); it != alg_data.non_dominated_set.end();++it) {
+        MyFile << endl << it->first << "\t" << it->second/10;
     }
 
     //Imprimir demarcação de final de arquivo
-    if(sd.algorithm_name == "EXACT"){
+    if(alg_data.param.algorithm_name == "EXACT"){
 
-        if(sd.is_optimal){
+        if(alg_data.is_optimal){
             MyFile << "\t" << "*";
         }
         else{

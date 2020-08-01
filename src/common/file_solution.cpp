@@ -20,7 +20,7 @@ void FindFilesInFolder(string folder_solution, vector<string> &files)
  * Método para ler um arquivo com um conjunto de soluções não-dominadas e
  * salvar os dados na estrutura ir
  */
-void ReadFile(solution_data &sd)
+void ReadFile(algorithm_data &alg_data)
 {
     fstream file;
     string str;
@@ -28,57 +28,57 @@ void ReadFile(solution_data &sd)
     double d_num;
     pair<unsigned, double> p;
 
-    file.open(sd.file_solution);
+    file.open(alg_data.param.file_solution);
 
     //Instância
     file >> str;
     file >> str;
-    sd.instance_name = str;
+    alg_data.param.instance_name = str;
 
     //Nome do algoritmo
     file >> str;
     file >> str;
-    sd.algorithm_name = str;
+    alg_data.param.algorithm_name = str;
 
     //Tempo
     file >> str;
     file >> d_num;
-    sd.time_limit = d_num;
+    alg_data.time_limit = d_num;
 
     //Semente
     file >> str;
     file >> num;
-    sd.seed = num;
+    alg_data.param.u_seed = num;
 
     //Tempo passado
     file >> str;
     file >> d_num;
-    sd.elapsed_time_sec = d_num;
+    alg_data.elapsed_time_sec = d_num;
 
     //Alpha
     file >> str;
     file >> d_num;
-    sd.alpha = d_num;
+    alg_data.param.d_alpha = d_num;
 
     //Tamanho da população
     file >> str;
     file >> num;
-    sd.population_size = num;
+    alg_data.param.u_population_size = num;
 
     //Probabilidade de mutação
     file >> str;
     file >> num;
-    sd.prob_mutation = num;
+    alg_data.param.u_prob_mutation = num;
 
     //Pular o nome dos objetivos
     file >> str;
     file >> str;
 
-    sd.non_dominated_set.clear();
+    alg_data.non_dominated_set.clear();
     //Ler o conjunto não-dominado
     while (file >> p.first >> p.second)
     {
-        sd.non_dominated_set.push_back(p);
+        alg_data.non_dominated_set.push_back(p);
         //Se tem espaço
         if(file.peek() == '\t'){
             //Ler a string END

@@ -49,7 +49,7 @@ algorithm[1]="GA"
 #Pega quantos algoritmos serao executados
 size_algorithm=${#algorithm[@]}
 
-folder_solution="Solutions/2020_07_24_17_16/"
+folder_solution="Solutions/2020_07_28_15_07/"
 
 #tempo em milisegundos (valor sera multiplicado pela numero de tarefas da instancia)
 max_time_factor[1]=1000

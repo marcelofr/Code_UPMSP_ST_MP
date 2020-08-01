@@ -5,7 +5,7 @@ void RunWeightedMathModel(double max_time, double alpha, Solution * my_solution)
 {
 
     //Instance::ReadJulioInstance(instance_file);
-    Instance::PrintInstance1();
+    //Instance::PrintInstance1();
 
     double d_num;
 
@@ -32,25 +32,32 @@ void RunWeightedMathModel(double max_time, double alpha, Solution * my_solution)
         }
 
 
+
         string var;
 
         var = "CMax";
         d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
         my_solution->makeSpan = d_num;
+        #ifdef DEBUG
         cout << endl << var << ": " << d_num << endl;
+        #endif
 
         var = "PecOn";
         d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
         my_solution->TEC = d_num;
+        #ifdef DEBUG
         cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
+        #endif
 
         var = "PecOff";
         d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
         my_solution->TEC += d_num;
+        #ifdef DEBUG
         cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
         //Mymodel->get
 
         Mymodel->PrintVars();
+        #endif
 
 
     } catch(GRBException e) {

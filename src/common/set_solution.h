@@ -1,7 +1,6 @@
 #ifndef SET_SOLUTION_H
 #define SET_SOLUTION_H
 
-#include "solution.h"
 #include "genetic_algorithm/ga.h"
 
 void SortByMakespan(vector<Solution*> &set_solution);

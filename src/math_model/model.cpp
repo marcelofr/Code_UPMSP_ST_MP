@@ -14,7 +14,12 @@ void Model::Create(GRBModel *model, double MaxTime)
 {
     this->model = model;
 
+
+    model->set(GRB_IntParam_OutputFlag, 0);
+
+#ifdef DEBUG
     model->set(GRB_IntParam_OutputFlag, 1);
+#endif
 
     model->set(GRB_IntParam_Threads, 1);
     //model->set(GRB_IntParam_LazyConstraints, 1);
@@ -81,7 +86,7 @@ void Model::SetObjective(double alpha)
     // Set objective
     //(2)
     //double alpha = 0.5;
-    GRBLinExpr aux = (CMax/Instance::num_planning_horizon)*alpha +((PecOn+PecOff)/Instance::max_cost)*(1-alpha);
+    GRBLinExpr aux = (CMax/double(Instance::num_planning_horizon))*alpha +((PecOn+PecOff)/double(Instance::max_cost))*(1-alpha);
     //GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
     //GRBLinExpr aux = (CMax);
     //GRBLinExpr aux = (PecOn+PecOff);
