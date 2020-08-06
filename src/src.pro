@@ -24,6 +24,7 @@ SOURCES += \
 
 HEADERS += \
     common/Timer.h \
+    common/algorithm_data.h \
     common/experiments.h \
     common/file_solution.h \
     common/generate_intances.h \

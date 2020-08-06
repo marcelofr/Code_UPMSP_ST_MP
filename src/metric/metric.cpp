@@ -5,7 +5,7 @@ void CalculateHypervolume(map<string, map<string, vector<pair<unsigned, double>>
                           map<string, pair<unsigned, double>> reference_points)
 {
 
-    solution_data sd;
+    algorithm_data alg_data;
     double hv;
 
     //cout << setprecision(10);
@@ -33,19 +33,19 @@ void CalculateHypervolume(map<string, map<string, vector<pair<unsigned, double>>
 
 void ReadFiles(vector<string> files, map<string, map<string, vector<pair<unsigned, double>>>> &sets){
 
-    solution_data sd;
+    algorithm_data alg_data;
 
     //Ordenar o vetor de arquivos
     sort(files.begin(), files.end());
 
     //Ler cada arquivo de solução
     for(auto it : files){
-        sd.file_solution = it;
-        sd.non_dominated_set.clear();
-        ReadFile(sd);
+        alg_data.param.file_solution = it;
+        alg_data.non_dominated_set.clear();
+        ReadFile(alg_data);
 
         //Montar a estrutura com todas as instâncias e seus conjunto de soluções
-        sets[sd.instance_name].insert({to_string(sd.seed), sd.non_dominated_set});
+        sets[alg_data.param.instance_name].insert({alg_data.param.s_seed, alg_data.non_dominated_set});
 
     }
 }

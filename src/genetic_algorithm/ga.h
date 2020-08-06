@@ -51,11 +51,7 @@ void PopulationAddIndividual(vector<GASolution> &population, GASolution &individ
 void PrintPopulation(vector<GASolution*> &population);
 void Crossover(vector<GASolution*> &population, vector<GASolution*> &new_population);
 void Mutation(vector<GASolution*> &population, vector<GASolution*> &new_population, unsigned prob_mutation);
-void Selection(vector<GASolution> &population, vector<GASolution> &new_population);
-void GenerateOffspring1(GASolution parent1, GASolution parent2,
-                       GASolution & offspring1, GASolution & offspring2);
-void GenerateOffspring2(GASolution parent1, GASolution parent2,
-                       GASolution &offspring1, GASolution &offspring2);
+
 void GenerateOffspring3(GASolution *parent1, GASolution *parent2,
                        GASolution *offspring1, GASolution *offspring2);
 void MutationSwapInside(GASolution &individual);

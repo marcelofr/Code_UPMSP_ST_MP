@@ -14,27 +14,13 @@
 #include "file_solution.h"
 #include <map>
 #include "metric/metric.h"
+#include "algorithm_data.h"
 
 using namespace std;
 
-struct Parameters{
-    string instance_folder;
-    string instance_file;
-    string instance_extension;
-    string instance_name;
-    string seed;
-    string algorithm;
-    string file_solution;
-    string folder_solution;
-    string max_time_factor;
-    string alpha;
-    string prob_mutation;
-    string tam_population;
-};
+void RunAlgorithm(algorithm_data alg_data);
 
-void RunAlgorithm(Parameters Param);
-
-void SalveFileSolution(solution_data sd);
+void SalveFileSolution(algorithm_data alg_data);
 //void SalveReferenceSolution(vector<pair<unsigned, double>> non_dominated_set, string folder_solution, string instance_name, string algorithm_name);
 void SelectOnlyValidSolutions(vector<Solution*> non_dominated_set);
 
