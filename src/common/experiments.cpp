@@ -17,6 +17,21 @@ void RunAlgorithm(Parameters Param){
     //Instance::ReadJulioInstance(Param.instance_file);
     Instance::ReadMarceloInstance(Param.instance_file);
 
+    /*Fazer a discretização do tempo*/
+    Instance::num_planning_horizon = ((Instance::num_planning_horizon+1)/10)-1;
+    for(unsigned i=0; i<Instance::num_days; i++){
+        Instance::v_peak_start[i] = Instance::v_peak_start[i]/10;
+        Instance::v_peak_end[i] = ((Instance::v_peak_end[i]+1)/10)-1;
+    }
+    for(unsigned i=1; i<=Instance::num_machine; i++){
+        for(unsigned j=1; j<=Instance::num_jobs; j++){
+            Instance::m_processing_time[i][j] = ceil(double(Instance::m_processing_time[i][j])/double(10));
+            for(unsigned k=1; k<=Instance::num_jobs; k++){
+                Instance::m_setup_time[i][j][k] = ceil(double(Instance::m_setup_time[i][j][k])/double(10));
+            }
+        }
+    }
+
     Instance::seed = seed;
 
     //Critério de parada baseado no artigo do Luciano, Swarm 2019
@@ -45,13 +60,6 @@ void RunAlgorithm(Parameters Param){
     }
     else if(Param.algorithm == "EXACT"){
 
-        /*Fazer a discretização do tempo*/
-        Instance::num_planning_horizon = ((Instance::num_planning_horizon+1)/10)-1;
-        for(unsigned i=0; i<Instance::num_days; i++){
-            Instance::v_peak_start[i] = Instance::v_peak_start[i]/10;
-            Instance::v_peak_end[i] = ((Instance::v_peak_end[i]+1)/10)-1;
-        }
-
         max_time = (max_time_factor*6/10)* Instance::num_jobs * log(Instance::num_machine);
 
         //Set seed
@@ -61,9 +69,9 @@ void RunAlgorithm(Parameters Param){
         my_solution = new Solution();
         my_solution->GreedyInitialSolutionMakespan();
 
-        //RunWeightedMathModel(max_time, alpha, my_solution);
+        RunWeightedMathModel(max_time, alpha, my_solution);
         //RunEpsilonMathModel(max_time, 0, my_solution->TEC, my_solution);
-        RunEpsilonMathModel(max_time, my_solution->makeSpan, 0, my_solution);
+        //RunEpsilonMathModel(max_time, my_solution->makeSpan, 0, my_solution);
 
         non_dominated_set.push_back(my_solution);
 
