@@ -28,6 +28,21 @@ void Model::Create(GRBModel *model, double MaxTime)
     //model->set(GRB_DoubleParam_TimeLimit, 300.0);
     model->set(GRB_DoubleParam_MIPGap, EPS);
 
+    /*Fazer a discretização do tempo*/
+    /*Instance::num_planning_horizon = ((Instance::num_planning_horizon+1)/Instance::disc)-1;
+    for(unsigned i=0; i<Instance::num_days; i++){
+        Instance::v_peak_start[i] = Instance::v_peak_start[i]/Instance::disc;
+        Instance::v_peak_end[i] = ((Instance::v_peak_end[i]+1)/Instance::disc)-1;
+    }
+    for(unsigned i=1; i<=Instance::num_machine; i++){
+        for(unsigned j=1; j<=Instance::num_jobs; j++){
+            Instance::m_processing_time[i][j] = ceil(double(Instance::m_processing_time[i][j])/double(10));
+            for(unsigned k=1; k<=Instance::num_jobs; k++){
+                Instance::m_setup_time[i][j][k] = ceil(double(Instance::m_setup_time[i][j][k])/double(10));
+            }
+        }
+    }*/
+
 }
 
 void Model::AddVar()
@@ -86,7 +101,7 @@ void Model::SetObjective(double alpha)
     // Set objective
     //(2)
     //double alpha = 0.5;
-    GRBLinExpr aux = (CMax/double(Instance::num_planning_horizon))*alpha +((PecOn+PecOff)/double(Instance::max_cost))*(1-alpha);
+    GRBLinExpr aux = (CMax/Instance::num_planning_horizon)*alpha +((PecOn+PecOff)/Instance::max_cost)*(1-alpha);
     //GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
     //GRBLinExpr aux = (CMax);
     //GRBLinExpr aux = (PecOn+PecOff);
@@ -123,14 +138,14 @@ void Model::SetConstraint()
     double aux0;
     string str;
 
-    //(3)
+    //(2)
     //Toda tarefa j deve ser processada apenas uma vez
     unsigned limit, pt_round;
     for (unsigned j = 1; j <= Instance::num_jobs; j++) {
         aux1 = 0;
         for (unsigned i = 1; i <= Instance::num_machine; i++) {
             for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
-                pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
                 limit = Instance::num_planning_horizon - pt_round;
                 for (unsigned h = 0; h <= limit; h++) {
                     aux1 +=X[i][j][h][l];
@@ -142,7 +157,7 @@ void Model::SetConstraint()
         model->addConstr(aux1, GRB_EQUAL, 1, str);
     }
 
-    //(4)
+    //(3)
     //
     unsigned limit2;
     int a, b;
@@ -153,7 +168,7 @@ void Model::SetConstraint()
                     for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
                         for (unsigned h = 0; h <= Instance::num_planning_horizon; h++) {
                             aux1 = 0;
-                            pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                            pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
                             a = h + pt_round + Instance::m_setup_time[i][j][k] - 1;
                             b = Instance::num_planning_horizon;
                             limit2 = unsigned(min(a, b));
@@ -171,7 +186,7 @@ void Model::SetConstraint()
         }
     }
 
-    //(5)
+    //(4)
     for (unsigned i = 1; i <= Instance::num_machine; i++) {
         for (unsigned j = 1; j <= Instance::num_jobs; j++) {
             for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
@@ -179,7 +194,7 @@ void Model::SetConstraint()
                     //str = "Sum(X[i, " + itos(j) + ", l, h]) = 1 |
                     //i(1:" + itos(Instance::numMachine) + "), l(1:" + itos(Instance::numModeOp) + "),
                     //h(0:" + itos(Instance::numPlanningHorizon) + ")";
-                    pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                    pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
                     model->addConstr(CMax, GRB_GREATER_EQUAL, X[i][j][h][l]*(h+pt_round), str);
                 }
             }
@@ -190,7 +205,7 @@ void Model::SetConstraint()
     int c;
 
 
-    //(6)
+    //(5)
     resultado = 0;
     aux0 = 0;
     for (unsigned i = 1; i <= Instance::num_machine; i++) {
@@ -199,11 +214,11 @@ void Model::SetConstraint()
 
                 aux0 = Instance::v_consumption_factor[l]*
                         Instance::v_machine_potency[i]*
-                        Instance::rate_on_peak/6;
+                        Instance::rate_on_peak/60;
 
                 aux2 = 0;
                 for (unsigned h = 0; h < Instance::v_peak_start[0]; h++) {
-                    pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                    pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
                     a = h + pt_round - 1;
                     b = Instance::v_peak_end[0];
                     c = min(a, b);
@@ -217,7 +232,7 @@ void Model::SetConstraint()
 
                 aux3 = 0;
                 for (unsigned h = Instance::v_peak_start[0]; h <= Instance::v_peak_end[0]; h++) {
-                    pt_round = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                    pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
                     a = h + pt_round;
                     b = Instance::v_peak_end[0] + 1;
                     c = min(a, b);
@@ -235,7 +250,7 @@ void Model::SetConstraint()
     model->addConstr(PecOn, GRB_GREATER_EQUAL, resultado, str);
 
 
-    //(7) PEC_off
+    //(6) PEC_off
     aux1 = 0;
     aux2 = 0;
     aux3 = 0;
@@ -248,11 +263,11 @@ void Model::SetConstraint()
 
                 aux0 = Instance::v_consumption_factor[l]*
                         Instance::v_machine_potency[i]*
-                        Instance::rate_off_peak/6;
+                        Instance::rate_off_peak/60;
 
                 aux2 = 0;
                 for (unsigned h = 0; h < Instance::v_peak_start[0]; h++) {
-                    a = h+ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                    a = h+ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
                     b = Instance::v_peak_start[0];
                     c = min(a, b);
                     c -= h;
@@ -266,15 +281,15 @@ void Model::SetConstraint()
                 aux3 = 0;
                 for (unsigned h = Instance::v_peak_start[0]; h <= Instance::v_peak_end[0]; h++) {
                     a = 0;
-                    b = h+ceil(Instance::m_processing_time[i][j]/
-                                   Instance::v_speed_factor[l])-Instance::v_peak_end[0]-1;
+                    b = h+ceil(double(Instance::m_processing_time[i][j])/
+                                   double(Instance::v_speed_factor[l])-Instance::v_peak_end[0]-1);
                     c = max(a, b);
                     aux3 += X[i][j][h][l]*c;
                 }
 
                 aux4 = 0;
                 for (unsigned h = Instance::v_peak_end[0]+1; h <= Instance::num_planning_horizon; h++) {
-                    c = ceil(Instance::m_processing_time[i][j]/Instance::v_speed_factor[l]);
+                    c = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
                     aux4 += X[i][j][h][l]*c;
                 }
 

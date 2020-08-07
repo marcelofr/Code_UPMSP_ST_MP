@@ -13,19 +13,22 @@ void RunAlgorithm(algorithm_data alg_data){
     Instance::ReadMarceloInstance(alg_data.param.instance_file);
 
     /*Fazer a discretização do tempo*/
-    Instance::num_planning_horizon = ((Instance::num_planning_horizon+1)/10)-1;
+    Instance::discretization_factor = 1;
+    Instance::num_planning_horizon = ((Instance::num_planning_horizon+1)/Instance::discretization_factor)-1;
     for(unsigned i=0; i<Instance::num_days; i++){
-        Instance::v_peak_start[i] = Instance::v_peak_start[i]/10;
-        Instance::v_peak_end[i] = ((Instance::v_peak_end[i]+1)/10)-1;
+        Instance::v_peak_start[i] = Instance::v_peak_start[i]/Instance::discretization_factor;
+        Instance::v_peak_end[i] = ((Instance::v_peak_end[i]+1)/Instance::discretization_factor)-1;
     }
     for(unsigned i=1; i<=Instance::num_machine; i++){
         for(unsigned j=1; j<=Instance::num_jobs; j++){
-            Instance::m_processing_time[i][j] = ceil(double(Instance::m_processing_time[i][j])/double(10));
+            Instance::m_processing_time[i][j] = ceil(double(Instance::m_processing_time[i][j])/double(Instance::discretization_factor));
             for(unsigned k=1; k<=Instance::num_jobs; k++){
-                Instance::m_setup_time[i][j][k] = ceil(double(Instance::m_setup_time[i][j][k])/double(10));
+                Instance::m_setup_time[i][j][k] = ceil(double(Instance::m_setup_time[i][j][k])/double(Instance::discretization_factor));
             }
         }
     }
+    Instance::max_cost = Instance::max_cost/Instance::discretization_factor;
+
     vector<Solution*> non_dominated_set;
 
     alg_data.is_optimal = false;
@@ -81,8 +84,8 @@ void RunAlgorithm(algorithm_data alg_data){
     alg_data.non_dominated_set.clear();
     pair<unsigned, double> aux;
     for(auto it:non_dominated_set){
-        aux.first = it->makeSpan;
-        aux.second = it->TEC;
+        aux.first = it->makeSpan*Instance::discretization_factor;
+        aux.second = it->TEC*Instance::discretization_factor;
         alg_data.non_dominated_set.push_back(aux);
     }
 
@@ -94,9 +97,9 @@ void RunAlgorithm(algorithm_data alg_data){
 #ifdef IRACE
     pair<unsigned, double> reference_point;
     double hv;
-    reference_point.first = sd.non_dominated_set.back().first;
-    reference_point.second = sd.non_dominated_set.front().second;
-    hv = CalculateHypervolumeMin(sd.non_dominated_set, reference_point);
+    reference_point.first = alg_data.non_dominated_set.back().first;
+    reference_point.second = alg_data.non_dominated_set.front().second;
+    hv = CalculateHypervolumeMin(alg_data.non_dominated_set, reference_point);
     //cout << hv << " " << ir.elapsed_time_sec << endl;
     cout << hv << endl;
 #endif
@@ -138,7 +141,7 @@ void SalveFileSolution(algorithm_data alg_data){
     MyFile << "Makespan" << "\t" << "TEC";
 
     for (auto it=alg_data.non_dominated_set.begin(); it != alg_data.non_dominated_set.end();++it) {
-        MyFile << endl << it->first << "\t" << it->second/10;
+        MyFile << endl << it->first << "\t" << it->second;
     }
 
     //Imprimir demarcação de final de arquivo

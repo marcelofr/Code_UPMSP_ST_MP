@@ -447,8 +447,10 @@ double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h)
         PEC_on = 0;
     }
 
-    PEC_off = (PEC_off*Instance::rate_off_peak*Instance::v_consumption_factor[job_mode_op[job]]*Instance::v_machine_potency[machine]/60);
-    PEC_on = (PEC_on*Instance::rate_on_peak*Instance::v_consumption_factor[job_mode_op[job]]*Instance::v_machine_potency[machine]/60);
+    PEC_off = (PEC_off*Instance::rate_off_peak*Instance::v_consumption_factor[job_mode_op[job]]
+                *Instance::v_machine_potency[machine]/60);
+    PEC_on = (PEC_on*Instance::rate_on_peak*Instance::v_consumption_factor[job_mode_op[job]]
+                *Instance::v_machine_potency[machine]/60);
 
     PEC = PEC_off + PEC_on;
 

@@ -9,6 +9,7 @@ double Instance::rate_on_peak = 0;
 double Instance::rate_off_peak = 0;
 unsigned Instance::max_cost = 0;
 unsigned Instance::seed = 0;
+unsigned Instance::discretization_factor = 1;
 
 vector<unsigned> Instance::v_peak_start;
 vector<unsigned> Instance::v_peak_end;

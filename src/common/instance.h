@@ -22,6 +22,7 @@ public:
     static unsigned num_mode_op, max_cost;
     static double rate_on_peak, rate_off_peak;
     static unsigned seed;
+    static unsigned discretization_factor;
 
     //Um horário de pico para cada dia
     static vector<unsigned> v_peak_start, v_peak_end;
