@@ -145,7 +145,10 @@ void Model::SetConstraint()
         aux1 = 0;
         for (unsigned i = 1; i <= Instance::num_machine; i++) {
             for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
-                pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
+                pt_round = ceil(
+                            double(Instance::m_processing_time[i][j])/
+                            double(Instance::v_speed_factor[l])
+                           );
                 limit = Instance::num_planning_horizon - pt_round;
                 for (unsigned h = 0; h <= limit; h++) {
                     aux1 +=X[i][j][h][l];
@@ -168,7 +171,10 @@ void Model::SetConstraint()
                     for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
                         for (unsigned h = 0; h <= Instance::num_planning_horizon; h++) {
                             aux1 = 0;
-                            pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
+                            pt_round = ceil(
+                                        double(Instance::m_processing_time[i][j])/
+                                        double(Instance::v_speed_factor[l])
+                                       );
                             a = h + pt_round + Instance::m_setup_time[i][j][k] - 1;
                             b = Instance::num_planning_horizon;
                             limit2 = unsigned(min(a, b));
@@ -194,7 +200,10 @@ void Model::SetConstraint()
                     //str = "Sum(X[i, " + itos(j) + ", l, h]) = 1 |
                     //i(1:" + itos(Instance::numMachine) + "), l(1:" + itos(Instance::numModeOp) + "),
                     //h(0:" + itos(Instance::numPlanningHorizon) + ")";
-                    pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
+                    pt_round = ceil(
+                                double(Instance::m_processing_time[i][j])/
+                                double(Instance::v_speed_factor[l])
+                               );
                     model->addConstr(CMax, GRB_GREATER_EQUAL, X[i][j][h][l]*(h+pt_round), str);
                 }
             }
@@ -212,13 +221,16 @@ void Model::SetConstraint()
         for (unsigned j = 1; j <= Instance::num_jobs; j++) {
             for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
 
-                aux0 = Instance::v_consumption_factor[l]*
+                aux0 = double(Instance::v_consumption_factor[l]*
                         Instance::v_machine_potency[i]*
-                        Instance::rate_on_peak/60;
+                        Instance::rate_on_peak)/double(60);
 
                 aux2 = 0;
                 for (unsigned h = 0; h < Instance::v_peak_start[0]; h++) {
-                    pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
+                    pt_round = ceil(
+                                double(Instance::m_processing_time[i][j])/
+                                double(Instance::v_speed_factor[l])
+                               );
                     a = h + pt_round - 1;
                     b = Instance::v_peak_end[0];
                     c = min(a, b);
@@ -232,7 +244,10 @@ void Model::SetConstraint()
 
                 aux3 = 0;
                 for (unsigned h = Instance::v_peak_start[0]; h <= Instance::v_peak_end[0]; h++) {
-                    pt_round = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
+                    pt_round = ceil(
+                                    double(Instance::m_processing_time[i][j])/
+                                    double(Instance::v_speed_factor[l])
+                                );
                     a = h + pt_round;
                     b = Instance::v_peak_end[0] + 1;
                     c = min(a, b);
@@ -257,39 +272,51 @@ void Model::SetConstraint()
     aux4 = 0;
     aux0 = 0;
     resultado = 0;
+    int d;
     for (unsigned i = 1; i <= Instance::num_machine; i++) {
         for (unsigned j = 1; j <= Instance::num_jobs; j++) {
             for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
 
-                aux0 = Instance::v_consumption_factor[l]*
+                aux0 = double(Instance::v_consumption_factor[l]*
                         Instance::v_machine_potency[i]*
-                        Instance::rate_off_peak/60;
+                        Instance::rate_off_peak)/double(60);
 
                 aux2 = 0;
                 for (unsigned h = 0; h < Instance::v_peak_start[0]; h++) {
-                    a = h+ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
+                    a = h + ceil(
+                                    double(Instance::m_processing_time[i][j])/
+                                    double(Instance::v_speed_factor[l])
+                                );
                     b = Instance::v_peak_start[0];
                     c = min(a, b);
-                    c -= h;
+                    d = c - h;
                     a = 0;
-                    b = h+ceil(Instance::m_processing_time[i][j]/
-                                   Instance::v_speed_factor[l])-Instance::v_peak_end[0]-1;
-                    c += max(a, b);
-                    aux2 += X[i][j][h][l]*c;
+                    b = h + ceil(
+                                    double(Instance::m_processing_time[i][j])/
+                                    double(Instance::v_speed_factor[l])
+                                ) - Instance::v_peak_end[0] - 1;
+                    c = max(a, b);
+                    d = d + c;
+                    aux2 += X[i][j][h][l]*d;
                 }
 
                 aux3 = 0;
                 for (unsigned h = Instance::v_peak_start[0]; h <= Instance::v_peak_end[0]; h++) {
                     a = 0;
-                    b = h+ceil(double(Instance::m_processing_time[i][j])/
-                                   double(Instance::v_speed_factor[l])-Instance::v_peak_end[0]-1);
+                    b = h + ceil(
+                                    double(Instance::m_processing_time[i][j])/
+                                    double(Instance::v_speed_factor[l])
+                                ) - Instance::v_peak_end[0] - 1;
                     c = max(a, b);
                     aux3 += X[i][j][h][l]*c;
                 }
 
                 aux4 = 0;
                 for (unsigned h = Instance::v_peak_end[0]+1; h <= Instance::num_planning_horizon; h++) {
-                    c = ceil(double(Instance::m_processing_time[i][j])/double(Instance::v_speed_factor[l]));
+                    c = ceil(
+                                double(Instance::m_processing_time[i][j])/
+                                double(Instance::v_speed_factor[l])
+                            );
                     aux4 += X[i][j][h][l]*c;
                 }
 

@@ -1,6 +1,6 @@
 ﻿#include "nsga_ii.h"
 
-void nsga_ii(algorithm_data alg_data, vector<Solution*> &non_dominated_set){
+void nsga_ii(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Timer *t1){
 
     vector<GASolution*> P;
 
@@ -14,10 +14,6 @@ void nsga_ii(algorithm_data alg_data, vector<Solution*> &non_dominated_set){
 
     vector<GASolution*> Q, R;
     vector<vector<GASolution*>> F;
-
-    Timer *t1 = new Timer();
-
-    t1->start();
 
     unsigned i, j;
 
@@ -81,10 +77,10 @@ void nsga_ii(algorithm_data alg_data, vector<Solution*> &non_dominated_set){
         Crossover(P, Q);
         Mutation(P, Q, alg_data.param.u_prob_mutation);
 
+        j++;
+
         //Registar a contagem do tempo
         t1->stop();
-
-        j++;
 
     }
 
@@ -93,13 +89,6 @@ void nsga_ii(algorithm_data alg_data, vector<Solution*> &non_dominated_set){
 
     //Criar as frentes F[1], F[2], ...
     FastNonDominatedSort(F, R);
-
-#ifdef DEBUG
-    //PrintPopulation(population);
-    PrintPopulation(F[0]);
-
-    t1->printElapsedTimeInMilliSec();
-#endif
 
     non_dominated_set.clear();
     non_dominated_set.assign(F[0].begin(), F[0].end());

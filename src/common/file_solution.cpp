@@ -49,6 +49,8 @@ void ReadFile(algorithm_data &alg_data)
     file >> str;
     file >> num;
     alg_data.param.u_seed = num;
+    alg_data.param.s_seed = itos(num);
+
 
     //Tempo passado
     file >> str;

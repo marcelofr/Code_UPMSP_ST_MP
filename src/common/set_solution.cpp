@@ -1,5 +1,6 @@
 #include "set_solution.h"
 
+
 void SortByMakespan(vector<Solution*> &set_solution)
 {
     sort(set_solution.begin(), set_solution.end(), CompareMakespan);

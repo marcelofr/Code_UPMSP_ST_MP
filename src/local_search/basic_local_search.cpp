@@ -1,19 +1,29 @@
 #include "basic_local_search.h"
 
+
+/*
+ * Método para imprimir um vetor de soluções
+ */
+void PrintNonDominatedSet(vector<Solution*> &non_dominated_set)
+{
+    for(auto it = non_dominated_set.begin(); it != non_dominated_set.end(); ++it){
+        (*it)->Print();
+    }
+}
+
 /*
  * Método que gerar vizinhos através da realização de  trocas de tarefas em uma máquina.
  * Ele tenta gerar novos vizinhos até encontrar um que possa ser incluído
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool SwapInsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
+bool SwapInsideLS_FI(LSSolution *my_solution, NDSetSolution *non_dominated_set)
 {
     unsigned long num_job_maq;
 
-    LSSolution *neighbor_sol;
+    LSSolution *neighbor_sol = new LSSolution();
 
     //Criar uma cópia da solução
-    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i de 1 à n
@@ -33,13 +43,14 @@ bool SwapInsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_dominated
                 neighbor_sol->CalculateObjective();
 
                 //Tentar adicionar o vizinho gerado no conjunto não-dominado
-                //Se conseguiu, então retorna true
-                if(AddSolution(neighbor_sol, non_dominated_set)){
+                //Se conseguiu, então retorna true, senão continua a busca
+                //if(AddSolution(neighbor_sol, non_dominated_set)){
+                if(non_dominated_set->AddSolution(neighbor_sol)){
 
                     return true;
                 }
                 else{
-                    neighbor_sol = my_solution;
+                    *neighbor_sol = *my_solution;
                 }
             }
         }
@@ -57,14 +68,13 @@ bool SwapInsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_dominated
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool SwapOutsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominated_set)
+bool SwapOutsideLS_FI(LSSolution* my_solution, NDSetSolution *non_dominated_set)
 {
     unsigned long num_job_maq1, num_job_maq2;
 
-    LSSolution *neighbor_sol;
+    Solution *neighbor_sol = new Solution();
 
     //Criar uma cópia da solução
-    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i1 de 1 à n
@@ -89,12 +99,13 @@ bool SwapOutsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominate
 
                     //Tentar adicionar o vizinho gerado no conjunto não-dominado
                     //Se conseguiu, então retorna true
-                    if(AddSolution(neighbor_sol, non_dominated_set)){
+                    //if(AddSolution(neighbor_sol, non_dominated_set)){
+                    if(non_dominated_set->AddSolution(neighbor_sol)){
 
                         return true;
                     }
                     else{
-                        neighbor_sol = my_solution;
+                        *neighbor_sol = *my_solution;
                     }
 
                 }
@@ -113,14 +124,13 @@ bool SwapOutsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominate
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool InsertInsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominated_set)
+bool InsertInsideLS_FI(LSSolution* my_solution, NDSetSolution *non_dominated_set)
 {
     unsigned long num_job_maq;
 
-    LSSolution *neighbor_sol;
+    LSSolution *neighbor_sol = new LSSolution();
 
     //Criar uma cópia da solução
-    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i de 1 à n
@@ -142,12 +152,13 @@ bool InsertInsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominat
 
                     //Tentar adicionar o vizinho gerado no conjunto não-dominado
                     //Se conseguiu, então retorna true
-                    if(AddSolution(neighbor_sol, non_dominated_set)){
+                    //if(AddSolution(neighbor_sol, non_dominated_set)){
+                    if(non_dominated_set->AddSolution(neighbor_sol)){
 
                         return true;
                     }
                     else{
-                        neighbor_sol = my_solution;
+                        *neighbor_sol = *my_solution;
                     }
                 }
 
@@ -167,14 +178,13 @@ bool InsertInsideLS_FI(LSSolution* my_solution, vector<LSSolution*> &non_dominat
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool InsertOutsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
+bool InsertOutsideLS_FI(LSSolution *my_solution, NDSetSolution *non_dominated_set)
 {
     unsigned long num_job_maq1, num_job_maq2;
 
-    LSSolution *neighbor_sol;
+    LSSolution *neighbor_sol = new LSSolution();
 
     //Criar uma cópia da solução
-    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i1 de 1 à n
@@ -200,12 +210,13 @@ bool InsertOutsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_domina
 
                         //Tentar adicionar o vizinho gerado no conjunto não-dominado
                         //Se conseguiu, então retorna true
-                        if(AddSolution(neighbor_sol, non_dominated_set)){
+                        //if(AddSolution(neighbor_sol, non_dominated_set)){
+                        if(non_dominated_set->AddSolution(neighbor_sol)){
 
                             return true;
                         }
                         else{
-                            neighbor_sol = my_solution;
+                            *neighbor_sol = *my_solution;
                         }
                     }
                 }
@@ -225,14 +236,13 @@ bool InsertOutsideLS_FI(LSSolution *my_solution, vector<LSSolution*> &non_domina
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool ChangeOpModeLS(LSSolution *my_solution, vector<LSSolution*> &non_dominated_set)
+bool ChangeOpModeLS(LSSolution *my_solution, NDSetSolution *non_dominated_set)
 {
     unsigned long num_job_maq, job;
 
-    LSSolution *neighbor_sol;
+    LSSolution *neighbor_sol = new LSSolution();
 
     //Criar uma cópia da solução
-    neighbor_sol = nullptr;
     *neighbor_sol = *my_solution;
 
     //Para cada máquina i de 1 à n
@@ -256,7 +266,8 @@ bool ChangeOpModeLS(LSSolution *my_solution, vector<LSSolution*> &non_dominated_
 
                     //Tentar adicionar o vizinho gerado no conjunto não-dominado
                     //Se conseguiu, então retorna true
-                    if(AddSolution(neighbor_sol, non_dominated_set)){
+                    //if(AddSolution(neighbor_sol, non_dominated_set)){
+                    if(non_dominated_set->AddSolution(neighbor_sol)){
 
                         return true;
                     }

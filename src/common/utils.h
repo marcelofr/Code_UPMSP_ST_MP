@@ -8,8 +8,8 @@
 #include <vector>
 #include <algorithm>
 
-#define RELEASE
-//#define DEBUG
+//#define RELEASE
+#define DEBUG
 //#define IRACE
 
 

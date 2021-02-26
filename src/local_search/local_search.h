@@ -3,9 +3,10 @@
 
 #include "common/solution.h"
 #include "basic_local_search.h"
+#include "common/Timer.h"
+#include "common/set_solution.h"
 
-void GenInitialSet(vector<LSSolution*> &non_dominated_set);
 
-void HillClimbing(vector<Solution*> &non_dominated_set);
+void HillClimbing(NDSetSolution *non_dominated_set, Timer *t1);
 
 #endif // LOCAL_SEARCH_H

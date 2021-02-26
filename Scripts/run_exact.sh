@@ -5,8 +5,8 @@ cd ..
 instance_folder="Instances/SMALL/"
 #instance_folder="Instances/Debug/";
 
-#files="6_2_1439_3_S_1-9"
-files="*"
+files="8_2_1439_3_S_1-9"
+#files="*"
 instance_extension=".dat"
 
 #Sementes
@@ -49,7 +49,7 @@ algorithm[1]="EXACT"
 #Pega quantos algoritmos serao executados
 size_algorithm=${#algorithm[@]}
 
-folder_solution="Solutions/2020_08_01_18_48/"
+folder_solution="Solutions/2020_08_07_17_06/"
 
 #tempo em milisegundos (valor sera multiplicado pela numero de tarefas da instancia)
 max_time_factor[1]=800
@@ -63,17 +63,17 @@ then
 fi
 
 
-alpha[1]=0.01
-alpha[2]=0.1
-alpha[3]=0.2
-alpha[4]=0.3
-alpha[5]=0.4
-alpha[6]=0.5
-alpha[7]=0.6
-alpha[8]=0.7
-alpha[9]=0.8
-alpha[10]=0.9
-alpha[11]=0.99
+alpha[1]=0.8
+#alpha[2]=0.1
+#alpha[3]=0.2
+#alpha[4]=0.3
+#alpha[5]=0.4
+#alpha[6]=0.5
+#alpha[7]=0.6
+#alpha[8]=0.7
+#alpha[9]=0.8
+#alpha[10]=0.9
+#alpha[11]=0.99
 
 size_alpha=${#alpha[@]}
 

@@ -47,18 +47,19 @@ int main(int argc, char** argv)
         alg_data.param.instance_extension = ".dat";
         alg_data.param.instance_file = alg_data.param.instance_folder + alg_data.param.instance_name + alg_data.param.instance_extension;
 
-        alg_data.param.s_seed = "123456";
-        //Param.algorithm = "GENERATE_INSTANCES_SMALL";
-        //Param.algorithm = "RUN_METRIC";
+        alg_data.param.s_seed = "60543";
+        //alg_data.param.algorithm_name = "GENERATE_INSTANCES_SMALL";
+        //alg_data.param.algorithm_name = "RUN_METRIC";
         //alg_data.param.algorithm_name = "GA";
-        alg_data.param.algorithm_name = "EXACT";
-        alg_data.param.s_max_time_factor = "100";
+        //alg_data.param.algorithm_name = "EXACT";
+        alg_data.param.algorithm_name = "LS";
+        alg_data.param.s_max_time_factor = "1000";
         //Param.folder_solution = "../../Solutions/2020_07_24_17_16/";
-        alg_data.param.folder_solution = "../../Solutions/Test/";
+        alg_data.param.folder_solution = "../../Test/";
         alg_data.param.file_solution = alg_data.param.folder_solution + alg_data.param.algorithm_name + "_"
                 + alg_data.param.instance_name + "_" + alg_data.param.s_seed +  ".sol";
-        alg_data.param.s_alpha = "0.9";
-        alg_data.param.s_population_size = "100";
+        alg_data.param.s_alpha = "0.9999";
+        alg_data.param.s_population_size = "110";
         alg_data.param.s_prob_mutation = "5";
 
     }

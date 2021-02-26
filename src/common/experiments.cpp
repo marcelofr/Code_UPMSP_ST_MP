@@ -37,14 +37,19 @@ void RunAlgorithm(algorithm_data alg_data){
 
     //Definir o tempo limite de execução
     alg_data.time_limit = alg_data.param.u_max_time_factor * Instance::num_jobs * log(Instance::num_machine);
-#ifdef DEBUG
-    cout << "Tempo limite: " << alg_data.time_limit << endl;
-#endif
+
+    #ifdef DEBUG
+        cout << "Tempo limite: " << alg_data.time_limit << endl;
+    #endif
 
     if(alg_data.param.algorithm_name == "GA"){
 
-        //Instance::PrintInstance1();
-        nsga_ii(alg_data, non_dominated_set);
+        nsga_ii(alg_data, non_dominated_set, t1);
+
+        #ifdef DEBUG
+            PrintNonDominatedSet(non_dominated_set);
+            t1->printElapsedTimeInMilliSec();
+        #endif
 
     }
     else if(alg_data.param.algorithm_name == "EXACT"){
@@ -69,7 +74,26 @@ void RunAlgorithm(algorithm_data alg_data){
 
     }
     else if(alg_data.param.algorithm_name == "LS"){
-        HillClimbing(non_dominated_set);
+
+        NDSetSolution *non_dominated_set_ls = new NDSetSolution();
+
+        non_dominated_set_ls->GenInitialSet();
+
+        #ifdef DEBUG
+            cout << "======Solução inicial===========" << endl;
+            non_dominated_set_ls->PrintSetSolution();
+            cout << "=================" << endl;
+        #endif
+
+
+        HillClimbing(non_dominated_set_ls, t1);
+
+        #ifdef DEBUG
+            cout << "======Solução final===========" << endl;
+            non_dominated_set_ls->PrintSetSolution();
+            t1->printElapsedTimeInMilliSec();
+            cout << "=================" << endl;
+        #endif
     }
 
     t1->stop();
@@ -89,20 +113,20 @@ void RunAlgorithm(algorithm_data alg_data){
         alg_data.non_dominated_set.push_back(aux);
     }
 
-#ifndef IRACE
-    //Salvar o conjunto não-dominado em arquivo
-    SalveFileSolution(alg_data);
-#endif
+    #ifndef IRACE
+        //Salvar o conjunto não-dominado em arquivo
+        SalveFileSolution(alg_data);
+    #endif
 
-#ifdef IRACE
-    pair<unsigned, double> reference_point;
-    double hv;
-    reference_point.first = alg_data.non_dominated_set.back().first;
-    reference_point.second = alg_data.non_dominated_set.front().second;
-    hv = CalculateHypervolumeMin(alg_data.non_dominated_set, reference_point);
-    //cout << hv << " " << ir.elapsed_time_sec << endl;
-    cout << hv << endl;
-#endif
+    #ifdef IRACE
+        pair<unsigned, double> reference_point;
+        double hv;
+        reference_point.first = alg_data.non_dominated_set.back().first;
+        reference_point.second = alg_data.non_dominated_set.front().second;
+        hv = CalculateHypervolumeMin(alg_data.non_dominated_set, reference_point);
+        //cout << hv << " " << ir.elapsed_time_sec << endl;
+        cout << hv << endl;
+    #endif
 
 }
 
@@ -201,11 +225,11 @@ void CalculateMetric(string folder_solution)
     CalculateHypervolume(sets, hypervolume, reference_points);
 
     //Calcular a diferença de hipervolume para todas as instâncias em sets
-    for(auto instance : hypervolume){
+    /*for(auto instance : hypervolume){
         for(auto seed : instance.second){
             hypervolume[instance.first].insert({seed.first+"_diff", hypervolume[instance.first]["ref"]-seed.second});
         }
-    }
+    }*/
 
     cout << setprecision(10);
 

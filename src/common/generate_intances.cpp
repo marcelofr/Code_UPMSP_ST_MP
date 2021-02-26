@@ -33,7 +33,7 @@ void GenerateSmallInstances()
 
 
     pair<unsigned, unsigned>range_potency;
-    range_potency.first = 100;
+    range_potency.first = 40;
     range_potency.second = 200;
     ip.range_potency = range_potency;
 
