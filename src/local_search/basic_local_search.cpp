@@ -17,7 +17,7 @@ void PrintNonDominatedSet(vector<Solution*> &non_dominated_set)
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool SwapInsideLS_FI(LSSolution *my_solution, NDSetSolution *non_dominated_set)
+bool SwapInsideLS_FI(LSSolution *my_solution, NDSetSolution<LSSolution*> *non_dominated_set)
 {
     unsigned long num_job_maq;
 
@@ -68,11 +68,11 @@ bool SwapInsideLS_FI(LSSolution *my_solution, NDSetSolution *non_dominated_set)
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool SwapOutsideLS_FI(LSSolution* my_solution, NDSetSolution *non_dominated_set)
+bool SwapOutsideLS_FI(LSSolution* my_solution, NDSetSolution<LSSolution*> *non_dominated_set)
 {
     unsigned long num_job_maq1, num_job_maq2;
 
-    Solution *neighbor_sol = new Solution();
+    LSSolution *neighbor_sol = new LSSolution();
 
     //Criar uma cópia da solução
     *neighbor_sol = *my_solution;
@@ -124,7 +124,7 @@ bool SwapOutsideLS_FI(LSSolution* my_solution, NDSetSolution *non_dominated_set)
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool InsertInsideLS_FI(LSSolution* my_solution, NDSetSolution *non_dominated_set)
+bool InsertInsideLS_FI(LSSolution* my_solution, NDSetSolution<LSSolution *> *non_dominated_set)
 {
     unsigned long num_job_maq;
 
@@ -178,7 +178,7 @@ bool InsertInsideLS_FI(LSSolution* my_solution, NDSetSolution *non_dominated_set
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool InsertOutsideLS_FI(LSSolution *my_solution, NDSetSolution *non_dominated_set)
+bool InsertOutsideLS_FI(LSSolution *my_solution, NDSetSolution<LSSolution *> *non_dominated_set)
 {
     unsigned long num_job_maq1, num_job_maq2;
 
@@ -236,7 +236,7 @@ bool InsertOutsideLS_FI(LSSolution *my_solution, NDSetSolution *non_dominated_se
  * no conjunto não-dominado (first improvement), ou até percorrer toda a vizinhança
  * Ele retorna verdadeiro, caso consiga adicionar um vizinho ao conjunto não-dominado
  */
-bool ChangeOpModeLS(LSSolution *my_solution, NDSetSolution *non_dominated_set)
+bool ChangeOpModeLS(LSSolution *my_solution, NDSetSolution<LSSolution *> *non_dominated_set)
 {
     unsigned long num_job_maq, job;
 

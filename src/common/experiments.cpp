@@ -44,11 +44,29 @@ void RunAlgorithm(algorithm_data alg_data){
 
     if(alg_data.param.algorithm_name == "GA"){
 
-        nsga_ii(alg_data, non_dominated_set, t1);
+        //vector<GASolution*> non_dominated_set_ga;
+        NDSetSolution<GASolution *> *non_dominated_set_ga = new NDSetSolution<GASolution *>();
+
+        //GenerateInitialPopulation(non_dominated_set_ga, alg_data.param.u_population_size);
+        //GenerateInitialPopulation(non_dominated_set_ga->set_solution, alg_data.param.u_population_size);
+        non_dominated_set_ga->GenerateGreedyRandomInitialSolution(alg_data.param.u_population_size);
+        //non_dominated_set_ga->GenerateGreedyInitialSolution();
 
         #ifdef DEBUG
-            PrintNonDominatedSet(non_dominated_set);
+            cout << "===========Inicio População Inicial===========" << endl;
+            PrintPopulation(non_dominated_set_ga->set_solution);
+            //non_dominated_set_ga->PrintSetSolution();
+            cout << "===========Fim População Inicial===========" << endl << endl;
+        #endif
+
+        nsga_ii(alg_data, non_dominated_set_ga->set_solution, t1);
+
+        #ifdef DEBUG
+            cout << "===========Inicio NSGA===========" << endl;
+            PrintPopulation(non_dominated_set_ga->set_solution);
+            //non_dominated_set_ga->PrintSetSolution();
             t1->printElapsedTimeInMilliSec();
+            cout << "===========Fim NSGA===========" << endl;
         #endif
 
     }
@@ -75,24 +93,23 @@ void RunAlgorithm(algorithm_data alg_data){
     }
     else if(alg_data.param.algorithm_name == "LS"){
 
-        NDSetSolution *non_dominated_set_ls = new NDSetSolution();
+        NDSetSolution<LSSolution *> *non_dominated_set_ls = new NDSetSolution<LSSolution *>();
 
-        non_dominated_set_ls->GenInitialSet();
+        non_dominated_set_ls->GenerateGreedyInitialSolution();
 
         #ifdef DEBUG
-            cout << "======Solução inicial===========" << endl;
+            cout << "===========Inicio Solução Inicial===========" << endl;
             non_dominated_set_ls->PrintSetSolution();
-            cout << "=================" << endl;
+            cout << "===========Fim Solução Inicial===========" << endl << endl;
         #endif
-
 
         HillClimbing(non_dominated_set_ls, t1);
 
         #ifdef DEBUG
-            cout << "======Solução final===========" << endl;
+            cout << "===========Inicio HillClimbing===========" << endl;
             non_dominated_set_ls->PrintSetSolution();
             t1->printElapsedTimeInMilliSec();
-            cout << "=================" << endl;
+            cout << "===========Fim HillClimbing===========" << endl << endl;
         #endif
     }
 

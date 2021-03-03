@@ -1,16 +1,6 @@
 ﻿#include "nsga_ii.h"
 
-void nsga_ii(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Timer *t1){
-
-    vector<GASolution*> P;
-
-    GenerateInitialPopulation(P, alg_data.param.u_population_size);
-
-#ifdef DEBUG
-    cout << "====População Inicial========" << endl;
-    PrintPopulation(P);
-    cout << endl << endl << "======%===========%============%========%=========" << endl << endl;
-#endif
+void nsga_ii(algorithm_data alg_data, vector<GASolution*> &P, Timer *t1){
 
     vector<GASolution*> Q, R;
     vector<vector<GASolution*>> F;
@@ -60,7 +50,7 @@ void nsga_ii(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Time
         }
 
         //Apagar as soluções que não foram incluídas na próxima população
-        for(unsigned k = tam; k < F[i].size(); k++){
+        for(unsigned k = tam; k < F[i].size() && i < F.size(); k++){
             delete (GASolution*)F[i][k];
         }
 
@@ -90,8 +80,8 @@ void nsga_ii(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Time
     //Criar as frentes F[1], F[2], ...
     FastNonDominatedSort(F, R);
 
-    non_dominated_set.clear();
-    non_dominated_set.assign(F[0].begin(), F[0].end());
+    P.clear();
+    P.assign(F[0].begin(), F[0].end());
 
 }
 

@@ -25,6 +25,34 @@ Solution::Solution()
 
 }
 
+Solution::Solution (const Solution &s){
+    this->makeSpan = s.makeSpan;
+    this->TEC = s.TEC;
+    this->is_optimal = s.is_optimal;
+
+
+    for(unsigned i = 0; i < this->scheduling.size(); i++){
+        this->scheduling[i].clear();
+    }
+
+    for(unsigned i = 0; i < this->scheduling.size(); i++){
+        copy(s.scheduling[i].begin(), s.scheduling[i].end(), back_inserter(this->scheduling[i]));
+    }
+
+    this->H1.clear();
+    copy(s.H1.begin(), s.H1.end(), back_inserter(this->H1));
+    this->job_end_time1.clear();
+    copy(s.job_end_time1.begin(), s.job_end_time1.end(), back_inserter(this->job_end_time1));
+    this->job_start_time1.clear();
+    copy(s.job_start_time1.begin(), s.job_start_time1.end(), back_inserter(this->job_start_time1));
+    this->job_mode_op.clear();
+    copy(s.job_mode_op.begin(), s.job_mode_op.end(), back_inserter(this->job_mode_op));
+    this->machine_completion_time.clear();
+    copy(s.machine_completion_time.begin(), s.machine_completion_time.end(), back_inserter(this->machine_completion_time));
+    this->machine_TEC.clear();
+    copy(s.machine_TEC.begin(), s.machine_TEC.end(), back_inserter(this->machine_TEC));
+}
+
 Solution::~Solution()
 {
 
@@ -39,6 +67,56 @@ Solution::~Solution()
     machine_completion_time.clear();
     machine_TEC.clear();
     job_mode_op.clear();
+}
+
+
+Solution& Solution::operator=(const Solution &s){
+
+    if( &s != this ) {
+
+        Solution* ptr_object = NULL;
+        if(&s != ptr_object){
+            this->makeSpan = s.makeSpan;
+            this->TEC = s.TEC;
+            this->is_optimal = s.is_optimal;
+
+
+            for(unsigned i = 0; i < this->scheduling.size(); i++){
+                this->scheduling[i].clear();
+            }
+
+            for(unsigned i = 0; i < this->scheduling.size(); i++){
+                copy(s.scheduling[i].begin(), s.scheduling[i].end(), back_inserter(this->scheduling[i]));
+            }
+
+
+
+            this->H1.clear();
+            copy(s.H1.begin(), s.H1.end(), back_inserter(this->H1));
+            this->job_end_time1.clear();
+            copy(s.job_end_time1.begin(), s.job_end_time1.end(), back_inserter(this->job_end_time1));
+            this->job_start_time1.clear();
+            copy(s.job_start_time1.begin(), s.job_start_time1.end(), back_inserter(this->job_start_time1));
+            this->job_mode_op.clear();
+            copy(s.job_mode_op.begin(), s.job_mode_op.end(), back_inserter(this->job_mode_op));
+            this->machine_completion_time.clear();
+            copy(s.machine_completion_time.begin(), s.machine_completion_time.end(), back_inserter(this->machine_completion_time));
+            this->machine_TEC.clear();
+            copy(s.machine_TEC.begin(), s.machine_TEC.end(), back_inserter(this->machine_TEC));
+        }
+
+    }
+    return *this;
+}
+
+bool Solution::operator <(const Solution& s) {
+        return (this->makeSpan < s.makeSpan && this->TEC < s.TEC)
+                || (this->makeSpan < s.makeSpan && abs(this->TEC - s.TEC) < EPS) ||
+                (this->makeSpan == s.makeSpan && this->TEC < s.TEC);
+}
+
+bool Solution::operator ==(const Solution& s) {
+        return (this->makeSpan == s.makeSpan && abs(this->TEC - s.TEC) < EPS);
 }
 
 void Solution::Print()

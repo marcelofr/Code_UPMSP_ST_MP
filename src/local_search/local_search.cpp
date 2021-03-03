@@ -3,26 +3,26 @@
 /*
  * Método para gerar um conjunto de soluções iniciais
  */
-void GenInitialSet(NDSetSolution &non_dominated_set)
+void GenInitialSet(NDSetSolution<LSSolution *> &non_dominated_set)
 {
-    Solution * my_solution;
+    LSSolution * my_solution;
 
     /*Gerar uma conjunto inicial*/
     /*Gerar uma solução gulosa considerando o objetivo do makespan*/
-    my_solution = new Solution();
+    my_solution = new LSSolution();
     my_solution->GreedyInitialSolutionMakespan();
     //AddSolution(my_solution, non_dominated_set.set_solution);
     non_dominated_set.AddSolution(my_solution);
 
 
     /*Gerar uma solução gulosa considerando o objetivo do TEC*/
-    my_solution = new Solution();
+    my_solution = new LSSolution();
     my_solution->GreedyInitialSolutionTEC3();
     //AddSolution(my_solution, non_dominated_set);
     non_dominated_set.AddSolution(my_solution);
 }
 
-void HillClimbing(NDSetSolution *non_dominated_set, Timer *t1)
+void HillClimbing(NDSetSolution<LSSolution *> *non_dominated_set, Timer *t1)
 {
 
     //NonDominatedSetSolution cur_non_dominated_set;

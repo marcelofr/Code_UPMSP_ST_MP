@@ -7,6 +7,6 @@
 #include "common/set_solution.h"
 
 
-void HillClimbing(NDSetSolution *non_dominated_set, Timer *t1);
+void HillClimbing(NDSetSolution<LSSolution*> *non_dominated_set, Timer *t1);
 
 #endif // LOCAL_SEARCH_H

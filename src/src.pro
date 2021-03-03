@@ -13,6 +13,7 @@ SOURCES += \
         common/solution.cpp \
         common/utils.cpp \
         genetic_algorithm/ga.cpp \
+        genetic_algorithm/gasolution.cpp \
         genetic_algorithm/nsga_ii.cpp \
         local_search/basic_local_search.cpp \
         local_search/local_search.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     common/solution.h \
     common/utils.h \
     genetic_algorithm/ga.h \
+    genetic_algorithm/gasolution.h \
     genetic_algorithm/nsga_ii.h \
     local_search/basic_local_search.h \
     local_search/local_search.h \
