@@ -4,7 +4,7 @@ GASolution::GASolution() : Solution(){
 
 }
 
-GASolution::GASolution (const GASolution &s){
+GASolution::GASolution (const GASolution &s):Solution(s){
 
     this->crowding_distance = s.crowding_distance;
     this->rank = s.rank;

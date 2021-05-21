@@ -27,4 +27,14 @@ void SelectOnlyValidSolutions(vector<Solution*> non_dominated_set);
 //void GenerateReferenceSet(string folder_solution, map<string, map<string, vector<pair<unsigned, double>>>> sets);
 void CalculateMetric(string folder_solution);
 
+void Discretize(unsigned factor);
+
+void RunAlgorithmNSGAII(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Timer *t1);
+void RunAlgorithmExact(algorithm_data alg_data, vector<Solution*> &non_dominated_set);
+//void RunAlgorithmHillClimbing(vector<Solution*> &non_dominated_set, Timer *t1);
+void RunAlgorithmHillClimbing(vector<Solution*> &non_dominated_set, algorithm_data alg_data, Timer *t1);
+void RunAlgorithmMOVNS(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Timer *t1);
+void RunAlgorithmMOVNSArroyo(algorithm_data alg_data, vector<Solution*> &nd_set_solution, Timer *t1);
+void RunAlgorithmMOVNSEduardo(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Timer *t1);
+
 #endif // EXPERIMENTS_H

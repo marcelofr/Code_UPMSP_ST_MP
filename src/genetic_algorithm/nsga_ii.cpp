@@ -10,6 +10,7 @@ void nsga_ii(algorithm_data alg_data, vector<GASolution*> &P, Timer *t1){
     j = 0;
 
 
+    t1->stop();
     while (t1->getElapsedTimeInMilliSec() < alg_data.time_limit) {
 
         //R_t <- P_t U Q_t
@@ -64,7 +65,7 @@ void nsga_ii(algorithm_data alg_data, vector<GASolution*> &P, Timer *t1){
         }
 
         //Criar um população Q_{t+1} de tamanho N
-        Crossover(P, Q);
+        Crossover(P, Q, alg_data.param.u_population_size);
         Mutation(P, Q, alg_data.param.u_prob_mutation);
 
         j++;

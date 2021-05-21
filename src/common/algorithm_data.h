@@ -28,6 +28,8 @@ struct algorithm_data{
     vector<pair<unsigned, double>>non_dominated_set;
     bool is_optimal;
     parameters param;
+    unsigned qtd_neighbor;
+    unsigned max_shake_level;
 };
 
 #endif // ALGORITHM_DATA_H

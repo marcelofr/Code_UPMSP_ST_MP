@@ -180,7 +180,7 @@ TEST_F(TestCommon, GreedyInitialSolutionMakespan) {
     Instance::ReadMarceloInstance("../../../Instances/SMALL/6_2_1439_3_S_1-9.dat");
     Instance::seed = 10683;
 
-    my_solution->GreedyInitialSolutionMakespan();
+    my_solution->GenerateGreedySolutionMakespan();
 
     //Verificar a sequência das tarefas
     EXPECT_EQ(my_solution->scheduling[1][0], 3);
@@ -281,7 +281,7 @@ TEST_F(TestCommon, GreedyInitialSolutionTEC3) {
     Instance::seed = 10683;
 
     Solution * my_solution = new Solution();
-    my_solution->GreedyInitialSolutionTEC3();
+    my_solution->GenerateGreedySolutionTEC3();
 
     //Verificar a sequência das tarefas
     EXPECT_EQ(my_solution->scheduling[1][0], 5);
@@ -384,7 +384,7 @@ TEST_F(TestCommon, HorizonTwoDays) {
 
     Solution * my_solution = new Solution();
     //Essa solução gulosa precisa de um horizonte maior
-    my_solution->GreedyInitialSolutionTEC3();
+    my_solution->GenerateGreedySolutionTEC3();
 
     //Verificar apenas as máquinas nas quais as tarefas com horário de término
     //maior que o início do horário de pico: 3 e 6

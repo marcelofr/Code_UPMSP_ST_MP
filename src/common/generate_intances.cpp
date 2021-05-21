@@ -76,7 +76,7 @@ void CreateNewIntance(InstanceParam ip)
     Solution * my_solution = new Solution();
 
     //Gerar uma solução inicial gulosa considerando o objetivo do TEC
-    my_solution->GreedyInitialSolutionTEC3();
+    my_solution->GenerateGreedySolutionTEC3();
     new_num_days = ceil(double(my_solution->makeSpan/(double)Instance::num_planning_horizon));
 
     for(unsigned i=Instance::num_days; i<new_num_days; i++){
@@ -89,7 +89,7 @@ void CreateNewIntance(InstanceParam ip)
     Instance::num_days = new_num_days;
 
     //Gerar uma solução inicial gulosa considerando o objetivo do makespan
-    my_solution->GreedyInitialSolutionMakespan();
+    my_solution->GenerateGreedySolutionMakespan();
     Instance::max_cost = ceil(my_solution->TEC);
 
     //Salvar dados da instância em arquivo

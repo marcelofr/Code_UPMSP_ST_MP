@@ -40,9 +40,10 @@ int main(int argc, char** argv)
     }
     else{
 
-        alg_data.param.instance_folder = "../../Instances/SMALL/";
-        //Param.instance_folder = "../../Instances/LARGE/";
-        alg_data.param.instance_name = "6_2_1439_3_S_1-9";
+        //alg_data.param.instance_folder = "../../Instances/SMALL/"; alg_data.param.instance_name = "6_2_1439_3_S_1-9";
+        //alg_data.param.instance_folder = "../../Instances/LARGE/"; alg_data.param.instance_name = "50_10_1439_5_S_1-9";
+        alg_data.param.instance_folder = "../../Instances/LARGE/"; alg_data.param.instance_name = "250_10_1439_5_S_1-124";
+
         //Param.instance_name = "7_2_1439_3_S_1-9";
         alg_data.param.instance_extension = ".dat";
         alg_data.param.instance_file = alg_data.param.instance_folder + alg_data.param.instance_name + alg_data.param.instance_extension;
@@ -50,12 +51,15 @@ int main(int argc, char** argv)
         alg_data.param.s_seed = "60543";
         //alg_data.param.algorithm_name = "GENERATE_INSTANCES_SMALL";
         //alg_data.param.algorithm_name = "RUN_METRIC";
-        //alg_data.param.algorithm_name = "GA";
+        //alg_data.param.algorithm_name = "GA"; //nsga-ii
         //alg_data.param.algorithm_name = "EXACT";
-        alg_data.param.algorithm_name = "LS";
+        //alg_data.param.algorithm_name = "LS"; //hill climb
+        //alg_data.param.algorithm_name = "MOVNS";
+        alg_data.param.algorithm_name = "MOVNS_Arroyo";
+        //alg_data.param.algorithm_name = "MOVNS_Eduardo";
         alg_data.param.s_max_time_factor = "1000";
         //Param.folder_solution = "../../Solutions/2020_07_24_17_16/";
-        alg_data.param.folder_solution = "../../Test/";
+        alg_data.param.folder_solution = "../../Solutions/Test/";
         alg_data.param.file_solution = alg_data.param.folder_solution + alg_data.param.algorithm_name + "_"
                 + alg_data.param.instance_name + "_" + alg_data.param.s_seed +  ".sol";
         alg_data.param.s_alpha = "0.9999";

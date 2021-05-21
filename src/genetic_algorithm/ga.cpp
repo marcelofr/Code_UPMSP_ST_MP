@@ -14,7 +14,7 @@ void GenerateInitialPopulation(vector<GASolution*> &population, unsigned tam_pop
     //my_solution = new GASolution();
     //my_solution->GreedyInitialSolutionMakespan();
     population.push_back(new GASolution());
-    population.back()->GreedyInitialSolutionMakespan();
+    population.back()->GenerateGreedySolutionMakespan();
     //population.push_back(*my_solution);
     //PopulationAddIndividual(population, *my_solution);
 
@@ -23,7 +23,7 @@ void GenerateInitialPopulation(vector<GASolution*> &population, unsigned tam_pop
     //my_solution->GreedyInitialSolutionTEC3();
     //population.push_back(*my_solution);
     population.push_back(new GASolution());
-    population.back()->GreedyInitialSolutionTEC3();
+    population.back()->GenerateGreedySolutionTEC3();
 
     /*Gerar o restante dos indivíduos aleatoriamente*/
     for (unsigned i = 0; i < tam_population-2; ++i) {
@@ -52,7 +52,7 @@ void PrintPopulation(vector<GASolution*> &population)
  * Cruzamento para gerar TAM_CROSSOVER indivíduos
  * Uso de torneio binário para selecionar os indivíduos para o cruzamento
  */
-void Crossover(vector<GASolution*> &population, vector<GASolution*> &new_population)
+void Crossover(vector<GASolution*> &population, vector<GASolution*> &new_population, unsigned population_size)
 {
     GASolution *parent1, *parent2, *offspring1, *offspring2;
     unsigned ind1, ind2;
@@ -61,7 +61,7 @@ void Crossover(vector<GASolution*> &population, vector<GASolution*> &new_populat
     new_population.clear();
 
     //Gerar novos indivíduos com o cruzamento
-    for (unsigned i = 0; i < population.size()/2; ++i) {
+    for (unsigned i = 0; i < population_size/2; ++i) {
 
         //Seleção de indivíduos por torneio binário
 
@@ -529,6 +529,8 @@ void MutationChangeH(GASolution &individual)
 void PopulationAddIndividual(vector<GASolution*> &population, GASolution *individual)
 {
     bool add = true;
+
+
     for(auto it = population.begin(); it != population.end(); ++it){
         //Se já tem um indivíduo igual na população
         if(individual->makeSpan == (*it)->makeSpan && abs(individual->TEC - (*it)->TEC) < EPS){

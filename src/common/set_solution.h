@@ -9,6 +9,14 @@ public:
     SetSolution(){
     }
 
+    /*SetSolution(const SetSolution<T> &set_solution){
+        //set_solution.set_solution
+        //move(this->set_solution.begin(), this->set_solution.end(), set_solution.set_solution.begin());
+        for(auto it:this->set_solution){
+            set_solution.set_solution.push_back(it);
+        }
+    }*/
+
     SetSolution(const vector<T> &set_solution){
         //this->set_solution = set_solution;
         move(this->set_solution_dominated.begin(), this->set_solution_dominated.end(), set_solution.begin());
@@ -48,7 +56,10 @@ public:
 template<class T>
 class NDSetSolution : public SetSolution<T>{
 public:
-    NDSetSolution(){};
+    NDSetSolution() = default;
+    NDSetSolution(const NDSetSolution<T> &nd_set_solution):SetSolution<T>(nd_set_solution){};
+    //NDSetSolution(const NDSetSolution<T> &nd_set_solution){};
+    ~NDSetSolution(){};
 
     /*
      * Método para adicionar uma nova solução ao conjunto não-dominado, caso possíveis:
@@ -57,14 +68,15 @@ public:
      * 3 - A solução domina então ela será adicionada e as outras serão removidas
      * Se conseguiu adicionar my_solution, então retorna verdadeiro
      */
-    bool AddSolution(T my_solution)
+    bool AddSolution(T my_solution, unsigned add_weak=0)
     {
+
 
         //caso 1
         //bool is_dominated = false;
-        for(auto it_sol = this->set_solution.begin(); it_sol != this->set_solution.end(); ++it_sol){
+        for(auto it_sol : this->set_solution){
             //Se my_solution é dominada por alguma solução do conjunto
-            if(**it_sol < *my_solution || **it_sol == *my_solution){
+            if(*it_sol < *my_solution || (*it_sol == *my_solution && !add_weak)){
                 return false;
             }
         }
@@ -74,6 +86,7 @@ public:
             //Se my_solution domina alguma solução do conjunto
             if(*my_solution < **it_sol){
                 //Remover essa solução do conjunto
+                delete *it_sol;
                 it_sol = this->set_solution.erase(it_sol);
             }
             else{
@@ -81,57 +94,245 @@ public:
             }
         }
         //Caso 2 e 3
-        this->set_solution.push_back(my_solution);
+        T new_solution = my_solution->Create();
+        *new_solution = *my_solution;
+        this->set_solution.push_back(new_solution);
         return true;
     }
 
-    void GenerateGreedyInitialSolution(){
+    /*
+     * Método para gerar um conjunto inicial de soluções gulosas
+     */
+    void ConstrutiveGreedy(){
 
         T my_solution;
-
-        /*Gerar uma conjunto inicial*/
+        my_solution = nullptr;
 
         /*Gerar uma solução gulosa considerando o objetivo do makespan*/
         my_solution = my_solution->Create();
-        my_solution->GreedyInitialSolutionMakespan();
-        //AddSolution(my_solution, non_dominated_set.set_solution);
+        my_solution->GenerateGreedySolutionMakespan();
         this->set_solution.push_back(my_solution);
 
 
         /*Gerar uma solução gulosa considerando o objetivo do TEC*/
         my_solution = my_solution->Create();
-        my_solution->GreedyInitialSolutionTEC3();
-        //AddSolution(my_solution, non_dominated_set);
-        //non_dominated_set.AddSolution(my_solution);
+        my_solution->GenerateGreedySolutionTEC3();
         this->set_solution.push_back(my_solution);
     }
 
     /*
-     * Método para gerar a população inicial com tamanho POPULATION_SIZE
+     * Método para gerar um conjunto inicial de soluções aleatórias
      */
-    void GenerateGreedyRandomInitialSolution(unsigned tam_population)
+    void ConstrutiveRandom(unsigned set_size)
     {
 
         T my_solution;
+        my_solution = nullptr;
 
-        /*Gerar uma solução gulosa considerando o objetivo do makespan*/
-        my_solution = my_solution->Create();
-        my_solution->GreedyInitialSolutionMakespan();
-        this->set_solution.push_back(my_solution);
-
-        /*Gerar uma solução gulosa considerando o objetivo do TEC*/
-        my_solution = my_solution->Create();
-        my_solution->GreedyInitialSolutionTEC3();
-        this->set_solution.push_back(my_solution);
-
-        /*Gerar o restante dos indivíduos aleatoriamente*/
-        for (unsigned i = 0; i < tam_population-2; ++i) {
+        /*Gerar os indivíduos aleatoriamente*/
+        for (unsigned i = 0; i < set_size; ++i) {
 
             my_solution = my_solution->Create();
             my_solution->RandomInitialSolution();
             this->set_solution.push_back(my_solution);
 
         }
+    }
+
+    /*
+     * Método para gerar um conjunto inicial de soluções parcialmente gulosa
+     * op=0 para criar uma população, op=1 para criar um conjunto não-dominado
+     */
+    void ContrutiveGRASP(double alpha, unsigned set_size, unsigned op=0){
+
+        T my_solution;
+        my_solution = nullptr;
+
+        for (unsigned i = 0; i < set_size/2; ++i) {
+
+            /*Gerar uma solução parcialmente gulosa considerando o objetivo do makespan*/
+            my_solution = my_solution->Create();
+            my_solution->GenerateGRASPSolutionMakespan(alpha);
+
+            if(op==0){
+                this->set_solution.push_back(my_solution);
+            }
+            else if(op==1){
+                this->AddSolution(my_solution);
+            }
+
+
+            /*Gerar uma solução parcialmente gulosa considerando o objetivo TEC*/
+            my_solution = my_solution->Create();
+            my_solution->GenerateGRASPSolutionTEC(alpha);
+            if(op==0){
+                this->set_solution.push_back(my_solution);
+            }
+            else if(op==1){
+                this->AddSolution(my_solution);
+            }
+
+        }
+
+    }
+
+    /*
+     * Método para gerar um conjunto inicial de soluções
+     * 2 gulosas e o restante aleatória
+     */
+    void ConstrutiveGreedyAndRandom(unsigned set_size)
+    {
+
+        T my_solution;
+
+        my_solution = nullptr;
+
+        /*Gerar uma solução gulosa considerando o objetivo do makespan*/
+        my_solution = my_solution->Create();
+        my_solution->GenerateGreedySolutionMakespan();
+        this->set_solution.push_back(my_solution);
+
+        /*Gerar uma solução gulosa considerando o objetivo do TEC*/
+        my_solution = my_solution->Create();
+        my_solution->GenerateGreedySolutionTEC3();
+        this->set_solution.push_back(my_solution);
+
+        /*Gerar o restante dos indivíduos aleatoriamente*/
+        for (unsigned i = 2; i < set_size; ++i) {
+
+            my_solution = my_solution->Create();
+            my_solution->RandomInitialSolution();
+            this->set_solution.push_back(my_solution);
+
+        }
+    }
+
+    /*
+     * Método para gerar um conjunto inicial de soluções
+     * 1/3 parcialmente gulosa makespan
+     * 1/3 parcialmente gulosa tec
+     * 1/3 aleatória
+     */
+    void ContrutiveGRASPRandon(double alpha, unsigned set_size){
+
+        T my_solution;
+
+        my_solution = nullptr;
+
+
+        for (unsigned i = 0; i < set_size/3; ++i) {
+
+            /*Gerar uma solução gulosa considerando o objetivo do makespan*/
+            my_solution = my_solution->Create();
+            my_solution->GenerateGRASPSolutionMakespan(alpha);
+            //AddSolution(my_solution, non_dominated_set.set_solution);
+            this->set_solution.push_back(my_solution);
+
+
+            /*Gerar uma solução gulosa considerando o objetivo do makespan*/
+            my_solution = my_solution->Create();
+            my_solution->GenerateGRASPSolutionTEC(alpha);
+            //AddSolution(my_solution, non_dominated_set.set_solution);
+            this->set_solution.push_back(my_solution);
+
+            /*Gerar uma solução aleatoriamente*/
+            my_solution = my_solution->Create();
+            my_solution->RandomInitialSolution();
+            this->set_solution.push_back(my_solution);
+
+        }
+
+    }
+
+    /*
+     * Método para gerar um conjunto inicial de soluções
+     * 1/4 parcialmente gulosa makespan
+     * 1/4 parcialmente gulosa tec
+     * 1 gulosa makespan
+     * 1 gulosa tec
+     */
+    void ContrutiveGRASPGreedy(double alpha, unsigned set_size){
+
+        T my_solution;
+
+        my_solution = nullptr;
+
+        /*Gerar uma solução gulosa*/
+        my_solution = my_solution->Create();
+        my_solution->GenerateGreedySolutionMakespan();
+        this->set_solution.push_back(my_solution);
+
+
+        /*Gerar uma solução gulosa*/
+        my_solution = my_solution->Create();
+        my_solution->GenerateGreedySolutionTEC3();
+        this->set_solution.push_back(my_solution);
+
+        for (unsigned i = 2; i < set_size; ++i) {
+
+            /*Gerar uma solução gulosa considerando o objetivo do makespan*/
+            my_solution = my_solution->Create();
+            my_solution->GenerateGRASPSolutionMakespan(alpha);
+            //AddSolution(my_solution, non_dominated_set.set_solution);
+            this->set_solution.push_back(my_solution);
+
+
+            /*Gerar uma solução gulosa considerando o objetivo do makespan*/
+            my_solution = my_solution->Create();
+            my_solution->GenerateGRASPSolutionTEC(alpha);
+            this->set_solution.push_back(my_solution);
+        }
+
+    }
+
+
+    /*
+     * Método para gerar um conjunto inicial de soluções
+     * 1/5 parcialmente gulosa makespan
+     * 1/5 parcialmente gulosa tec
+     * 1/5 gulosa makespan
+     * 1/5 gulosa tec
+     * 1/5 aleatoria
+     */
+    void ContrutiveGRASPGreedyRandon(double alpha, unsigned tam_population){
+
+        T my_solution;
+
+        my_solution = nullptr;
+
+        /*Gerar uma solução gulosa*/
+        my_solution = my_solution->Create();
+        my_solution->GenerateGreedySolutionMakespan();
+        this->set_solution.push_back(my_solution);
+
+
+        /*Gerar uma solução gulosa*/
+        my_solution = my_solution->Create();
+        my_solution->GenerateGreedySolutionTEC3();
+        this->set_solution.push_back(my_solution);
+
+        for (unsigned i = 0; i < tam_population/4; ++i) {
+
+            /*Gerar uma solução parcialmente gulosa considerando o objetivo do makespan*/
+            my_solution = my_solution->Create();
+            my_solution->GenerateGRASPSolutionMakespan(alpha);
+            //AddSolution(my_solution, non_dominated_set.set_solution);
+            this->set_solution.push_back(my_solution);
+
+
+            /*Gerar uma solução parcialmente gulosa considerando o objetivo do makespan*/
+            my_solution = my_solution->Create();
+            my_solution->GenerateGRASPSolutionTEC(alpha);
+            //AddSolution(my_solution, non_dominated_set.set_solution);
+            this->set_solution.push_back(my_solution);
+
+            /*Gerar uma solução aleatoriamente*/
+            my_solution = my_solution->Create();
+            my_solution->RandomInitialSolution();
+            this->set_solution.push_back(my_solution);
+
+        }
+
     }
 
     NDSetSolution& operator=(NDSetSolution &s){
