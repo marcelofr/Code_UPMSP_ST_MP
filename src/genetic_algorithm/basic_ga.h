@@ -1,5 +1,5 @@
-#ifndef GA_H
-#define GA_H
+#ifndef BASIC_GA_H
+#define BASIC_GA_H
 
 #include "gasolution.h"
 #include <algorithm>    // std::sort
@@ -31,4 +31,4 @@ void SortByTEC(vector<GASolution*> &population);*/
 
 void UnionPopulation(vector<GASolution*> &R, vector<GASolution*> &P, vector<GASolution*> &Q);
 
-#endif // GA_H
+#endif // BASIC_GA_H

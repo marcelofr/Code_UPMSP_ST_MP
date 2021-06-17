@@ -30,6 +30,7 @@ struct algorithm_data{
     parameters param;
     unsigned qtd_neighbor;
     unsigned max_shake_level;
+    unsigned num_weights;
 };
 
 #endif // ALGORITHM_DATA_H

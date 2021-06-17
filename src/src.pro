@@ -12,17 +12,19 @@ SOURCES += \
         common/set_solution.cpp \
         common/solution.cpp \
         common/utils.cpp \
-        genetic_algorithm/ga.cpp \
-        genetic_algorithm/gasolution.cpp \
+        genetic_algorithm/basic_ga.cpp \
         genetic_algorithm/nsga_ii.cpp \
-        local_search/basic_local_search.cpp \
-        local_search/local_search.cpp \
+        local_search/basic_ls_multi.cpp \
+        local_search/main_ls_multi.cpp \
+        local_search/neighborhood_ls_multi.cpp \
         main.cpp \
         math_model/model.cpp \
         math_model/run_model.cpp \
         metric/hypervolume.cpp \
-        metric/metric.cpp
-
+        metric/metric.cpp \
+        mono/basic_ls_mono.cpp \
+        mono/main_ls_mono.cpp \
+        mono/neighborhood_ls_mono.cpp
 HEADERS += \
     common/Timer.h \
     common/algorithm_data.h \
@@ -33,15 +35,21 @@ HEADERS += \
     common/set_solution.h \
     common/solution.h \
     common/utils.h \
-    genetic_algorithm/ga.h \
+    genetic_algorithm/basic_ga.h \
     genetic_algorithm/gasolution.h \
     genetic_algorithm/nsga_ii.h \
-    local_search/basic_local_search.h \
-    local_search/local_search.h \
+    local_search/basic_ls_multi.h \
+    local_search/lssolution.h \
+    local_search/main_ls_multi.h \
+    local_search/neighborhood_ls_multi.h \
     math_model/model.h \
     math_model/run_model.h \
     metric/hypervolume.h \
-    metric/metric.h
+    metric/metric.h \
+    mono/basic_ls_mono.h \
+    mono/main_ls_mono.h \
+    mono/monosolution.h \
+    mono/neighborhood_ls_mono.h
 
 # INCLUDEPATH += $$PWD/../gurobi702/linux64/include
 # INCLUDEPATH += /opt/gurobi752/linux64/include

@@ -32,6 +32,10 @@
 *.app
 
 build/
+Solutions/
+docs/
+tex/
+Code_UPMSP_ST_MP.pro.user.*
 Code_UPMSP_ST_MP.pro.user
 .trace.log
 # Solutions/

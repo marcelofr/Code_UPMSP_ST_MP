@@ -1,4 +1,4 @@
-#include "ga.h"
+#include "basic_ga.h"
 
 using namespace std;
 
@@ -490,7 +490,7 @@ void MutationChangeOpMode(GASolution &individual)
 
     do{
         //Selecionar um novo modo de operação
-        op_mode = rand()%Instance::num_mode_op;
+        op_mode = 1+rand()%Instance::num_mode_op;
 
     }while(op_mode != individual.job_mode_op[job]);
 

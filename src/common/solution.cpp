@@ -23,6 +23,9 @@ Solution::Solution()
     //Criar um vetor para armazenar o modo de operação de cada tarefa
     job_mode_op = vector<unsigned>(Instance::num_jobs+1);
 
+    makeSpan = 0;
+    TEC = 0;
+
 }
 
 Solution::Solution (const Solution &s){
@@ -170,7 +173,7 @@ void Solution::Print()
     for (size_t i = 1; i <= Instance::num_machine; ++i) {
         cout << "Máquina " << i << ": ";
         for (auto it = scheduling[i].begin(); it != scheduling[i].end(); ++it) {
-            cout << *it << " ";
+            cout << *it << "[" << job_mode_op[*it] << "]" << " ";
         }
         cout << " (" << machine_completion_time[i] << ") " << endl;
     }
@@ -382,6 +385,9 @@ void Solution::GenerateGRASPSolutionMakespan(double alpha)
         //Criar a lista de candidatos
         for(auto it = jobs.begin()+1; it != jobs.end(); ++it){
 
+            best_machine = 0;
+            best_position = 0;
+            diff_time = 0;
 
             #ifdef V1
             GreedyChoiceMakespan(*it, best_op_mode, best_machine, best_position, diff_time);
@@ -588,22 +594,25 @@ void Solution::CalculateShorterTimeHorizon()
 
             job_start_time1[*j] = start;
 
-            //Tempo de preparação da tarefa j
+            //Calcular o tempo de preparação da tarefa j
             setup_time = Instance::m_setup_time[i][previous_job][(*j)];
 
-            //Armazenar o tempo de início da tarefa j
+            //Armazenar o instante de início da tarefa j
             H1[*j] = job_start_time1[*j] + setup_time;
 
             //Tempo de processamento da tarefa j
             l = job_mode_op[*j];
-            processing_time = ceil(Instance::m_processing_time[i][*j]/Instance::v_speed_factor[l]);
+            processing_time = ceil(double(Instance::m_processing_time[i][*j])/
+                                double(Instance::v_speed_factor[l]));
 
-            //Identificar a tarefa anterior
-            previous_job = *j;
 
+            //Armazenar o instante de término da tarefa
             job_end_time1[*j] = H1[*j] + processing_time;
 
-            //A próxima tarefa começa após a tarefa atual
+            //Atualizar a tarefa anterior
+            previous_job = *j;
+
+            //Atualizar o instante de início da próxima tarefa
             start = job_end_time1[*j];
 
         }
@@ -649,7 +658,8 @@ void Solution::CalculateShorterTimeHorizonMachine(unsigned machine)
 
         //Tempo de processamento da tarefa j
         l = job_mode_op[*j];
-        processing_time = ceil(Instance::m_processing_time[machine][*j]/Instance::v_speed_factor[l]);
+        processing_time = ceil(double(Instance::m_processing_time[machine][*j])/
+                double(Instance::v_speed_factor[l]));
 
         //Identificar a tarefa anterior
         previous_job = *j;
@@ -696,8 +706,9 @@ void Solution::CalculateHorizonAvoidingPeak()
             setup_time = Instance::m_setup_time[i][previous_job][(*j)];
 
             //Tempo de processamento da tarefa j
-            l = job_mode_op[*j];
-            processing_time = ceil(Instance::m_processing_time[i][*j]/Instance::v_speed_factor[l]);
+            l = job_mode_op[*j];            
+            processing_time = ceil(double(Instance::m_processing_time[i][*j])/
+                    double(Instance::v_speed_factor[l]));
 
             total_time_job = setup_time + processing_time;
 
@@ -727,6 +738,62 @@ void Solution::CalculateHorizonAvoidingPeak()
         machine_completion_time[i] = job_end_time1[previous_job];
 
     }
+}
+
+
+/*
+ * Método para calcular o instante inicial para cada tarefa
+ * considerando a alocação atual e evitando o horário de pico
+ */
+void Solution::CalculateHorizonAvoidingPeakMachine(unsigned machine)
+{
+
+    unsigned previous_job, setup_time, processing_time, l, total_time_job;
+
+    //for(size_t i = 1; i <= Instance::num_machine; ++i){
+
+        machine_completion_time[machine] = 0;
+        previous_job = 0;
+
+        //Percorrer as tarefas de cada máquina
+        for(auto j = scheduling[machine].begin(); j != scheduling[machine].end(); ++j){
+
+            //Tempo de preparação da tarefa j
+            setup_time = Instance::m_setup_time[machine][previous_job][(*j)];
+
+            //Tempo de processamento da tarefa j
+            l = job_mode_op[*j];
+            processing_time = ceil(double(Instance::m_processing_time[machine][*j])/
+                    double(Instance::v_speed_factor[l]));
+
+            total_time_job = setup_time + processing_time;
+
+            unsigned end_day = floor(job_end_time1[*j]/(double)Instance::num_planning_horizon);
+
+            //Condição para evitar o horário de pico
+            if(job_end_time1[previous_job] < Instance::v_peak_start[end_day]
+                    && job_end_time1[previous_job] + total_time_job > Instance::v_peak_start[end_day]){
+                //Atualizar o instante de início
+                job_start_time1[*j] = max(Instance::v_peak_end[end_day] - setup_time, job_end_time1[previous_job]);
+                H1[*j] = job_start_time1[*j] + setup_time;
+                job_end_time1[*j] = H1[*j] + processing_time;
+            }
+            else{
+                //Atualizar o instante de início
+                job_start_time1[*j] = job_end_time1[previous_job];
+                H1[*j] = job_start_time1[*j] + setup_time;
+                job_end_time1[*j] = H1[*j] + processing_time;
+            }
+
+            //A tarefa j passa a ser a tarefa anterior
+            previous_job = *j;
+
+        }
+
+        //Atualizar o tempo de término da máquina
+        machine_completion_time[machine] = job_end_time1[previous_job];
+
+    //}
 }
 
 void Solution::CalculateObjective()
@@ -805,16 +872,14 @@ void Solution::CalculateObjectiveMachine(unsigned machine)
  */
 double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h)
 {
-    double PEC, PEC_on, PEC_off, pt, end;
+    double pt, end, time_job_on, time_job_off;
 
-    PEC_off = PEC_on = 0;
-
-    pt = ceil(Instance::m_processing_time[machine][job]
-            /Instance::v_speed_factor[job_mode_op[job]]);
+    pt = double(Instance::m_processing_time[machine][job])
+                /double(Instance::v_speed_factor[job_mode_op[job]]);
 
     end = h + pt;
 
-    unsigned h_day = floor(h/(double)Instance::num_planning_horizon);
+    unsigned h_day = floor(double(h)/double(Instance::num_planning_horizon));
 
     //Se a tarefa começa antes do pico
     if(h < Instance::v_peak_start[h_day]){
@@ -822,24 +887,24 @@ double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h)
         //Se a tarefa termina antes do pico
         if(end < Instance::v_peak_start[h_day]){
 
-            PEC_off = pt;
+            time_job_off = pt;
 
-            PEC_on = 0;
+            time_job_on = 0;
         }
         //Se a tarefa termina dentro do pico
         else if(end < Instance::v_peak_end[h_day]){
 
-            PEC_off = Instance::v_peak_start[h_day] - h;
+            time_job_off = Instance::v_peak_start[h_day] - h;
 
-            PEC_on = end - Instance::v_peak_start[h_day];
+            time_job_on = end - Instance::v_peak_start[h_day];
 
         }
         else{
 
-            PEC_off = Instance::v_peak_start[h_day] - h;
-            PEC_off += end - Instance::v_peak_end[h_day];
+            time_job_off = Instance::v_peak_start[h_day] - h;
+            time_job_off += end - Instance::v_peak_end[h_day];
 
-            PEC_on = Instance::v_peak_end[h_day] - Instance::v_peak_start[h_day];
+            time_job_on = Instance::v_peak_end[h_day] - Instance::v_peak_start[h_day];
 
         }
     }
@@ -847,48 +912,51 @@ double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h)
     else if(h < Instance::v_peak_end[h_day]){
         //Se a tarefa termina dentro do pico
         if(end < Instance::v_peak_end[h_day]){
-            PEC_off = 0;
+            time_job_off = 0;
 
-            PEC_on = pt;
+            time_job_on = pt;
         }
         else{
-            PEC_on = Instance::v_peak_end[h_day] - h;
+            time_job_on = Instance::v_peak_end[h_day] - h;
 
-            PEC_off = end - Instance::v_peak_end[h_day];
+            time_job_off = end - Instance::v_peak_end[h_day];
         }
     }
     else{
-        PEC_off = pt;
+        time_job_off = pt;
 
-        PEC_on = 0;
+        time_job_on = 0;
     }
 
-    PEC_off = (PEC_off*Instance::rate_off_peak*Instance::v_consumption_factor[job_mode_op[job]]
-                *Instance::v_machine_potency[machine]/60);
-    PEC_on = (PEC_on*Instance::rate_on_peak*Instance::v_consumption_factor[job_mode_op[job]]
-                *Instance::v_machine_potency[machine]/60);
+    double PEC, PEC_on, PEC_off;
+
+    PEC_off = (double(time_job_off*Instance::rate_off_peak*Instance::v_consumption_factor[job_mode_op[job]]
+                *Instance::v_machine_potency[machine])/double(60));
+    PEC_on = (double(time_job_on*Instance::rate_on_peak*Instance::v_consumption_factor[job_mode_op[job]]
+                *Instance::v_machine_potency[machine])/double(60));
 
     PEC = PEC_off + PEC_on;
 
-    return ceil(PEC);
+    return PEC;
 
 }
 
 void Solution::Check()
 {
     unsigned job, previous, end_job, start_job;
+    unsigned ctm, time_job, makespan_calc, tec_calc;
+
+    makespan_calc = 0;
+    tec_calc = 0;
+
     for (unsigned i = 1; i <= Instance::num_machine; i++) {
         previous = 0;
         start_job = 0;
+        ctm = 0;
         for (unsigned j = 0; j < scheduling[i].size(); j++) {
 
             //Selecionar a tarefa atual
             job = scheduling[i][j];
-
-            //Calcular o tempo de término da tarefa atual
-            end_job = start_job +
-                    ceil(Instance::m_processing_time[i][job]) / Instance::v_speed_factor[job_mode_op[job]] +
-                    Instance::m_setup_time[i][previous][job];
 
             //Se o tempo calculado for diferente do valor armazenado, existe um erro
             if(job_start_time1[job] < start_job){
@@ -897,9 +965,64 @@ void Solution::Check()
 
             }
 
+            //Calcular o tempo de término da tarefa atual
+            time_job = ceil(double(Instance::m_processing_time[i][job])
+                            / double(Instance::v_speed_factor[job_mode_op[job]]));
+
+            //Se o tempo calculado for diferente do valor armazenado, existe um erro
+            if(H1[job] != job_start_time1[job] + Instance::m_setup_time[i][previous][job]){
+                cout << "=========Erro==============" << endl;
+                cout << "Fim da tarefa " << job << ", na máquina " << i << " calculado errado" << endl;
+
+            }
+
+            end_job = job_start_time1[job] + time_job + Instance::m_setup_time[i][previous][job];
+
+            //Se o tempo calculado for diferente do valor armazenado, existe um erro
+            if(job_end_time1[job] != end_job){
+                cout << "=========Erro==============" << endl;
+                cout << "Fim da tarefa " << job << ", na máquina " << i << " calculado errado" << endl;
+
+            }
+
+            ctm = end_job;
+
+            tec_calc += CalcPECToJob(i, job, H1[job]);
+
             //Atualizar a informação da tarefa anterior e do instante de início
             previous = job;
             start_job = end_job;
+
+        }
+
+        if(ctm > makespan_calc){
+            makespan_calc = ctm;
+        }
+
+        if(ctm != machine_completion_time[i]){
+            cout << "=========Erro==============" << endl;
+            cout << "Tempo de termino da máquina " << i << endl;
+        }
+
+
+    }
+
+    if(makespan_calc != makeSpan){
+        cout << "=========Erro==============" << endl;
+        cout << "Makespan, valor esperado: " << makespan_calc << " armazenado: " << makeSpan << endl;
+    }
+
+    if(tec_calc != TEC){
+        cout << "=========Erro==============" << endl;
+        cout << "Custo de energia, valor esperado: " << tec_calc << " armazenado: " << TEC << endl;
+    }
+
+    for (unsigned i = 1; i <= Instance::num_jobs; i++) {
+        //Se o tempo calculado for diferente do valor armazenado, existe um erro
+        if(job_mode_op[i] < 1 || job_mode_op[i] > Instance::num_mode_op){
+            cout << "=========Erro==============" << endl;
+            cout << "Tarefa " << i << " com modo de operação " << job_mode_op[i] << " errado" << endl;
+
         }
     }
 }
@@ -926,8 +1049,8 @@ unsigned Solution::FindJobBestPosMacMakespan(unsigned new_job, unsigned machine)
     for(auto j = scheduling[machine].begin(); j != scheduling[machine].end(); ++j){
 
         //Tempo de processamento que será incrementado
-        increased_time = ceil(Instance::m_processing_time[machine][new_job] /
-                               Instance::v_speed_factor[job_mode_op[new_job]]);
+        increased_time = ceil(double(Instance::m_processing_time[machine][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
         //Tempo de preparação que será incrementado
         increased_time += Instance::m_setup_time[machine][previos_job][new_job];
@@ -957,8 +1080,8 @@ unsigned Solution::FindJobBestPosMacMakespan(unsigned new_job, unsigned machine)
     //---Nessa parte será calculado o custo de inserir a nova tarefa após à última---
 
     //Tempo de processamento que será incrementado
-    increased_time = ceil(Instance::m_processing_time[machine][new_job] /
-                           Instance::v_speed_factor[job_mode_op[new_job]]);
+    increased_time = ceil(double(Instance::m_processing_time[machine][new_job]) /
+                           double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
     //Tempo de preparação que será incrementado
     increased_time += Instance::m_setup_time[machine][previos_job][new_job];
@@ -1017,6 +1140,121 @@ unsigned Solution::FindJobBestPosMacTEC3(unsigned new_job, unsigned machine)
 
 }
 
+unsigned Solution::FindJobBestPosMacWeigth(unsigned new_job, unsigned machine, pair<double,double>weights, double &smaller_weigth_obj_machine, unsigned &diff_time_job)
+{
+    unsigned previos_job, best_position, decreased_time, increased_time;
+    unsigned completion_time, new_makespan;
+    unsigned h, setup;
+    double job_tec;
+
+    smaller_weigth_obj_machine = INT_MAX;
+
+    //Retornar se não definiu o modo de operação de new_job
+    if(job_mode_op[new_job] == 0){
+        return scheduling[machine].size();
+    }
+
+    //A tarefa fictícia zero é anterior à primeira tarefa da máquina i
+    previos_job = 0;
+
+    best_position = 0;
+
+    //A tarefa fictícia zero é anterior à primeira tarefa da máquina i
+    previos_job = best_position = 0;
+
+    //Tentar inserir antes de cada tarefa presente na máquina
+    for(auto j = scheduling[machine].begin(); j != scheduling[machine].end(); ++j){
+
+        //Tempo de processamento que será incrementado
+        increased_time = ceil(double(Instance::m_processing_time[machine][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
+
+        //Tempo de preparação que será incrementado
+        increased_time += Instance::m_setup_time[machine][previos_job][new_job];
+        increased_time += Instance::m_setup_time[machine][new_job][*j];
+
+
+        //Tempo de preparação que será reduzido
+        decreased_time = Instance::m_setup_time[machine][previos_job][*j];
+
+        //Tempo de termino da máquina i será igual ao valor atual mais
+        //o custo da inserção da tarefa na posição j
+
+        completion_time = this->machine_completion_time[machine] + increased_time - decreased_time;
+
+        if(completion_time > this->makeSpan){
+            new_makespan = completion_time;
+        }
+        else{
+            new_makespan = this->makeSpan;
+        }
+
+        //A tarefe atual passa a ser a tarefa anterior
+        previos_job = *j;
+
+        //######################
+
+        setup = Instance::m_setup_time[machine][previos_job][new_job];
+
+        h = job_end_time1[previos_job] + setup;
+
+        //Mudei
+        //machine_tec = CalcPECToJob(machine, *j, h);
+        job_tec = CalcPECToJob(machine, new_job, h);
+
+
+        //Se o novo tempo de término da máquina i é menor
+        //que o melhor tempo de termíno encontra até agora,
+        //então encontrei uma posição melhor para fazer a inserção
+        if((new_makespan*weights.first + job_tec*weights.second) < smaller_weigth_obj_machine){
+            best_position = j - scheduling[machine].begin();
+            smaller_weigth_obj_machine = (new_makespan*weights.first + job_tec*weights.second);
+            diff_time_job = increased_time - decreased_time;
+        }
+
+        //A tarefa atual passa a ser a tarefa anterior
+        previos_job = *j;
+    }
+
+    //---Nessa parte será calculado o custo de inserir a nova tarefa após à última---
+
+    //Tempo de processamento que será incrementado
+    increased_time = ceil(double(Instance::m_processing_time[machine][new_job]) /
+                           double(Instance::v_speed_factor[job_mode_op[new_job]]));
+
+    //Tempo de preparação que será incrementado
+    increased_time += Instance::m_setup_time[machine][previos_job][new_job];
+
+    //Tempo de termino da máquina i será igual ao valor atual mais
+    //o custo da inserção da tarefa na posição j
+    completion_time = this->machine_completion_time[machine] + increased_time;
+
+    if(completion_time > this->makeSpan){
+        new_makespan = completion_time;
+    }
+    else{
+        new_makespan = this->makeSpan;
+    }
+
+    //##############
+    setup = Instance::m_setup_time[machine][previos_job][new_job];
+
+    h = job_end_time1[previos_job] + setup;
+
+    job_tec = CalcPECToJob(machine, new_job, h);
+
+    //Se o novo tempo de término da máquina i é menor
+    //que o melhor tempo de termíno encontra até agora,
+    //então encontrei uma posição melhor para fazer a inserção
+    if((new_makespan*weights.first + job_tec*weights.second) < smaller_weigth_obj_machine){
+        best_position = scheduling[machine].size();
+        smaller_weigth_obj_machine = (completion_time*weights.first + job_tec*weights.second);
+        diff_time_job = increased_time;
+    }
+
+    return best_position;
+}
+
 void Solution::SelectBestModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op)
 {
     unsigned current_mode, job;
@@ -1027,10 +1265,10 @@ void Solution::SelectBestModeOpJob(unsigned machine, unsigned position, unsigned
 
     current_mode = job_mode_op[job];
 
-    pt_new = ceil(Instance::m_processing_time[machine][job]/
-            Instance::v_speed_factor[new_mode_op]);
-    pt_old = ceil(Instance::m_processing_time[machine][job]/
-                        Instance::v_speed_factor[current_mode]);
+    pt_new = ceil(double(Instance::m_processing_time[machine][job])/
+            double(Instance::v_speed_factor[new_mode_op]));
+    pt_old = ceil(double(Instance::m_processing_time[machine][job])/
+                        double(Instance::v_speed_factor[current_mode]));
 
     diff_t = (pt_new - pt_old);
 
@@ -1163,8 +1401,8 @@ void Solution::AddJobGreedyTECMachine3(unsigned machine, unsigned new_job, unsig
         }
 
         //Tempo de processamento de new_job que será incrementado
-        difference = ceil(Instance::m_processing_time[machine][new_job] /
-                               Instance::v_speed_factor[job_mode_op[new_job]]);
+        difference = ceil(double(Instance::m_processing_time[machine][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
         //Tempo de preparação antes de new_job que será incrementado
         difference += Instance::m_setup_time[machine][previos_job][new_job];
@@ -1202,8 +1440,8 @@ void Solution::AddJobGreedyTECMachine3(unsigned machine, unsigned new_job, unsig
 
         job_start_time1[*it] = start;
         H1[*it] = job_start_time1[*it] + Instance::m_setup_time[machine][previos_job][*it];
-        job_end_time1[*it] = H1[*it] + ceil(Instance::m_processing_time[machine][*it] /
-                                            Instance::v_speed_factor[job_mode_op[*it]]);
+        job_end_time1[*it] = H1[*it] + ceil(double(Instance::m_processing_time[machine][*it]) /
+                                            double(Instance::v_speed_factor[job_mode_op[*it]]));
 
         start = job_end_time1[*it];
         previos_job = *it;
@@ -1249,8 +1487,8 @@ void Solution::AddJobGreedyMakespan(unsigned new_job, unsigned mode_op)
         }
 
         //Tempo de processamento de new_job que será incrementado
-        difference = ceil(Instance::m_processing_time[i][new_job] /
-                               Instance::v_speed_factor[job_mode_op[new_job]]);
+        difference = ceil(double(Instance::m_processing_time[i][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
         //Tempo de preparação antes de new_job que será incrementado
         difference += Instance::m_setup_time[i][previos_job][new_job];
@@ -1326,8 +1564,8 @@ void Solution::GreedyChoiceMakespan(unsigned new_job, unsigned mode_op, unsigned
         }
 
         //Tempo de processamento de new_job que será incrementado
-        difference = ceil(Instance::m_processing_time[i][new_job] /
-                               Instance::v_speed_factor[job_mode_op[new_job]]);
+        difference = ceil(double(Instance::m_processing_time[i][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
         //Tempo de preparação antes de new_job que será incrementado
         difference += Instance::m_setup_time[i][previos_job][new_job];
@@ -1410,8 +1648,8 @@ void Solution::RandomChoiceMakespan(unsigned new_job, unsigned mode_op, unsigned
         }
 
         //Tempo de processamento de new_job que será incrementado
-        difference = ceil(Instance::m_processing_time[i][new_job] /
-                               Instance::v_speed_factor[job_mode_op[new_job]]);
+        difference = ceil(double(Instance::m_processing_time[i][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
         //Tempo de preparação antes de new_job que será incrementado
         difference += Instance::m_setup_time[i][previos_job][new_job];
@@ -1491,8 +1729,8 @@ void Solution::GreedyChoiceTEC(unsigned new_job, unsigned mode_op, unsigned &bes
         }
 
         //Tempo de processamento de new_job que será incrementado
-        difference = ceil(Instance::m_processing_time[i][new_job] /
-                               Instance::v_speed_factor[job_mode_op[new_job]]);
+        difference = ceil(double(Instance::m_processing_time[i][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
         //Tempo de preparação antes de new_job que será incrementado
         difference += Instance::m_setup_time[i][previos_job][new_job];
@@ -1524,6 +1762,41 @@ void Solution::GreedyChoiceTEC(unsigned new_job, unsigned mode_op, unsigned &bes
         }
 
     }
+
+}
+
+void Solution::GreedyChoiceWeigth(unsigned new_job, unsigned mode_op, unsigned &best_machine, unsigned &best_position, unsigned &diff_time, double &obj_job, pair<double,double>weights)
+{
+    unsigned best_position_machine, diff_time_machine;
+    double new_job_weigth_obj_machine, smaller_new_job_weigth_obj;
+
+    smaller_new_job_weigth_obj = INT_MAX;
+
+    //Definir o modo de operação da nova tarefa
+    job_mode_op[new_job] = mode_op;
+
+    best_machine = 1;
+
+    //Percorrer cada máquina
+    for (unsigned i = 1; i <= Instance::num_machine; i++) {
+
+        //Encontrar a melhor posição na máquina i
+        best_position_machine = FindJobBestPosMacWeigth(new_job, i, weights, new_job_weigth_obj_machine, diff_time_machine);
+
+        //Se encontrou uma posição com menor custo
+        //if(new_job_tec < smaller_new_job_tec && completion_time <= Instance::num_planning_horizon){
+        if(new_job_weigth_obj_machine < smaller_new_job_weigth_obj){
+            smaller_new_job_weigth_obj = new_job_weigth_obj_machine;
+
+            best_machine = i;
+            best_position = best_position_machine;
+
+            diff_time = diff_time_machine;
+        }
+
+    }
+
+    obj_job = smaller_new_job_weigth_obj;
 
 }
 
@@ -1574,8 +1847,8 @@ void Solution::RandomChoiceTEC(unsigned new_job, unsigned mode_op, unsigned &bes
         }
 
         //Tempo de processamento de new_job que será incrementado
-        difference = ceil(Instance::m_processing_time[i][new_job] /
-                               Instance::v_speed_factor[job_mode_op[new_job]]);
+        difference = ceil(double(Instance::m_processing_time[i][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
         //Tempo de preparação antes de new_job que será incrementado
         difference += Instance::m_setup_time[i][previos_job][new_job];
@@ -1648,8 +1921,8 @@ void Solution::AddJobGreedyTEC2(unsigned new_job, unsigned mode_op)
         }
 
         //Tempo de processamento de new_job que será incrementado
-        difference = ceil(Instance::m_processing_time[i][new_job] /
-                               Instance::v_speed_factor[job_mode_op[new_job]]);
+        difference = ceil(double(Instance::m_processing_time[i][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
         //Tempo de preparação antes de new_job que será incrementado
         difference += Instance::m_setup_time[i][previos_job][new_job];
@@ -1697,8 +1970,8 @@ void Solution::AddJobGreedyTEC2(unsigned new_job, unsigned mode_op)
 
         job_start_time1[*it] = start;
         H1[*it] = job_start_time1[*it] + Instance::m_setup_time[best_machine][previos_job][*it];
-        job_end_time1[*it] = H1[*it] + ceil(Instance::m_processing_time[best_machine][*it] /
-                                            Instance::v_speed_factor[job_mode_op[*it]]);
+        job_end_time1[*it] = H1[*it] + ceil(double(Instance::m_processing_time[best_machine][*it]) /
+                                            double(Instance::v_speed_factor[job_mode_op[*it]]));
 
         start = job_end_time1[*it];
         previos_job = *it;
@@ -1746,8 +2019,8 @@ void Solution::AddJobGreedyTEC3(unsigned new_job, unsigned mode_op)
         }
 
         //Tempo de processamento de new_job que será incrementado
-        difference = ceil(Instance::m_processing_time[i][new_job] /
-                               Instance::v_speed_factor[job_mode_op[new_job]]);
+        difference = ceil(double(Instance::m_processing_time[i][new_job]) /
+                               double(Instance::v_speed_factor[job_mode_op[new_job]]));
 
         //Tempo de preparação antes de new_job que será incrementado
         difference += Instance::m_setup_time[i][previos_job][new_job];
@@ -1797,8 +2070,8 @@ void Solution::AddJobGreedyTEC3(unsigned new_job, unsigned mode_op)
 
         job_start_time1[*it] = start;
         H1[*it] = job_start_time1[*it] + Instance::m_setup_time[best_machine][previos_job][*it];
-        job_end_time1[*it] = H1[*it] + ceil(Instance::m_processing_time[best_machine][*it] /
-                                            Instance::v_speed_factor[job_mode_op[*it]]);
+        job_end_time1[*it] = H1[*it] + ceil(double(Instance::m_processing_time[best_machine][*it]) /
+                                            double(Instance::v_speed_factor[job_mode_op[*it]]));
 
         start = job_end_time1[*it];
         previos_job = *it;
@@ -1940,12 +2213,55 @@ void Solution::InsertOutside(unsigned machine1, unsigned pos1, unsigned machine2
 
 
 /*
+ * Inserção de duas tarefas com duas máquinas
+ * A tarefa que está em pos1 da máquina 1 será inserida em pos3 da máquina 2
+ * A tarefa que está em pos2 da máquina 1 será inserida em pos4 da máquina 2
+ */
+void Solution::InsertOutsideDuo(unsigned machine1, unsigned pos1,unsigned pos2, unsigned machine2, unsigned pos3, unsigned pos4)
+{
+
+    //Criar um iterator para a primeira tarefa
+    auto it_job1 = this->scheduling[machine1].begin() + pos1;
+    auto it_job3 = this->scheduling[machine2].begin() + pos3;
+
+    //Inserir a primeira tarefa na outra máquina
+    this->scheduling[machine2].insert(it_job3, *it_job1);
+
+    //Remover a primeira tarefa da sua antiga posição
+    this->scheduling[machine1].erase(it_job1);
+
+    auto it_job2 = this->scheduling[machine1].begin() + pos2 - 1;
+    auto it_job4 = this->scheduling[machine2].begin() + pos4;
+
+    this->scheduling[machine2].insert(it_job4, *it_job2);
+
+
+    this->scheduling[machine1].erase(it_job2);
+}
+
+/*
  * Inserção com duas máquinas
  * A tarefa que está em pos1 da máquina 1 será inserida em pos2 da máquina 2
  */
 void Solution::InsertOutsideDelta(unsigned machine1, unsigned pos1, unsigned machine2, unsigned pos2)
 {
     InsertOutside(machine1, pos1, machine2, pos2);
+
+    //Calcula os objetivos considerando apenas a máquina modificada
+    this->CalculateShorterTimeHorizonMachine(machine1);
+    this->CalculateObjectiveMachine(machine1);
+
+    this->CalculateShorterTimeHorizonMachine(machine2);
+    this->CalculateObjectiveMachine(machine2);
+}
+
+/*
+ * Inserção com duas máquinas
+ * A tarefa que está em pos1 da máquina 1 será inserida em pos2 da máquina 2
+ */
+void Solution::InsertOutsideDuoDelta(unsigned machine1, unsigned pos1, unsigned pos2, unsigned machine2, unsigned pos3, unsigned pos4)
+{
+    InsertOutsideDuo(machine1, pos1, pos2, machine2, pos3, pos4);
 
     //Calcula os objetivos considerando apenas a máquina modificada
     this->CalculateShorterTimeHorizonMachine(machine1);
@@ -2038,6 +2354,19 @@ unsigned Solution::GetCheapestOpMode()
     return best_op_mode;
 }
 
+unsigned Solution::GetMakespanMachine()
+{
+    unsigned makespan_machine = 1;
+
+    for(unsigned i = 2; i <= Instance::num_machine; i++){
+        if(machine_completion_time[i] > machine_completion_time[makespan_machine]){
+            makespan_machine = i;
+        }
+    }
+
+    return makespan_machine;
+}
+
 void Solution::AddJob(unsigned new_job, unsigned machine, unsigned positon, unsigned diff_time)
 {
     //Inserir j na solução s, na máquina i, na posição p
@@ -2053,6 +2382,10 @@ void Solution::AddJob(unsigned new_job, unsigned machine, unsigned positon, unsi
     //Alocar a nova tarefa na melhor posição identificada
     scheduling[machine][positon] = new_job;
     machine_completion_time[machine] += diff_time;
+
+    if(machine_completion_time[machine] > makeSpan){
+        makeSpan = machine_completion_time[machine];
+    }
 }
 
 
@@ -2094,3 +2427,7 @@ bool CompareTEC(Solution * l, Solution * r) //(2)
     }
 
 }
+
+
+double Z_STAR::makespan = 0;
+double Z_STAR::TEC = 0;

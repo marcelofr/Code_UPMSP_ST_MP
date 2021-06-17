@@ -1,10 +1,9 @@
-#include "local_search.h"
+#include "main_ls_multi.h"
 
 void LS_FI_OP(NDSetSolution<LSSolution *> non_dominated_set_in, NDSetSolution<LSSolution *> &non_dominated_set_out, unsigned op_neighbor)
 {
 
     for(auto it : non_dominated_set_in.set_solution){
-
         switch (op_neighbor) {
         case 0:
             InsertInsideLS_FI(it, non_dominated_set_out);
@@ -22,6 +21,9 @@ void LS_FI_OP(NDSetSolution<LSSolution *> non_dominated_set_in, NDSetSolution<LS
         case 4:
             SwapOutsideLS_FI(it, non_dominated_set_out);
             break;
+        /*case 5:
+            InsertOutsideDuoLS_FI(it, non_dominated_set_out);
+            break;*/
         default:
             break;
         }
@@ -113,34 +115,91 @@ bool LS_BI_OP(NDSetSolution<LSSolution *> non_dominated_set_in, NDSetSolution<LS
     return improve;
 }
 
-bool VND_BI(NDSetSolution<LSSolution *> non_dominated_set_in, NDSetSolution<LSSolution *> &non_dominated_set_out)
+/*
+ * Local search multiobjective with best improvement
+ */
+bool LS_Multi_BI(NDSetSolution<LSSolution *> &non_dominated_set, double time_limit, Timer *t1 )
 {
 
-    NDSetSolution<LSSolution *> non_dominated_set_local;
-    for(auto it: non_dominated_set_in.set_solution){
-        non_dominated_set_local.AddSolution(it);
-    }
+    unsigned index;
+    LSSolution *current_solution = new LSSolution();
 
     bool improve=false;
 
-    for(auto it : non_dominated_set_in.set_solution){
+    unsigned num_neighbor = 6;
 
-        if(SwapInsideLS_BI(it, non_dominated_set_local)
-                || SwapOutsideLS_BI(it, non_dominated_set_local)
-                || InsertInsideLS_BI(it, non_dominated_set_local)
-                || InsertOutsideLS_BI(it, non_dominated_set_local)
-                || ChangeOpModeLS_BI(it, non_dominated_set_local))
-        {
-            improve=true;
+    while(t1->getElapsedTimeInMilliSec() < time_limit){
+        index = SelectNonVisitedSolution(non_dominated_set);
+        if(index > non_dominated_set.set_solution.size()){
             break;
         }
+        *current_solution = *non_dominated_set.set_solution[index];
+        non_dominated_set.set_solution[index]->was_visited = true;
 
+        for (unsigned i=0;i<num_neighbor ; ) {
+            switch (i) {
+                case 0:
+                    if(SwapInsideLS_BI(current_solution, non_dominated_set)){
+                        i=0;
+                        improve=true;
+                    }
+                    else{
+                        i++;
+                    }
+                break;
+                case 1:
+                    if(SwapOutsideLS_BI(current_solution, non_dominated_set)){
+                        i=0;
+                        improve=true;
+                    }
+                    else{
+                        i++;
+                    }
+                break;
+                case 2:
+                    if(InsertInsideLS_BI(current_solution, non_dominated_set)){
+                        i=0;
+                        improve=true;
+                    }
+                    else{
+                        i++;
+                    }
+                break;
+                case 3:
+                    if(InsertOutsideLS_BI(current_solution, non_dominated_set)){
+                        i=0;
+                        improve=true;
+                    }
+                    else{
+                        i++;
+                    }
+                break;
+                case 4:
+                    if(ChangeOpModeLS_BI(current_solution, non_dominated_set)){
+                        i=0;
+                        improve=true;
+                    }
+                    else{
+                        i++;
+                    }
+                break;
+                case 5:
+
+                    if(IntesificationArroyo(current_solution, non_dominated_set, Instance::num_jobs/20)){
+                        i=0;
+                        improve=true;
+                    }
+                    else{
+                        i++;
+                    }
+                break;
+
+            }
+        }
+        t1->stop();
     }
 
-    for(auto it: non_dominated_set_local.set_solution){
-        non_dominated_set_out.AddSolution(it);
-        delete it;
-    }
+    delete current_solution;
 
     return improve;
 }
@@ -156,7 +215,7 @@ void HillClimbing(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
     while(t1->getElapsedTimeInMilliSec() < alg_data.time_limit){
     //while(true){
 
-        t1->stop();
+        /*t1->stop();
 
         index_solution = SelectNonVisitedSolution(non_dominated_set);
 
@@ -166,6 +225,8 @@ void HillClimbing(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
         else{
             break;
         }
+
+
 
         //*current_solution = *select_solution;
 
@@ -212,7 +273,9 @@ void HillClimbing(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
         else{
             //current_solution->was_visited = true;
             non_dominated_set.set_solution[index_solution]->was_visited = true;
-        }
+        }*/
+
+        LS_Multi_BI(non_dominated_set,alg_data.time_limit, t1);
 
         t1->stop();
 
@@ -318,6 +381,8 @@ void MOVNS_Arroyo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
 
     shaked_solution = new LSSolution ();
 
+    const double destruction_rate = 0.1;
+
     while (t1->getElapsedTimeInMilliSec() < alg_data.time_limit) {
 
         //Selecionar aleatoriamente uma estrutura de vizinhança
@@ -325,9 +390,9 @@ void MOVNS_Arroyo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
 
         //Shaking
         current_solution = SelectNonDomintatedSolution(non_dominated_set);
+        *shaked_solution = *current_solution;
         current_solution->was_visited = true;
 
-        *shaked_solution = *current_solution;
         shaked_solution = Shaking(shaked_solution, op_neighbor, 1);
 
         //Local search
@@ -344,7 +409,8 @@ void MOVNS_Arroyo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
         //Intensification
         index = rand()%non_dominated_set.set_solution.size();
         *shaked_solution = *non_dominated_set.set_solution[index];
-        IntesificationArroyo(shaked_solution, non_dominated_set, int(Instance::num_jobs*1.0));
+        shaked_solution->was_visited = false;
+        IntesificationArroyo(shaked_solution, non_dominated_set, int(Instance::num_jobs*destruction_rate));
 
         t1->stop();
 
@@ -381,21 +447,18 @@ void MOVNS_Eduardo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_dat
             nd_set_solution_shaked.AddSolution(shaked_solution);
         }
 
-
-        /*//Local search
-        //improve = VND_FI(nd_set_solution_shaked, non_dominated_set);
-        //improve = VND_BI(nd_set_solution_shaked, non_dominated_set);
-        for(unsigned i=0; i<alg_data.qtd_neighbor; i++){
-            improve = LS_BI_OP(nd_set_solution_shaked, non_dominated_set_local, i);
-        }*/
         r = 0;
-        //improve = false;
-        while(r < alg_data.qtd_neighbor+1){
+        while(r < alg_data.qtd_neighbor+1 && t1->getElapsedTimeInMilliSec() < alg_data.time_limit){
+            for(auto it : non_dominated_set_local.set_solution){
+                delete it;
+            }
+            non_dominated_set_local.set_solution.clear();
             if(r < alg_data.qtd_neighbor){
                 LS_BI_OP(nd_set_solution_shaked, non_dominated_set_local, r);
                 //LS_FI_OP(nd_set_solution_shaked, non_dominated_set_local, r);
             }
             else{
+
                 //Intensification
                 index = rand()%nd_set_solution_shaked.set_solution.size();
                 *shaked_solution = *nd_set_solution_shaked.set_solution[index];
@@ -405,7 +468,7 @@ void MOVNS_Eduardo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_dat
 
             improve = false;
             for(auto it:non_dominated_set_local.set_solution){
-                if(non_dominated_set.AddSolution(it))
+                if(nd_set_solution_shaked.AddSolution(it))
                     improve = true;
             }
 
@@ -415,6 +478,22 @@ void MOVNS_Eduardo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_dat
             else{
                 r++;
             }
+
+            t1->stop();
+        }
+
+        improve = false;
+        for(auto it:nd_set_solution_shaked.set_solution){
+            if(non_dominated_set.AddSolution(it))
+                improve = true;
+        }
+
+        if(!improve){
+
+            shake_level++;
+            if(shake_level >= alg_data.max_shake_level){
+                shake_level = 2;
+            }
         }
 
 
@@ -423,25 +502,12 @@ void MOVNS_Eduardo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_dat
         }
         nd_set_solution_shaked.set_solution.clear();
 
-        //Level control
-        /*if(!improve){
-
-            //Intensification
-            index = rand()%non_dominated_set.set_solution.size();
-            *shaked_solution = *non_dominated_set.set_solution[index];
-            //IntesificationArroyo(shaked_solution, non_dominated_set, int(Instance::num_jobs*0.1));
-            improve = IntesificationArroyo(shaked_solution, non_dominated_set, int(Instance::num_jobs*0.1));*/
-
-            //if(!improve){
-                shake_level++;
-                if(shake_level >= alg_data.max_shake_level){
-                    shake_level = 2;
-                }
-            //}
-        //}
-
         t1->stop();
+
     }
 
     delete shaked_solution;
 }
+
+
+

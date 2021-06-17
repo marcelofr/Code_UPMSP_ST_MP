@@ -8,13 +8,15 @@
 #include "genetic_algorithm/nsga_ii.h"
 #include "math_model/run_model.h"
 #include "common/solution.h"
-#include "local_search/local_search.h"
+#include "local_search/main_ls_multi.h"
 #include "common/set_solution.h"
 #include "metric/hypervolume.h"
 #include "file_solution.h"
 #include <map>
 #include "metric/metric.h"
 #include "algorithm_data.h"
+#include "mono/main_ls_mono.h"
+#include "mono/basic_ls_mono.h"
 
 using namespace std;
 
@@ -36,5 +38,6 @@ void RunAlgorithmHillClimbing(vector<Solution*> &non_dominated_set, algorithm_da
 void RunAlgorithmMOVNS(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Timer *t1);
 void RunAlgorithmMOVNSArroyo(algorithm_data alg_data, vector<Solution*> &nd_set_solution, Timer *t1);
 void RunAlgorithmMOVNSEduardo(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Timer *t1);
+void RunAlgorithmMono(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Timer *t1);
 
 #endif // EXPERIMENTS_H

@@ -46,6 +46,9 @@ void RunAlgorithm(algorithm_data alg_data){
     else if(alg_data.param.algorithm_name == "MOVNS_Eduardo"){
         RunAlgorithmMOVNSEduardo(alg_data, nd_set_solution, t1);
     }
+    else if(alg_data.param.algorithm_name == "MONO"){
+        RunAlgorithmMono(alg_data, nd_set_solution, t1);
+    }
 
     t1->stop();
 
@@ -56,6 +59,9 @@ void RunAlgorithm(algorithm_data alg_data){
     alg_data.non_dominated_set.clear();
     pair<unsigned, double> aux;
     for(auto it:nd_set_solution){
+        #ifdef DEBUG
+            it->Check();
+        #endif
         aux.first = it->makeSpan*Instance::discretization_factor;
         aux.second = it->TEC*Instance::discretization_factor;
         alg_data.non_dominated_set.push_back(aux);
@@ -99,6 +105,7 @@ void RunAlgorithmNSGAII(algorithm_data alg_data, vector<Solution*> &non_dominate
     //non_dominated_set_ga->ContrutiveGRASPRandon(0.5, alg_data.param.u_population_size);
     //non_dominated_set_ga->ContrutiveGRASPGreedy(0.5, alg_data.param.u_population_size);
     //non_dominated_set_ga->ContrutiveGRASPGreedyRandon(0.0, alg_data.param.u_population_size);
+    //non_dominated_set_ga->ConstructiveCombinatorialSolution();
 
 
     #ifdef DEBUG
@@ -148,11 +155,13 @@ void RunAlgorithmExact(algorithm_data alg_data, vector<Solution*> &non_dominated
     alg_data.param.file_solution = alg_data.param.folder_solution + alg_data.param.algorithm_name + "_" + alg_data.param.instance_name + "_" + alg_data.param.s_alpha + ".sol";
 }
 
+
 void RunAlgorithmHillClimbing(vector<Solution*> &non_dominated_set, algorithm_data alg_data, Timer *t1){
 
     NDSetSolution<LSSolution *> *non_dominated_set_ls = new NDSetSolution<LSSolution *>();
 
     non_dominated_set_ls->ConstrutiveGreedy();
+    //non_dominated_set_ls->ConstructiveCombinatorialSolution();
     //non_dominated_set_ls->ConstrutiveGreedyAndRandom(alg_data.param.u_population_size);
 
     #ifdef DEBUG
@@ -216,8 +225,10 @@ void RunAlgorithmMOVNSArroyo(algorithm_data alg_data, vector<Solution*> &nd_set_
     NDSetSolution<LSSolution*> *obj_nd_set_solution = new NDSetSolution<LSSolution*>();
 
     obj_nd_set_solution->ConstrutiveGreedy();
+    //obj_nd_set_solution->ConstructiveCombinatorialSolution();
     //obj_nd_set_solution->ConstrutiveGreedyAndRandom(alg_data.param.u_population_size);
-    //obj_nd_set_solution->ContrutiveGRASP(0.5, alg_data.param.u_population_size, 1);
+    //obj_nd_set_solution->ContrutiveGRASP(0.1, alg_data.param.u_population_size, 1);
+    //obj_nd_set_solution->ConstrutiveRandom(100);
 
     #ifdef DEBUG
         cout << "===========Inicio Solução Inicial===========" << endl;
@@ -231,6 +242,7 @@ void RunAlgorithmMOVNSArroyo(algorithm_data alg_data, vector<Solution*> &nd_set_
 
     #ifdef DEBUG
         cout << "===========Inicio MOVNS Arroyo===========" << endl;
+        SortByMakespanLSSolution(obj_nd_set_solution->set_solution);
         obj_nd_set_solution->PrintSetSolution();
         t1->printElapsedTimeInMilliSec();
         cout << "===========Fim MOVNS Arroyo===========" << endl << endl;
@@ -251,6 +263,7 @@ void RunAlgorithmMOVNSEduardo(algorithm_data alg_data, vector<Solution*> &non_do
     non_dominated_set_ls->ContrutiveGRASP(0.5, alg_data.param.u_population_size, 1);
     //non_dominated_set_ls->ConstrutiveGreedyAndRandom(alg_data.param.u_population_size);
     //non_dominated_set_ls->ConstrutiveGreedy();
+    //non_dominated_set_ls->ConstructiveCombinatorialSolution();
 
     #ifdef DEBUG
         cout << "===========Inicio Solução Inicial===========" << endl;
@@ -259,7 +272,7 @@ void RunAlgorithmMOVNSEduardo(algorithm_data alg_data, vector<Solution*> &non_do
     #endif
 
     alg_data.qtd_neighbor = 5;
-    alg_data.max_shake_level = ceil(double(Instance::num_jobs)/double(5));
+    alg_data.max_shake_level = ceil(double(Instance::num_jobs)/double(10));
 
     MOVNS_Eduardo(*non_dominated_set_ls, alg_data, t1);
 
@@ -276,6 +289,53 @@ void RunAlgorithmMOVNSEduardo(algorithm_data alg_data, vector<Solution*> &non_do
     }
 
     delete non_dominated_set_ls;
+}
+
+void RunAlgorithmMono(algorithm_data alg_data, vector<Solution*> &non_dominated_set, Timer *t1){
+
+    NDSetSolution<MonoSolution *> *non_dominated_set_ms = new NDSetSolution<MonoSolution *>();
+
+    //non_dominated_set_ms->ContrutiveGRASP(0.5, 4, 0);
+    //non_dominated_set_ms->ConstrutiveGreedyAndRandom(3);
+    //non_dominated_set_ms->ConstrutiveGreedy();
+    //non_dominated_set_ms->ConstructiveCombinatorialSolution();
+    //non_dominated_set_ms->ConstrutiveRandom(10);
+    non_dominated_set_ms->ConstrutiveGreedyWeight(100);
+
+    #ifdef DEBUG
+        cout << "===========Inicio Solução Inicial===========" << endl;
+        non_dominated_set_ms->PrintSetSolution();
+        cout << "===========Fim Solução Inicial===========" << endl << endl;
+    #endif
+
+    //alg_data.num_weights = 3;
+    alg_data.qtd_neighbor = 5;
+
+    //SortByMakespanMonoSolution(non_dominated_set_ms->set_solution);
+
+    //SetWeights(*non_dominated_set_ms);
+    MOVNS_D(*non_dominated_set_ms, alg_data, t1);
+
+    NDSetSolution<MonoSolution *> *non_dominated_set_local = new NDSetSolution<MonoSolution *>();
+
+    for(auto it:non_dominated_set_ms->set_solution){
+        non_dominated_set_local->AddSolution(it);
+    }
+
+#ifdef DEBUG
+    cout << "===========Inicio MOVNS Eduardo===========" << endl;
+    t1->stop();
+    non_dominated_set_local->PrintSetSolution();
+    t1->printElapsedTimeInMilliSec();
+    cout << "===========Fim MOVNS Eduardo===========" << endl << endl;
+#endif
+
+    non_dominated_set.clear();
+    for(auto it:non_dominated_set_local->set_solution){
+        non_dominated_set.push_back(it);
+    }
+
+    delete non_dominated_set_ms;
 }
 
 void Discretize(unsigned factor){
