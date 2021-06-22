@@ -7,6 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <math.h>
 
 //#define RELEASE
 #define DEBUG
@@ -37,5 +38,6 @@ void Union( int uf[],int x, int y ) ;
 
 bool AddPoint(pair<unsigned, double> point, vector<pair<unsigned, double>> &non_dominated_set);
 void SortByMakespan(vector<pair<unsigned, double>> &set_solution);
+double CalcDistancePointToLine(pair<double, double> point, pair<double, double> cof_line);
 
 #endif // UTILS_H

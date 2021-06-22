@@ -227,7 +227,7 @@ void RunAlgorithmMOVNSArroyo(algorithm_data alg_data, vector<Solution*> &nd_set_
     obj_nd_set_solution->ConstrutiveGreedy();
     //obj_nd_set_solution->ConstructiveCombinatorialSolution();
     //obj_nd_set_solution->ConstrutiveGreedyAndRandom(alg_data.param.u_population_size);
-    //obj_nd_set_solution->ContrutiveGRASP(0.1, alg_data.param.u_population_size, 1);
+    //obj_nd_set_solution->ContrutiveGRASP(0.5, alg_data.param.u_population_size, 1);
     //obj_nd_set_solution->ConstrutiveRandom(100);
 
     #ifdef DEBUG
@@ -278,6 +278,7 @@ void RunAlgorithmMOVNSEduardo(algorithm_data alg_data, vector<Solution*> &non_do
 
     #ifdef DEBUG
         cout << "===========Inicio MOVNS Eduardo===========" << endl;
+        SortByMakespanLSSolution(non_dominated_set_ls->set_solution);
         non_dominated_set_ls->PrintSetSolution();
         t1->printElapsedTimeInMilliSec();
         cout << "===========Fim MOVNS Eduardo===========" << endl << endl;
@@ -300,7 +301,7 @@ void RunAlgorithmMono(algorithm_data alg_data, vector<Solution*> &non_dominated_
     //non_dominated_set_ms->ConstrutiveGreedy();
     //non_dominated_set_ms->ConstructiveCombinatorialSolution();
     //non_dominated_set_ms->ConstrutiveRandom(10);
-    non_dominated_set_ms->ConstrutiveGreedyWeight(100);
+    non_dominated_set_ms->ConstrutiveGreedyWeight(101);
 
     #ifdef DEBUG
         cout << "===========Inicio Solução Inicial===========" << endl;

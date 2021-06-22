@@ -83,16 +83,16 @@ public:
     unsigned FindJobBestPosMacMakespan(unsigned new_job, unsigned machine);
     unsigned FindJobBestPosMacTEC(unsigned new_job, unsigned machine, unsigned &best_op);
     unsigned FindJobBestPosMacTEC3(unsigned new_job, unsigned machine);
-    unsigned FindJobBestPosMacWeigth(unsigned new_job, unsigned machine, pair<double,double>weights, double &smaller_weigth_obj_machine, unsigned &diff_time_job);
+
 
     void SelectBestModeOpJob(unsigned machine, unsigned position, unsigned new_mode_op);
 
     //Solução inicial
     void AddJobGreedyMakespan(unsigned new_job, unsigned mode_op);
-    void GreedyChoiceMakespan(unsigned new_job, unsigned mode_op, unsigned &best_machine, unsigned &best_position, unsigned &diff_time);
+    void GreedyChoiceMakespan(unsigned new_job, unsigned mode_op, unsigned &best_machine,
+                              unsigned &best_position, unsigned &diff_time, unsigned &new_makespan);
     void RandomChoiceMakespan(unsigned new_job, unsigned mode_op, unsigned &best_machine, unsigned &best_position, unsigned &diff_time);
     void GreedyChoiceTEC(unsigned new_job, unsigned mode_op, unsigned &best_machine, unsigned &best_position, unsigned &diff_time, double &pec_job);
-    void GreedyChoiceWeigth(unsigned new_job, unsigned mode_op, unsigned &best_machine, unsigned &best_position, unsigned &diff_time, double &obj_job, pair<double,double>weights);
     void RandomChoiceTEC(unsigned new_job, unsigned mode_op, unsigned &best_machine, unsigned &best_position, unsigned &diff_time, double &pec_job);
     //void AddJobGreedyTEC(unsigned new_job, unsigned mode_op);
     void AddJobGreedyTEC2(unsigned new_job, unsigned mode_op);

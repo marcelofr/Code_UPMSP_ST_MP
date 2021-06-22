@@ -15,4 +15,7 @@ MonoSolution * Destruction(MonoSolution * solution, unsigned level);
 void Construction(MonoSolution * partial_solution, vector<unsigned> removed_jobs);
 bool IntesificationArroyo(MonoSolution *current_solution, unsigned level);
 
+MonoSolution * Shaking(MonoSolution *cur_solution, unsigned op_neighbor, unsigned level);
+MonoSolution *GenNeighborSol(MonoSolution *my_solution, unsigned op_neighbor);
+
 #endif // BASIC_LS_MONO_H

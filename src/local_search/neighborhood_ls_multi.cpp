@@ -93,7 +93,7 @@ bool SwapInsideLS_BI(LSSolution *my_solution, NDSetSolution<LSSolution*> &non_do
         num_job_maq = neighbor_sol->scheduling[i].size();
 
         //Para cada tarefa j da máquina i
-        for (unsigned j = 0; j < num_job_maq; j++) {
+        for (unsigned j = 0; j < num_job_maq-1; j++) {
 
             //Para cada tarefa k da máquina i
             for (unsigned k = j+1; k < num_job_maq; ++k) {
@@ -113,23 +113,6 @@ bool SwapInsideLS_BI(LSSolution *my_solution, NDSetSolution<LSSolution*> &non_do
                     //*best_solution = *neighbor_sol;
                     improve=true;
                 }
-
-                /*if(neighbor_sol->machine_completion_time[i] > Instance::v_peak_start[0]){
-
-                    neighbor_sol->CalculateHorizonAvoidingPeakMachine(i);
-                    neighbor_sol->CalculateObjectiveMachine(i);
-
-                    if(non_dominated_set_out.AddSolution(neighbor_sol)){
-                    //if(neighbor_sol < best_solution){
-                        // *best_solution = *neighbor_sol;
-                        improve=true;
-                    }
-
-                    neighbor_sol->CalculateShorterTimeHorizonMachine(i);
-                    neighbor_sol->CalculateObjectiveMachine(i);
-                }*/
-
-
 
                 neighbor_sol->SwapInsideDelta(i, k, j);
             }
@@ -271,27 +254,6 @@ bool SwapOutsideLS_BI(LSSolution* my_solution, NDSetSolution<LSSolution*> &non_d
                         improve = true;
                     }
 
-                    /*if(neighbor_sol->machine_completion_time[i1] > Instance::v_peak_start[0] || neighbor_sol->machine_completion_time[i2] > Instance::v_peak_start[0]){
-
-                        neighbor_sol->CalculateHorizonAvoidingPeakMachine(i1);
-                        neighbor_sol->CalculateObjectiveMachine(i1);
-
-                        neighbor_sol->CalculateHorizonAvoidingPeakMachine(i2);
-                        neighbor_sol->CalculateObjectiveMachine(i2);
-
-                        if(non_dominated_set_out.AddSolution(neighbor_sol)){
-                        //if(neighbor_sol < best_solution){
-                            // *best_solution = *neighbor_sol;
-                            improve=true;
-                        }
-
-                        neighbor_sol->CalculateShorterTimeHorizonMachine(i1);
-                        neighbor_sol->CalculateObjectiveMachine(i1);
-
-                        neighbor_sol->CalculateShorterTimeHorizonMachine(i2);
-                        neighbor_sol->CalculateObjectiveMachine(i2);
-                    }*/
-
                     neighbor_sol->SwapOutsideDelta(i2, k, i1, j);
 
                 }
@@ -429,21 +391,6 @@ bool InsertInsideLS_BI(LSSolution* my_solution, NDSetSolution<LSSolution *> &non
                         improve = true;
                     }
 
-                    /*if(neighbor_sol->machine_completion_time[i] > Instance::v_peak_start[0]){
-
-                        neighbor_sol->CalculateHorizonAvoidingPeakMachine(i);
-                        neighbor_sol->CalculateObjectiveMachine(i);
-
-                        if(non_dominated_set_out.AddSolution(neighbor_sol)){
-                        //if(neighbor_sol < best_solution){
-                            // *best_solution = *neighbor_sol;
-                            improve=true;
-                        }
-
-                        neighbor_sol->CalculateShorterTimeHorizonMachine(i);
-                        neighbor_sol->CalculateObjectiveMachine(i);
-                    }*/
-
                     neighbor_sol->InsertInsideDelta(i, k, j);
                 }
 
@@ -453,10 +400,6 @@ bool InsertInsideLS_BI(LSSolution* my_solution, NDSetSolution<LSSolution *> &non
             }
         }
     //}
-
-    /*if(non_dominated_set_out.AddSolution(best_solution)){
-        improve=true;
-    }*/
 
     //delete best_solution;
     delete neighbor_sol;
@@ -598,27 +541,6 @@ bool InsertOutsideLS_BI(LSSolution *my_solution, NDSetSolution<LSSolution *> &no
                             //*best_solution = *neighbor_sol;
                             improve = true;
                         }
-
-                        /*if(neighbor_sol->machine_completion_time[i1] > Instance::v_peak_start[0] || neighbor_sol->machine_completion_time[i2] > Instance::v_peak_start[0]){
-
-                            neighbor_sol->CalculateHorizonAvoidingPeakMachine(i1);
-                            neighbor_sol->CalculateObjectiveMachine(i1);
-
-                            neighbor_sol->CalculateHorizonAvoidingPeakMachine(i2);
-                            neighbor_sol->CalculateObjectiveMachine(i2);
-
-                            if(non_dominated_set_out.AddSolution(neighbor_sol)){
-                            //if(neighbor_sol < best_solution){
-                                // *best_solution = *neighbor_sol;
-                                improve=true;
-                            }
-
-                            neighbor_sol->CalculateShorterTimeHorizonMachine(i1);
-                            neighbor_sol->CalculateObjectiveMachine(i1);
-
-                            neighbor_sol->CalculateShorterTimeHorizonMachine(i2);
-                            neighbor_sol->CalculateObjectiveMachine(i2);
-                        }*/
 
                         neighbor_sol->InsertOutsideDelta(i2, k, i1, j);
 
@@ -769,21 +691,6 @@ bool ChangeOpModeLS_BI(LSSolution *my_solution, NDSetSolution<LSSolution *> &non
                         improve = true;
                     }
 
-                    /*if(neighbor_sol->machine_completion_time[i] > Instance::v_peak_start[0]){
-
-                        neighbor_sol->CalculateHorizonAvoidingPeakMachine(i);
-                        neighbor_sol->CalculateObjectiveMachine(i);
-
-                        if(non_dominated_set_out.AddSolution(neighbor_sol)){
-                        //if(neighbor_sol < best_solution){
-                            // *best_solution = *neighbor_sol;
-                            improve=true;
-                        }
-
-                        neighbor_sol->CalculateShorterTimeHorizonMachine(i);
-                        neighbor_sol->CalculateObjectiveMachine(i);
-                    }*/
-
                     neighbor_sol->ChangeModeOpJobDelta(i, j, old_op);
                 }
 
@@ -793,10 +700,6 @@ bool ChangeOpModeLS_BI(LSSolution *my_solution, NDSetSolution<LSSolution *> &non
             }
         }
     }
-
-    /*if(non_dominated_set_out.AddSolution(best_solution)){
-        improve=true;
-    }*/
 
     delete neighbor_sol;
     //delete best_solution;

@@ -205,7 +205,8 @@ TEST_F(TestCommon, GreedyInitialSolutionMakespan) {
     ct = 0;
 
     job = my_solution->scheduling[machine][0];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 35), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 0);
@@ -214,7 +215,8 @@ TEST_F(TestCommon, GreedyInitialSolutionMakespan) {
 
 
     job = my_solution->scheduling[machine][1];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 23), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 5);
@@ -222,7 +224,8 @@ TEST_F(TestCommon, GreedyInitialSolutionMakespan) {
     ct += pt + st;
 
     job = my_solution->scheduling[machine][2];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 14), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 3);
@@ -236,7 +239,8 @@ TEST_F(TestCommon, GreedyInitialSolutionMakespan) {
     ct = 0;
 
     job = my_solution->scheduling[machine][0];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 7), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 0);
@@ -244,7 +248,8 @@ TEST_F(TestCommon, GreedyInitialSolutionMakespan) {
     ct += pt + st;
 
     job = my_solution->scheduling[machine][1];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 12), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 2);
@@ -252,7 +257,8 @@ TEST_F(TestCommon, GreedyInitialSolutionMakespan) {
     ct += pt + st;
 
     job = my_solution->scheduling[machine][2];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 16), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 5);
@@ -307,7 +313,8 @@ TEST_F(TestCommon, GreedyInitialSolutionTEC3) {
     ct = 0;
 
     job = my_solution->scheduling[machine][0];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 20), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 0);
@@ -316,7 +323,8 @@ TEST_F(TestCommon, GreedyInitialSolutionTEC3) {
 
 
     job = my_solution->scheduling[machine][1];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 53), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 5);
@@ -324,7 +332,8 @@ TEST_F(TestCommon, GreedyInitialSolutionTEC3) {
     ct += pt + st;
 
     job = my_solution->scheduling[machine][2];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 3), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 3);
@@ -332,7 +341,8 @@ TEST_F(TestCommon, GreedyInitialSolutionTEC3) {
     ct += pt + st;
 
     job = my_solution->scheduling[machine][3];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 34), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 2);
@@ -345,7 +355,8 @@ TEST_F(TestCommon, GreedyInitialSolutionTEC3) {
     ct = 0;
 
     job = my_solution->scheduling[machine][0];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 10), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 0);
@@ -353,7 +364,8 @@ TEST_F(TestCommon, GreedyInitialSolutionTEC3) {
     ct += pt + st;
 
     job = my_solution->scheduling[machine][1];
-    pt = ceil(Instance::m_processing_time[machine][job]/Instance::v_speed_factor[my_solution->job_mode_op[job]]);
+    pt = ceil(double(Instance::m_processing_time[machine][job])/
+              double(Instance::v_speed_factor[my_solution->job_mode_op[job]]));
     EXPECT_LE(abs(pt - 18), EPS);
     st = Instance::m_setup_time[machine][previos][job];
     EXPECT_EQ(st, 2);
@@ -440,7 +452,8 @@ TEST_F(TestCommon, HorizonTwoDays) {
             EXPECT_EQ(my_solution->job_start_time1[*job], h);
             h += Instance::m_setup_time[i][previos][*job];
             EXPECT_EQ(my_solution->H1[*job], h);
-            h += ceil(Instance::m_processing_time[i][*job]/Instance::v_speed_factor[mode_op]);
+            h += ceil(double(Instance::m_processing_time[i][*job])/
+                    double(Instance::v_speed_factor[mode_op]));
             EXPECT_EQ(my_solution->job_end_time1[*job], h);
             previos = *job;
         }

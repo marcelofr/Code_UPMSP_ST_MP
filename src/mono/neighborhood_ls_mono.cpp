@@ -12,6 +12,8 @@ bool SwapInsideLSMono_FI(MonoSolution *my_solution)
 
     MonoSolution *neighbor_sol = new MonoSolution();
 
+    my_solution->CalculeMonoObjectiveTchebycheff();
+
     //Criar uma cópia da solução
     *neighbor_sol = *my_solution;
 
@@ -50,8 +52,6 @@ bool SwapInsideLSMono_FI(MonoSolution *my_solution)
         }
     //}
 
-    my_solution->CalculeMonoObjectiveTchebycheff();
-
     delete neighbor_sol;
 
     //Retorna falso, caso não consiga encontrar um vizinho melhor
@@ -78,8 +78,8 @@ bool SwapInsideLSMono_BI(MonoSolution *my_solution)
 
     improve = false;
     //Para cada máquina i de 1 à n
-    for (unsigned i = 1; i <= Instance::num_machine; i++) {
-    //unsigned i = neighbor_sol->GetMakespanMachine();
+    //for (unsigned i = 1; i <= Instance::num_machine; i++) {
+    unsigned i = neighbor_sol->GetMakespanMachine();{
         num_job_maq = my_solution->scheduling[i].size();
 
         //Para cada tarefa j da máquina i
@@ -214,8 +214,8 @@ bool SwapOutsideLSMono_BI(MonoSolution *my_solution)
 
     improve = false;
     //Para cada máquina i1 de 1 à n
-    for (unsigned i1 = 1; i1 <= Instance::num_machine-1; i1++) {
-    //unsigned i1 = neighbor_sol->GetMakespanMachine();
+    //for (unsigned i1 = 1; i1 <= Instance::num_machine-1; i1++) {
+    unsigned i1 = neighbor_sol->GetMakespanMachine();{
         num_job_maq1 = my_solution->scheduling[i1].size();
 
         //Para cada máquina i2 de i1+1 à n
@@ -346,9 +346,9 @@ bool InsertInsideLSMono_BI(MonoSolution *my_solution)
 
     improve = false;
     //Para cada máquina i de 1 à n
-    for (unsigned i = 1; i <= Instance::num_machine; i++) {
-    //unsigned i = neighbor_sol->GetMakespanMachine();
-        num_job_maq = neighbor_sol->scheduling[i].size();
+    //for (unsigned i = 1; i <= Instance::num_machine; i++) {
+    unsigned i = neighbor_sol->GetMakespanMachine();
+        num_job_maq = neighbor_sol->scheduling[i].size();{
 
         //Para cada tarefa j da máquina i
         for (unsigned j = 0; j < num_job_maq; j++) {
@@ -480,8 +480,8 @@ bool InsertOutsideLSMono_BI(MonoSolution *my_solution)
 
     improve = false;
     //Para cada máquina i1 de 1 à n
-    for (unsigned i1 = 1; i1 <= Instance::num_machine-1; i1++) {
-    //unsigned i1 = neighbor_sol->GetMakespanMachine();
+    //for (unsigned i1 = 1; i1 <= Instance::num_machine-1; i1++) {
+    unsigned i1 = neighbor_sol->GetMakespanMachine();{
         num_job_maq1 = my_solution->scheduling[i1].size();
 
         //Para cada máquina i2 de i1+1 à n
@@ -617,8 +617,8 @@ bool ChangeOpModeLSMono_BI(MonoSolution *my_solution)
 
     improve = false;
     //Para cada máquina i de 1 à n
-    for (unsigned i = 1; i <= Instance::num_machine; i++) {
-    //unsigned i = neighbor_sol->GetMakespanMachine();
+    //for (unsigned i = 1; i <= Instance::num_machine; i++) {
+    unsigned i = neighbor_sol->GetMakespanMachine();{
         num_job_maq = neighbor_sol->scheduling[i].size();
 
         //Para cada tarefa j da máquina i

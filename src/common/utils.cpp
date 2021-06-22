@@ -142,3 +142,15 @@ void SortByMakespan(vector<pair<unsigned, double>> &set_solution)
 {
     sort(set_solution.begin(), set_solution.end(), CompareMakespanPoint);
 }
+
+double CalcDistancePointToLine(pair<double, double> point, pair<double, double> cof_line)
+{
+    double distance;
+    double m;
+    m = double(cof_line.second)/double(cof_line.first);
+    double a, b;
+    a = m;
+    b = -1;
+    distance = double(abs(a*point.first + b*point.second))/double(sqrt(pow(a,2)+pow(b,2)));
+    return distance;
+}

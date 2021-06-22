@@ -251,3 +251,142 @@ bool IntesificationArroyo(MonoSolution *current_solution, unsigned level){
     return improve;
 
 }
+
+MonoSolution *GenNeighborSol(MonoSolution *my_solution, unsigned op_neighbor)
+{
+
+    unsigned i1, i2, j1, j2, mode_op;
+
+    //op_mov
+    switch (op_neighbor) {
+        //Troca na mesma máquina
+        case 0:
+
+            //Selecionar a máquina i1 com pelo menos 2 tarefas
+            do {
+                i1 = 1+rand()%Instance::num_machine;
+            } while (my_solution->scheduling[i1].size() < 2);
+
+            //Selecionar a primeira tarefa
+            j1 = rand()%my_solution->scheduling[i1].size();
+
+            //Selecionar a segunda tarefa, diferente da primeira
+            //do{
+                j2 = rand()%my_solution->scheduling[i1].size();
+            //}while(j1==j2);
+
+            //Realizar troca
+            my_solution->SwapInside(i1, j1, j2);
+
+            break;
+
+        //Troca em máquinas diferentes
+        case 1:
+
+            //Selecionar máquina i1 com pelo menos 1 tarefa
+            do {
+                i1 = 1+rand()%Instance::num_machine;
+            } while (my_solution->scheduling[i1].size() < 1);
+
+            //Selecionar máquina i2 com pelo menos 1 tarefa
+            do{
+                i2 = 1+rand()%Instance::num_machine;
+            }while(my_solution->scheduling[i2].size() < 1);
+
+            //Selecionar a primeira tarefa
+            j1 = rand()%my_solution->scheduling[i1].size();
+
+            //Selecionar a segunda tarefa
+            j2 = rand()%my_solution->scheduling[i2].size();
+
+            //Realizar troca
+            my_solution->SwapOutside(i1, j1, i2, j2);
+
+            break;
+
+        //Inserção na mesma máquina
+        case 2:
+
+            //Selecionar a máquina i1 com pelo menos 2 tarefas
+            do {
+                i1 = 1+rand()%Instance::num_machine;
+            } while (my_solution->scheduling[i1].size() < 2);
+
+            //Selecionar a primeira tarefa
+            j1 = rand()%my_solution->scheduling[i1].size();
+
+            //Selecionar a segunda tarefa, diferente da primeira
+            //do{
+                j2 = rand()%my_solution->scheduling[i1].size();
+            //}while(j1==j2);
+
+            //Realizar inserção
+            my_solution->InsertInside(i1, j1, j2);
+
+            break;
+
+        //Inserção em máquinas diferentes
+        case 3:
+
+            //Selecionar máquina i1 com pelo menos 1 tarefa
+            do {
+                i1 = 1+rand()%Instance::num_machine;
+            } while (my_solution->scheduling[i1].size() < 1);
+
+            //Selecionar máquina i2 com pelo menos 1 tarefa
+            do{
+                i2 = 1+rand()%Instance::num_machine;
+            }while(my_solution->scheduling[i2].size() < 1);
+
+            //Selecionar a primeira tarefa
+            j1 = rand()%my_solution->scheduling[i1].size();
+
+            //Selecionar a segunda tarefa
+            j2 = rand()%my_solution->scheduling[i2].size();
+
+            //Realizar inserção
+            if(i1 != i2)
+                my_solution->InsertOutside(i1, j1, i2, j2);
+            else
+                my_solution->InsertInside(i1, j1, j2);
+
+            break;
+
+        //Troca de modo de operação
+        case 4:
+
+            //Selecionar máquina i1 com pelo menos 1 tarefa
+            do {
+                i1 = 1+rand()%Instance::num_machine;
+            } while (my_solution->scheduling[i1].size() < 1);
+
+            //Selecionar uma tarefa
+            j1 = rand()%my_solution->scheduling[i1].size();
+
+            //Selecionar modo de operação
+            mode_op = 1+rand()%Instance::num_mode_op;
+
+            //Realizar troca do modo de operação
+            my_solution->ChangeModeOpJob(i1, j1, mode_op);
+
+            break;
+    }
+
+    my_solution->CalculateShorterTimeHorizon();
+    my_solution->CalculateObjective();
+    my_solution->CalculeMonoObjectiveTchebycheff();
+
+    return my_solution;
+}
+
+
+MonoSolution * Shaking(MonoSolution *cur_solution, unsigned op_neighbor, unsigned level)
+{
+
+    for(unsigned i=0; i<level; i++){
+        //Gerar uma solução vizinha aleatoriamente
+        cur_solution = GenNeighborSol(cur_solution, op_neighbor);
+    }
+
+    return cur_solution;
+}

@@ -409,8 +409,8 @@ void MOVNS_Arroyo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
         //Intensification
         index = rand()%non_dominated_set.set_solution.size();
         *shaked_solution = *non_dominated_set.set_solution[index];
-        shaked_solution->was_visited = false;
-        IntesificationArroyo(shaked_solution, non_dominated_set, int(Instance::num_jobs*destruction_rate));
+        //shaked_solution->was_visited = false;
+        IntesificationArroyo(shaked_solution, non_dominated_set, ceil(Instance::num_jobs*destruction_rate));
 
         t1->stop();
 
@@ -463,7 +463,7 @@ void MOVNS_Eduardo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_dat
                 index = rand()%nd_set_solution_shaked.set_solution.size();
                 *shaked_solution = *nd_set_solution_shaked.set_solution[index];
                 //IntesificationArroyo(shaked_solution, non_dominated_set, int(Instance::num_jobs*0.1));
-                IntesificationArroyo(shaked_solution, non_dominated_set_local, int(Instance::num_jobs*0.1));
+                IntesificationArroyo(shaked_solution, non_dominated_set_local, ceil(Instance::num_jobs*0.1));
             }
 
             improve = false;
