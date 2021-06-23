@@ -1,25 +1,33 @@
 #include "main_ls_multi.h"
 
-void LS_FI_OP(NDSetSolution<LSSolution *> non_dominated_set_in, NDSetSolution<LSSolution *> &non_dominated_set_out, unsigned op_neighbor)
+bool LS_FI_OP(NDSetSolution<LSSolution *> non_dominated_set_in,
+              NDSetSolution<LSSolution *> &non_dominated_set_out, unsigned op_neighbor)
 {
+
+    bool improve = false;
 
     for(auto it : non_dominated_set_in.set_solution){
         switch (op_neighbor) {
         case 0:
-            InsertInsideLS_FI(it, non_dominated_set_out);
+            if(InsertInsideLS_FI(it, non_dominated_set_out))
+                improve = true;
             break;
         case 1:
-            SwapInsideLS_FI(it, non_dominated_set_out);
+            if(SwapInsideLS_FI(it, non_dominated_set_out))
+                improve = true;
 
             break;
         case 2:
-            ChangeOpModeLS_FI(it, non_dominated_set_out);
+            if(ChangeOpModeLS_FI(it, non_dominated_set_out))
+                improve = true;
             break;
         case 3:
-            InsertOutsideLS_FI(it, non_dominated_set_out);
+            if(InsertOutsideLS_FI(it, non_dominated_set_out))
+                improve = true;
             break;
         case 4:
-            SwapOutsideLS_FI(it, non_dominated_set_out);
+            if(SwapOutsideLS_FI(it, non_dominated_set_out))
+                improve = true;
             break;
         /*case 5:
             InsertOutsideDuoLS_FI(it, non_dominated_set_out);
@@ -28,7 +36,7 @@ void LS_FI_OP(NDSetSolution<LSSolution *> non_dominated_set_in, NDSetSolution<LS
             break;
         }
     }
-
+    return improve;
 }
 
 bool VND_FI(NDSetSolution<LSSolution *> non_dominated_set_in, NDSetSolution<LSSolution *> &non_dominated_set_out)
@@ -73,43 +81,38 @@ bool VND_FI(NDSetSolution<LSSolution *> non_dominated_set_in, NDSetSolution<LSSo
 
 }
 
-bool LS_BI_OP(NDSetSolution<LSSolution *> non_dominated_set_in, NDSetSolution<LSSolution *> &non_dominated_set_out, unsigned op_neighbor)
+bool LS_BI_OP(NDSetSolution<LSSolution *> non_dominated_set_in,
+              NDSetSolution<LSSolution *> &non_dominated_set_out, unsigned op_neighbor)
 {
 
-    NDSetSolution<LSSolution *> non_dominated_set_local;
     bool improve = false;
-
-    for(auto it: non_dominated_set_in.set_solution){
-        non_dominated_set_local.AddSolution(it);
-    }
 
     for(auto it : non_dominated_set_in.set_solution){
 
         switch (op_neighbor) {
         case 0:
-            SwapInsideLS_BI(it, non_dominated_set_local);
+            if(SwapInsideLS_BI(it, non_dominated_set_out))
+                improve = true;
             break;
         case 1:
-            InsertInsideLS_BI(it, non_dominated_set_local);
+            if(InsertInsideLS_BI(it, non_dominated_set_out))
+                improve = true;
             break;
         case 2:
-            SwapOutsideLS_BI(it, non_dominated_set_local);
+            if(SwapOutsideLS_BI(it, non_dominated_set_out))
+                improve = true;
             break;
         case 3:
-            InsertOutsideLS_BI(it, non_dominated_set_local);
+            if(InsertOutsideLS_BI(it, non_dominated_set_out))
+                improve = true;
             break;
         case 4:
-            ChangeOpModeLS_BI(it, non_dominated_set_local);
+            if(ChangeOpModeLS_BI(it, non_dominated_set_out))
+                improve = true;
             break;
         default:
             break;
         }
-    }
-
-    for(auto it: non_dominated_set_local.set_solution){
-        if(non_dominated_set_out.AddSolution(it))
-            improve = true;
-        delete it;
     }
 
     return improve;
@@ -391,6 +394,7 @@ void MOVNS_Arroyo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
         //Shaking
         current_solution = SelectNonDomintatedSolution(non_dominated_set);
         *shaked_solution = *current_solution;
+
         current_solution->was_visited = true;
 
         shaked_solution = Shaking(shaked_solution, op_neighbor, 1);
@@ -420,11 +424,11 @@ void MOVNS_Arroyo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
 
 }
 
-void MOVNS_Eduardo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data alg_data, Timer *t1)
+void MOVNS_Eduardo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data alg_data,
+                   Timer *t1)
 {
 
     NDSetSolution<LSSolution *> nd_set_solution_shaked;
-    NDSetSolution<LSSolution *> non_dominated_set_local;
     unsigned op_neighbor, shake_level, index, r;
     LSSolution * shaked_solution;
     bool improve;
@@ -448,28 +452,20 @@ void MOVNS_Eduardo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_dat
         }
 
         r = 0;
+        improve = false;
         while(r < alg_data.qtd_neighbor+1 && t1->getElapsedTimeInMilliSec() < alg_data.time_limit){
-            for(auto it : non_dominated_set_local.set_solution){
-                delete it;
-            }
-            non_dominated_set_local.set_solution.clear();
+
             if(r < alg_data.qtd_neighbor){
-                LS_BI_OP(nd_set_solution_shaked, non_dominated_set_local, r);
-                //LS_FI_OP(nd_set_solution_shaked, non_dominated_set_local, r);
+                //improve = LS_BI_OP(nd_set_solution_shaked, non_dominated_set, r);
+                improve = LS_FI_OP(nd_set_solution_shaked, non_dominated_set, r);
             }
             else{
 
                 //Intensification
-                index = rand()%nd_set_solution_shaked.set_solution.size();
-                *shaked_solution = *nd_set_solution_shaked.set_solution[index];
+                index = rand()%non_dominated_set.set_solution.size();
+                *shaked_solution = *non_dominated_set.set_solution[index];
                 //IntesificationArroyo(shaked_solution, non_dominated_set, int(Instance::num_jobs*0.1));
-                IntesificationArroyo(shaked_solution, non_dominated_set_local, ceil(Instance::num_jobs*0.1));
-            }
-
-            improve = false;
-            for(auto it:non_dominated_set_local.set_solution){
-                if(nd_set_solution_shaked.AddSolution(it))
-                    improve = true;
+                improve = IntesificationArroyo(shaked_solution, non_dominated_set, ceil(Instance::num_jobs*0.1));
             }
 
             if(improve){
@@ -480,12 +476,6 @@ void MOVNS_Eduardo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_dat
             }
 
             t1->stop();
-        }
-
-        improve = false;
-        for(auto it:nd_set_solution_shaked.set_solution){
-            if(non_dominated_set.AddSolution(it))
-                improve = true;
         }
 
         if(!improve){

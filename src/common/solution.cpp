@@ -1606,7 +1606,8 @@ void Solution::RandomChoiceMakespan(unsigned new_job, unsigned mode_op, unsigned
  * Escolher a posição e a máquina que gere menor TEC
  * e como critério de desempate, o menor tempo de término na máquina
  */
-void Solution::GreedyChoiceTEC(unsigned new_job, unsigned mode_op, unsigned &best_machine, unsigned &best_position, unsigned &diff_time, double &pec_job)
+void Solution::GreedyChoiceTEC(unsigned new_job, unsigned mode_op, unsigned &best_machine,
+                               unsigned &best_position, unsigned &diff_time, double &pec_job)
 {
 
     unsigned best_position_machine, difference;

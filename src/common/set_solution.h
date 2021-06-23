@@ -112,13 +112,14 @@ public:
         /*Gerar uma solução gulosa considerando o objetivo do makespan*/
         my_solution = my_solution->Create();
         my_solution->GenerateGreedySolutionMakespan();
-        this->set_solution.push_back(my_solution);
+        this->AddSolution(my_solution);
 
 
         /*Gerar uma solução gulosa considerando o objetivo do TEC*/
         my_solution = my_solution->Create();
         my_solution->GenerateGreedySolutionTEC3();
-        this->set_solution.push_back(my_solution);
+        this->AddSolution(my_solution);
+
     }
 
     /*
@@ -148,6 +149,17 @@ public:
 
         T my_solution;
         my_solution = nullptr;
+
+        /*//Gerar uma solução gulosa considerando o objetivo do makespan
+        my_solution = my_solution->Create();
+        my_solution->GenerateGreedySolutionMakespan();
+        this->AddSolution(my_solution);
+
+
+        //Gerar uma solução gulosa considerando o objetivo do TEC
+        my_solution = my_solution->Create();
+        my_solution->GenerateGreedySolutionTEC3();
+        this->AddSolution(my_solution);*/
 
         unsigned mid = ceil(double(set_size)/double(2));
 

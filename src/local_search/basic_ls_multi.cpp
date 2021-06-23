@@ -442,7 +442,8 @@ LSSolution * Destruction(LSSolution * solution, unsigned level){
     return solution;
 }
 
-bool Construction(LSSolution * partial_solution, NDSetSolution<LSSolution *> &non_dominated_set, vector<unsigned> removed_jobs){
+bool Construction(LSSolution * partial_solution, NDSetSolution<LSSolution *> &non_dominated_set,
+                  vector<unsigned> removed_jobs){
 
     LSSolution *reconstructed_solution;
     unsigned size;
@@ -493,9 +494,6 @@ bool Construction(LSSolution * partial_solution, NDSetSolution<LSSolution *> &no
         for(auto it: non_dominated_set_partial_next.set_solution){
             non_dominated_set_partial.AddSolution(it);
         }
-        // Copying vector by copy function
-        //copy(nd_set_partial_temp.set_solution.begin(), nd_set_partial_temp.set_solution.end(), back_inserter(nd_set_partial.set_solution));
-        //nd_set_partial.set_solution.insert(nd_set_partial.set_solution.end(), nd_set_partial_temp.set_solution.begin(), nd_set_partial_temp.set_solution.end());
     }
 
     improve=false;
@@ -509,7 +507,6 @@ bool Construction(LSSolution * partial_solution, NDSetSolution<LSSolution *> &no
     }
     non_dominated_set_partial.set_solution.clear();
 
-    //delete non_dominated_set_partial_b;
     delete reconstructed_solution;
 
     return improve;
@@ -520,11 +517,7 @@ bool IntesificationArroyo(LSSolution *current_solution, NDSetSolution<LSSolution
 
     bool improve = false;
     LSSolution *partial_solution;
-    //unsigned index;
-    //NDSetSolution<LSSolution *> *non_dominated_set_i;
-    //NDSetSolution<LSSolution *> non_dominated_set_local;
 
-    //index = rand()%non_dominated_set.set_solution.size();
     partial_solution = new LSSolution();
 
     *partial_solution = *current_solution;
@@ -535,19 +528,7 @@ bool IntesificationArroyo(LSSolution *current_solution, NDSetSolution<LSSolution
 
     partial_solution->removed_jobs.clear();
 
-    //non_dominated_set_local.set_solution.clear();
-    //non_dominated_set_local.AddSolution(partial_solution);
-
     improve=Construction(partial_solution, non_dominated_set, removed_jobs);
-
-    /*for(auto it : non_dominated_set_local.set_solution){
-        if(non_dominated_set.AddSolution(it))
-            improve = true;
-    }
-
-    for(auto it : non_dominated_set_local.set_solution){
-        delete it;
-    }*/
 
     delete partial_solution;
 

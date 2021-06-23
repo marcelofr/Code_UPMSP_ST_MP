@@ -230,7 +230,12 @@ bool SwapOutsideLS_BI(LSSolution* my_solution, NDSetSolution<LSSolution*> &non_d
         num_job_maq1 = neighbor_sol->scheduling[i1].size();
 
         //Para cada máquina i2 de i1+1 à n
-        for (unsigned i2 = i1+1; i2 <= Instance::num_machine; i2++) {
+        for (unsigned i2 = 1; i2 <= Instance::num_machine; i2++) {
+
+            if(i1 == i2){
+                continue;
+            }
+
             num_job_maq2 = neighbor_sol->scheduling[i2].size();
 
             //Para cada tarefa j da máquina i1
@@ -671,7 +676,7 @@ bool ChangeOpModeLS_BI(LSSolution *my_solution, NDSetSolution<LSSolution *> &non
 
             old_op = neighbor_sol->job_mode_op[job];
 
-            //Para cada tarefa k da máquina i
+            //Para cada modo de operação k
             for (unsigned k = 1; k <= Instance::num_mode_op; ++k) {
 
                 if(old_op != k){

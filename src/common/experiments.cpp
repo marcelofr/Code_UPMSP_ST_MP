@@ -260,7 +260,7 @@ void RunAlgorithmMOVNSEduardo(algorithm_data alg_data, vector<Solution*> &non_do
 
     NDSetSolution<LSSolution *> *non_dominated_set_ls = new NDSetSolution<LSSolution *>();
 
-    non_dominated_set_ls->ContrutiveGRASP(0.5, alg_data.param.u_population_size, 1);
+    non_dominated_set_ls->ContrutiveGRASP(0.5, alg_data.param.u_population_size/2, 1);
     //non_dominated_set_ls->ConstrutiveGreedyAndRandom(alg_data.param.u_population_size);
     //non_dominated_set_ls->ConstrutiveGreedy();
     //non_dominated_set_ls->ConstructiveCombinatorialSolution();
