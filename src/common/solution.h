@@ -69,7 +69,7 @@ public:
     void GenerateGRASPSolutionMakespan(double alpha);
     void GenerateGRASPSolutionTEC(double alpha);
 
-    void CalculateShorterTimeHorizon();
+    void CalculateShorterTimeHorizon(bool update_h=true);
     void CalculateShorterTimeHorizonMachine(unsigned machine);
     void CalculateHorizonAvoidingPeak();
     void CalculateHorizonAvoidingPeakMachine(unsigned machine);

@@ -24,14 +24,14 @@ void RunWeightedMathModel(double max_time, double alpha, Solution * my_solution)
         Mymodel->SetInitialSolutionToMathModel(my_solution);
         Mymodel->Optimize();
 
+        Mymodel->GetSolutionFromModel(my_solution);
+
         if(model.get(GRB_IntAttr_Status) == GRB_OPTIMAL){
             my_solution->is_optimal = true;
         }
         else{
             my_solution->is_optimal = false;
         }
-
-
 
         string var;
 
@@ -44,19 +44,21 @@ void RunWeightedMathModel(double max_time, double alpha, Solution * my_solution)
 
         var = "PecOn";
         d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
-        my_solution->TEC = d_num;
+        //my_solution->TEC = d_num;
         #ifdef DEBUG
         cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
         #endif
 
         var = "PecOff";
         d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
-        my_solution->TEC += d_num;
+        //my_solution->TEC += d_num;
         #ifdef DEBUG
         cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
         //Mymodel->get
 
         Mymodel->PrintVars();
+
+        my_solution->Print();
         #endif
 
 
@@ -96,6 +98,8 @@ void RunEpsilonMathModel(double max_time, unsigned makespan, double TEP, Solutio
         }
         Mymodel->SetInitialSolutionToMathModel(my_solution);
         Mymodel->Optimize();
+
+        Mymodel->GetSolutionFromModel(my_solution);
 
         if(model.get(GRB_IntAttr_Status) == GRB_OPTIMAL){
             my_solution->is_optimal = true;
