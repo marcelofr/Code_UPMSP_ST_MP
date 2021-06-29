@@ -18,7 +18,7 @@ Solution::Solution()
     machine_completion_time = vector<unsigned>(Instance::num_machine+1);
 
     //Criar um vetor para armazenar o instante de término para cada máquina
-    machine_TEC = vector<unsigned>(Instance::num_machine+1);
+    machine_TEC = vector<double>(Instance::num_machine+1);
 
     //Criar um vetor para armazenar o modo de operação de cada tarefa
     job_mode_op = vector<unsigned>(Instance::num_jobs+1);
@@ -853,6 +853,41 @@ void Solution::CalculateObjective()
     }
 }
 
+void Solution::CalculateObjectiveDiscrete()
+{
+    //Calcular o makespan
+    makeSpan = 0;
+    unsigned size;
+    for (unsigned i = 1; i <= Instance::num_machine; ++i) {
+        machine_completion_time[i] = 0;
+        size = scheduling[i].size();
+        if(size){
+            unsigned last_job = scheduling[i][size-1];
+            machine_completion_time[i] = job_end_time1[last_job];
+            if(machine_completion_time[i] > makeSpan){
+                makeSpan = machine_completion_time[i];
+            }
+        }
+    }
+
+    //Calcular o custo total de energia
+
+    this->TEC = 0;
+
+    for(unsigned i = 1; i <= Instance::num_machine; ++i){
+
+        this->machine_TEC[i] = 0;
+
+        for(auto j = scheduling[i].begin(); j != scheduling[i].end(); ++j){
+
+            this->machine_TEC[i] += CalcPECToJob(i, *j, H1[*j], true);
+
+        }
+
+        this->TEC += this->machine_TEC[i];
+    }
+}
+
 void Solution::CalculateObjectiveMachine(unsigned machine)
 {
 
@@ -892,11 +927,15 @@ void Solution::CalculateObjectiveMachine(unsigned machine)
  * na máquina machine, começando a ser preparado em start e termina
  * em end, após a execução
  */
-double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h)
+double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h, bool discrete_time)
 {
     double pt, end, time_job_on, time_job_off;
 
-    pt = double(Instance::m_processing_time[machine][job])
+    if(discrete_time)
+        pt = ceil(double(Instance::m_processing_time[machine][job])
+                /double(Instance::v_speed_factor[job_mode_op[job]]));
+    else
+        pt = double(Instance::m_processing_time[machine][job])
                 /double(Instance::v_speed_factor[job_mode_op[job]]);
 
     end = h + pt;
@@ -952,8 +991,9 @@ double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h)
 
     double PEC, PEC_on, PEC_off;
 
-    PEC_off = (double(time_job_off*Instance::rate_off_peak*Instance::v_consumption_factor[job_mode_op[job]]
-                *Instance::v_machine_potency[machine])/double(60));
+    PEC_off = (double(time_job_off*Instance::rate_off_peak
+                      *Instance::v_consumption_factor[job_mode_op[job]]
+                        *Instance::v_machine_potency[machine])/double(60));
     PEC_on = (double(time_job_on*Instance::rate_on_peak*Instance::v_consumption_factor[job_mode_op[job]]
                 *Instance::v_machine_potency[machine])/double(60));
 
@@ -983,7 +1023,8 @@ void Solution::Check()
             //Se o tempo calculado for diferente do valor armazenado, existe um erro
             if(job_start_time1[job] < start_job){
                 cout << "=========Erro==============" << endl;
-                cout << "Inicio da tarefa " << job << ", na máquina " << i << " calculado errado" << endl;
+                cout << "Inicio preparação da tarefa " << job << ", na máquina " << i << ", valor esperado: "
+                            << start_job << " armazenado: " << job_start_time1[job] << endl;
 
             }
 
@@ -994,7 +1035,9 @@ void Solution::Check()
             //Se o tempo calculado for diferente do valor armazenado, existe um erro
             if(H1[job] != job_start_time1[job] + Instance::m_setup_time[i][previous][job]){
                 cout << "=========Erro==============" << endl;
-                cout << "Fim da tarefa " << job << ", na máquina " << i << " calculado errado" << endl;
+                cout << "Inicio execução da tarefa " << job << ", na máquina " << i << ", valor esperado: "
+                            << job_start_time1[job] + Instance::m_setup_time[i][previous][job]
+                               << " armazenado: " << H1[job] << endl;
 
             }
 
@@ -1003,7 +1046,8 @@ void Solution::Check()
             //Se o tempo calculado for diferente do valor armazenado, existe um erro
             if(job_end_time1[job] != end_job){
                 cout << "=========Erro==============" << endl;
-                cout << "Fim da tarefa " << job << ", na máquina " << i << " calculado errado" << endl;
+                cout << "Fim Execução  da tarefa " << job << ", na máquina " << i << ", valor esperado: "
+                            << end_job << " armazenado: " << job_end_time1[job] << endl;
 
             }
 

@@ -101,8 +101,8 @@ void Model::SetObjective(double alpha)
     // Set objective
     //(2)
     //double alpha = 0.5;
-    //GRBLinExpr aux = (CMax/double(Instance::num_planning_horizon))*alpha +((PecOn+PecOff)/double(Instance::max_cost))*(1-alpha);
-    GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
+    GRBLinExpr aux = (CMax/double(Instance::num_planning_horizon))*alpha +((PecOn+PecOff)/double(Instance::max_cost))*(1-alpha);
+    //GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
     //GRBLinExpr aux = CMax + (PecOn+PecOff);
     //GRBLinExpr aux = (CMax);
     //GRBLinExpr aux = (PecOn+PecOff);
@@ -441,7 +441,7 @@ void Model::GetSolutionFromModel(Solution *MySolution)
 
         MySolution->CalculateShorterTimeHorizon(false);
 
-        MySolution->CalculateObjective();
+        MySolution->CalculateObjectiveDiscrete();
 
     }
     catch(GRBException e){

@@ -44,14 +44,14 @@ void RunWeightedMathModel(double max_time, double alpha, Solution * my_solution)
 
         var = "PecOn";
         d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
-        //my_solution->TEC = d_num;
+        my_solution->TEC = d_num;
         #ifdef DEBUG
         cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
         #endif
 
         var = "PecOff";
         d_num = model.getVarByName(var).get(GRB_DoubleAttr_X);
-        //my_solution->TEC += d_num;
+        my_solution->TEC += d_num;
         #ifdef DEBUG
         cout << var << ": " << model.getVarByName(var).get(GRB_DoubleAttr_X) << endl;
         //Mymodel->get
