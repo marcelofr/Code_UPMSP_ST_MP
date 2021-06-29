@@ -14,8 +14,8 @@ class Model
 protected:
     GRBModel *model;
     vector<vector<vector<vector<GRBVar>>>> X;
-    vector<vector<GRBVar>> Y;
-    vector<GRBVar> C;
+    //vector<vector<GRBVar>> Y;
+    //vector<GRBVar> C;
     GRBVar CMax, PecOn, PecOff;
 
     vector<vector<vector<double>>> FinalSolution;
@@ -33,8 +33,9 @@ public:
     void SetConstraintWithMakespan(unsigned makespan);
     void SetConstraintWithTEP(double TEP);
     void Optimize();
-    //void GetFinalSolutionFromModel(Solution &MySolution);
     void PrintVars();
+
+    void GetSolutionFromModel(Solution *MySolution);
 };
 
 #endif // MODEL_H

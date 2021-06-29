@@ -138,13 +138,20 @@ void RunAlgorithmExact(algorithm_data alg_data, vector<Solution*> &non_dominated
 
     //Gerar uma solução inicial gulosa considerando o objetivo do makespan
     my_solution = new Solution();
-    my_solution->GenerateGreedySolutionMakespan();
 
     //Modelo ponderado
     RunWeightedMathModel(alg_data.time_limit, alg_data.param.d_alpha, my_solution);
+
     //Modelo espsilon-restrito
-    //RunEpsilonMathModel(max_time, 0, my_solution->TEC, my_solution);
-    //RunEpsilonMathModel(max_time, my_solution->makeSpan, 0, my_solution);
+
+    /*if(true){
+        my_solution->GenerateGreedySolutionMakespan();
+        RunEpsilonMathModel(alg_data.time_limit, my_solution->makeSpan, 0, my_solution);
+    }
+    else{
+        my_solution->GenerateGreedySolutionTEC3();
+        RunEpsilonMathModel(alg_data.time_limit, 0, my_solution->TEC, my_solution);
+    }*/
 
     non_dominated_set.push_back(my_solution);
 

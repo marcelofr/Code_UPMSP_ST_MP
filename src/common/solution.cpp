@@ -598,7 +598,7 @@ void Solution::GenerateGRASPSolutionTEC(double alpha)
  * Método para calcular o instante inicial para cada tarefa
  * considerando um tempo mínimo entre as tarefas
  */
-void Solution::CalculateShorterTimeHorizon()
+void Solution::CalculateShorterTimeHorizon(bool update_h)
 {
     unsigned start;
     unsigned last_job, l;
@@ -617,8 +617,10 @@ void Solution::CalculateShorterTimeHorizon()
             //Calcular o tempo de preparação da tarefa j
             setup_time = Instance::m_setup_time[i][previous_job][(*j)];
 
-            //Armazenar o instante de início da tarefa j
-            H1[*j] = job_start_time1[*j] + setup_time;
+            if(update_h){
+                //Armazenar o instante de início da tarefa j
+                H1[*j] = job_start_time1[*j] + setup_time;
+            }
 
             //Tempo de processamento da tarefa j
             l = job_mode_op[*j];

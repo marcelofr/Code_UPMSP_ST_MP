@@ -101,8 +101,9 @@ void Model::SetObjective(double alpha)
     // Set objective
     //(2)
     //double alpha = 0.5;
-    GRBLinExpr aux = (CMax/Instance::num_planning_horizon)*alpha +((PecOn+PecOff)/Instance::max_cost)*(1-alpha);
-    //GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
+    //GRBLinExpr aux = (CMax/double(Instance::num_planning_horizon))*alpha +((PecOn+PecOff)/double(Instance::max_cost))*(1-alpha);
+    GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
+    //GRBLinExpr aux = CMax + (PecOn+PecOff);
     //GRBLinExpr aux = (CMax);
     //GRBLinExpr aux = (PecOn+PecOff);
     //GRBLinExpr aux = PecOn;
@@ -352,80 +353,6 @@ void Model::Optimize()
 
 }
 
-//void Exact::GetFinalSolutionFromModel(Solution &MySolution)
-//{
-//    size_t size;
-
-//    try{
-
-//        /*//Salvar solução final
-//        FinalSolution = vector<vector<vector<double>>> (NumMachines, vector<vector<double>>(NumJobs, vector<double>(NumJobs)));
-//        for (size_t i = 1; i < NumMachines; i++) {
-//            for (size_t j = 0; j < NumJobs; j++) {
-//                for (size_t k = 0; k < NumJobs; k++) {
-//                    FinalSolution[i][j][k] = this->X[i][j][k].get(GRB_DoubleAttr_X);
-//                }
-//            }
-//        }*/
-
-//        //Definir o makespan
-//        //MySolutionModel.MakeSpan = model.getObjective().getValue();
-
-//        /*
-//         * Pegar a primeira tarefa de cada máquina
-//         */
-//        for (size_t i = 1; i < NumMachines; i++) {
-//            //Zerar o sequenciamento da máquina i
-//            MySolution.scheduling[i].clear();
-//            //Zerar o tempo de término na máquina i
-//            MySolution.completionTimeMachine[i] = 0;
-//            for (size_t k = 1; k < NumJobs; k++) {
-//                if(this->FinalSolution[i][0][k] > 0.9){
-//                    //Adicionar a tarefa na primeira posição da máquina i
-//                    MySolution.scheduling[i].push_back(k);
-//                    //So tem uma tarefa como primeira
-//                    break;
-//                }
-//            }
-//            //Pegar o tempo de término de todas as máquinas, no modelo matemático
-//            /*var = "C[" + itos(i) + "]";
-//            aux = model->getVarByName(var);
-//            valor = int(aux.get(GRB_DoubleAttr_X));
-//            MySolution.completionTimeMachine[i] = valor;*/
-
-//        }
-
-//        /*
-//         * Pegar as demais tarefas de cada máquina
-//         */
-//        size_t prevjob = 0;
-//        for (size_t i = 1; i < NumMachines; i++) {
-//            size = MySolution.scheduling[i].size();
-//            if(size){
-//                prevjob = MySolution.scheduling[i][0];
-//            }
-//            for (size_t j = 1; j < NumJobs; j++) {
-//                for (size_t k = 1; k < NumJobs; k++) {
-//                    if(prevjob != k){
-//                        if(this->FinalSolution[i][prevjob][k] > 0.9){
-//                            //Adicionar a tarefa na primeira posição da máquina i
-//                            MySolution.scheduling[i].push_back(k);
-//                            prevjob = k;
-//                            //So tem uma tarefa como primeira
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-//        MySolution.CalculateFull();
-//    }
-//    catch(GRBException e){
-//        cout << e.getErrorCode();
-//    }
-//}
-
 void Model::PrintVars()
 {
 
@@ -448,5 +375,76 @@ void Model::PrintVars()
                 }
             }
         }
+    }
+}
+
+struct row{
+    unsigned h;
+    unsigned job;
+    unsigned machine;
+    unsigned op_mode;
+};
+
+bool compare_struct(const row &a, const row &b){
+    return a.h < b.h;
+}
+
+void Model::GetSolutionFromModel(Solution *MySolution)
+{
+    double valor;
+    string str;
+
+    vector<row> v_r;
+    row r;
+
+    try{
+
+        for (unsigned i = 1; i <= Instance::num_machine; i++) {
+            v_r.clear();
+            MySolution->scheduling[i].clear();
+            for (unsigned j = 1; j <= Instance::num_jobs; j++) {
+                for (unsigned h = 0; h <= Instance::num_planning_horizon; h++) {
+                    for (unsigned l = 1; l <= Instance::num_mode_op; l++) {
+
+                        str = "X[" + itos(i) + "][" + itos(j) + "][" + itos(h) + "][" + itos(l) + "]";
+                        valor = model->getVarByName(str).get(GRB_DoubleAttr_X);
+
+                        if(valor > 0){
+                            r.h = h;
+                            r.job = j;
+                            r.machine = i;
+                            r.op_mode = l;
+
+                            v_r.push_back(r);
+
+                        }
+
+                    }
+                }
+            }
+            sort(v_r.begin(), v_r.end(), compare_struct);
+            for(auto it:v_r){
+                MySolution->scheduling[it.machine].push_back(it.job);
+                MySolution->H1[it.job] = it.h;
+                MySolution->job_mode_op[it.job] = it.op_mode;
+            }
+            v_r.clear();
+        }
+
+        str = "CMax";
+        valor = model->getVarByName(str).get(GRB_DoubleAttr_X);
+
+        str = "PecOff";
+        valor = model->getVarByName(str).get(GRB_DoubleAttr_X);
+
+        valor = model->getObjective().getValue();
+
+        MySolution->CalculateShorterTimeHorizon(false);
+
+        MySolution->CalculateObjective();
+
+    }
+    catch(GRBException e){
+        cout << e.getErrorCode();
     }
 }
