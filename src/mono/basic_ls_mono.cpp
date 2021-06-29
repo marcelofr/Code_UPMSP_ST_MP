@@ -72,37 +72,35 @@ void SetWeights(NDSetSolution<MonoSolution *> non_dominated_set){
     x++;
     y--;
 
-    /*unsigned qtd_solutions;
-
-    qtd_solutions = non_dominated_set.set_solution.size();
-
-    non_dominated_set.set_solution.front()->weights.first = 0;
-    non_dominated_set.set_solution.front()->weights.second = 1;
-
-    non_dominated_set.set_solution.back()->weights.first = 1;
-    non_dominated_set.set_solution.back()->weights.second = 0;*/
-
-    /*for(auto it=non_dominated_set.set_solution.begin()+1; it<non_dominated_set.set_solution.end()-1; ++it){
-        (*it)->weights.first = 1/(qtd_solutions-1);
-        (*it)->weights.second = 1/2;
-
-    }*/
 }
 
 
-void GenerateWeightVector(vector<pair<double, double>> &W, unsigned num_weights){
+void GenerateWeightVector(vector<pair<double, double>> &Weigths, unsigned num_weights){
 
-    W.resize(num_weights);
+    Weigths.resize(num_weights);
 
     unsigned x,y;
     x = 0;
     y = num_weights;
-    for(unsigned h=0;h<num_weights ;h++){
-        W[h].first = double(x)/double(num_weights-1);
-        W[h].second = double(y-1)/double(num_weights-1);
+
+
+    Weigths[0].first = 1-EPS;
+    Weigths[0].second = EPS;
+
+    x++;
+    y--;
+
+    for(unsigned h=1;h<num_weights-1 ;h++){
+        Weigths[h].first = double(y-1)/double(num_weights-1);
+        Weigths[h].second = double(x)/double(num_weights-1);
         x++;
         y--;
     }
+
+    Weigths[num_weights-1].first = EPS;
+    Weigths[num_weights-1].second = 1-EPS;
+    x++;
+    y--;
 
 }
 

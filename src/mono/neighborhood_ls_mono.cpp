@@ -219,8 +219,12 @@ bool SwapOutsideLSMono_BI(MonoSolution *my_solution)
         num_job_maq1 = my_solution->scheduling[i1].size();
 
         //Para cada máquina i2 de i1+1 à n
-        for (unsigned i2 = i1+1; i2 <= Instance::num_machine; i2++) {
+        for (unsigned i2 = 1; i2 <= Instance::num_machine; i2++) {
             num_job_maq2 = my_solution->scheduling[i2].size();
+
+            if(i1 == i2){
+                continue;
+            }
 
             //Para cada tarefa j da máquina i1
             for (unsigned j = 0; j < num_job_maq1; j++) {
@@ -485,8 +489,12 @@ bool InsertOutsideLSMono_BI(MonoSolution *my_solution)
         num_job_maq1 = my_solution->scheduling[i1].size();
 
         //Para cada máquina i2 de i1+1 à n
-        for (unsigned i2 = i1+1; i2 <= Instance::num_machine; i2++) {
+        for (unsigned i2 = 1; i2 <= Instance::num_machine; i2++) {
             num_job_maq2 = my_solution->scheduling[i2].size();
+
+            if(i1 == i2){
+                continue;
+            }
 
             //Para cada tarefa j da máquina i1
             for (unsigned j = 0; j < num_job_maq1; j++) {

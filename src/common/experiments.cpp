@@ -301,7 +301,16 @@ void RunAlgorithmMono(algorithm_data alg_data, vector<Solution*> &non_dominated_
     //non_dominated_set_ms->ConstrutiveGreedy();
     //non_dominated_set_ms->ConstructiveCombinatorialSolution();
     //non_dominated_set_ms->ConstrutiveRandom(10);
-    non_dominated_set_ms->ConstrutiveGreedyWeight(101);
+
+    unsigned sz = 50;
+
+    alg_data.qtd_neighbor = 5;
+    alg_data.num_group = 3;
+    alg_data.num_weights = sz;
+
+    non_dominated_set_ms->ConstrutiveGreedyWeight(sz);
+    //alg_data.num_weights = non_dominated_set.set_solution.size();
+
 
     #ifdef DEBUG
         cout << "===========Inicio Solução Inicial===========" << endl;
@@ -309,10 +318,7 @@ void RunAlgorithmMono(algorithm_data alg_data, vector<Solution*> &non_dominated_
         cout << "===========Fim Solução Inicial===========" << endl << endl;
     #endif
 
-    //alg_data.num_weights = 3;
-    alg_data.qtd_neighbor = 5;
-
-    //SortByMakespanMonoSolution(non_dominated_set_ms->set_solution);
+    SortByMakespanMonoSolution(non_dominated_set_ms->set_solution);
 
     //SetWeights(*non_dominated_set_ms);
     MOVNS_D(*non_dominated_set_ms, alg_data, t1);

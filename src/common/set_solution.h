@@ -464,6 +464,7 @@ public:
         my_solution->weights.second = EPS;
 
         my_solution->GenerateGreedySolutionWeigth();
+        //this->AddSolution(my_solution);
         this->set_solution.push_back(my_solution);
 
         x++;
@@ -481,6 +482,7 @@ public:
             y--;
 
             my_solution->GenerateGreedySolutionWeigth();
+            //this->AddSolution(my_solution);
             this->set_solution.push_back(my_solution);
         }
 
@@ -491,6 +493,7 @@ public:
         my_solution->weights.second = 1-EPS;
 
         my_solution->GenerateGreedySolutionWeigth();
+        //this->AddSolution(my_solution);
         this->set_solution.push_back(my_solution);
 
     }

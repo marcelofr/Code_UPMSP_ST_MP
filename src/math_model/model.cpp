@@ -23,7 +23,7 @@ void Model::Create(GRBModel *model, double MaxTime)
 
     model->set(GRB_IntParam_Threads, 1);
     //model->set(GRB_IntParam_LazyConstraints, 1);
-    //model->set(GRB_IntParam_Presolve, 0);
+    model->set(GRB_IntParam_Presolve, 0);
     model->set(GRB_DoubleParam_TimeLimit, MaxTime);
     //model->set(GRB_DoubleParam_TimeLimit, 300.0);
     model->set(GRB_DoubleParam_MIPGap, EPS);
