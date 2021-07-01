@@ -1006,7 +1006,8 @@ double Solution::CalcPECToJob(unsigned machine, unsigned job, unsigned h, bool d
 void Solution::Check()
 {
     unsigned job, previous, end_job, start_job;
-    unsigned ctm, time_job, makespan_calc, tec_calc;
+    unsigned ctm, time_job, makespan_calc;
+    double tec_calc;
 
     makespan_calc = 0;
     tec_calc = 0;
@@ -1078,7 +1079,7 @@ void Solution::Check()
         cout << "Makespan, valor esperado: " << makespan_calc << " armazenado: " << makeSpan << endl;
     }
 
-    if(tec_calc != TEC){
+    if((tec_calc - TEC > 0.0001)){
         cout << "=========Erro==============" << endl;
         cout << "Custo de energia, valor esperado: " << tec_calc << " armazenado: " << TEC << endl;
     }

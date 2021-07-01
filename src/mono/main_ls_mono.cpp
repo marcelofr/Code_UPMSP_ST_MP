@@ -57,8 +57,6 @@ bool LS_Mono_BI(MonoSolution *my_solution, unsigned op_neighbor){
                 improve = true;
             }
         break;
-        case 5:
-        break;
 
     }
 
@@ -138,7 +136,6 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
 
     MonoSolution * current_solution;
 
-
     vector<pair<double, double>> Weights;
     GenerateWeightVector(Weights, alg_data.num_weights);
 
@@ -182,8 +179,9 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
     }*/
 
     //Associar cada pesa a um conjunto j de soluções
-    for(unsigned k=0; k<alg_data.num_group; k++){
-        for(unsigned i=0; i<alg_data.num_weights; i++){
+
+    for(unsigned i=0; i<alg_data.num_weights; i++){
+        for(unsigned k=0; k<alg_data.num_group; k++){
             best_distance = INT_MAX;
             best_index = 0;
             for(unsigned j=0; j<size_nds; j++){
@@ -194,7 +192,6 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
             }
             solution_neighboor[i][k] = best_index;
             distance_weighted_solution[i][best_index] = INT_MAX;
-
         }
     }
 
@@ -236,7 +233,7 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
 
                         non_dominated_set.set_solution[op]->CalculeMonoObjectiveTchebycheff();
 
-                        if(current_solution->objective_funtion < non_dominated_set.set_solution[op]->objective_funtion){
+                        if(current_solution->objective_funtion - non_dominated_set.set_solution[op]->objective_funtion < -0.01){
                             *non_dominated_set.set_solution[op] = *current_solution;
                             improve = true;
                         }
@@ -250,7 +247,7 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
                     non_dominated_set.set_solution[op]->CalculeMonoObjectiveTchebycheff();
 
                     if(current_solution->objective_funtion < non_dominated_set.set_solution[op]->objective_funtion){
-                        *non_dominated_set.set_solution[op] = *current_solution;
+                        //*non_dominated_set.set_solution[op] = *current_solution;
                         improve = true;
                     }
                 }
@@ -279,16 +276,11 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
 
 
                 if(obj_i < obj_j){
-                    *non_dominated_set.set_solution[it_j] = *non_dominated_set.set_solution[op];
+                    //*non_dominated_set.set_solution[it_j] = *non_dominated_set.set_solution[op];
+                    non_dominated_set.set_solution[it_j]->weights = w_j;
                 }
             }
 
-            non_dominated_set.set_solution[op]->was_visited = true;
-
-        }
-
-        for(unsigned i=0; i<non_dominated_set.set_solution.size();i++){
-            non_dominated_set.set_solution[i]->was_visited = false;
         }
 
         t1->stop();

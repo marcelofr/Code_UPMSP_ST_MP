@@ -460,8 +460,8 @@ public:
 
         /*Gerar uma solução gulosa considerando o objetivo do makespan*/
         my_solution = my_solution->Create();
-        my_solution->weights.first = 1-EPS;
-        my_solution->weights.second = EPS;
+        my_solution->weights.first = EPS;
+        my_solution->weights.second = 1-EPS;
 
         my_solution->GenerateGreedySolutionWeigth();
         //this->AddSolution(my_solution);
@@ -475,8 +475,8 @@ public:
             /*Gerar uma solução gulosa considerando o objetivo do makespan*/
             my_solution = my_solution->Create();
 
-            my_solution->weights.first = double(y-1)/double(set_size-1);
-            my_solution->weights.second = double(x)/double(set_size-1);
+            my_solution->weights.first = double(x)/double(set_size-1);
+            my_solution->weights.second = double(y-1)/double(set_size-1);
 
             x++;
             y--;
@@ -489,8 +489,8 @@ public:
         /*Gerar uma solução gulosa considerando o objetivo do makespan*/
         my_solution = my_solution->Create();
 
-        my_solution->weights.first = EPS;
-        my_solution->weights.second = 1-EPS;
+        my_solution->weights.first = 1-EPS;
+        my_solution->weights.second = EPS;
 
         my_solution->GenerateGreedySolutionWeigth();
         //this->AddSolution(my_solution);

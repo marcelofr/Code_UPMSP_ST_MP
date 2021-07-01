@@ -59,6 +59,7 @@ public:
         }
 
         this->objective_funtion = max(this->weights.first*(this->makeSpan-Z_STAR::makespan), this->weights.second*(this->TEC-Z_STAR::TEC));
+        //this->objective_funtion = (this->weights.first*this->makeSpan) + (this->weights.second*this->TEC);
     }
 
     void GenerateGreedySolutionWeigth()

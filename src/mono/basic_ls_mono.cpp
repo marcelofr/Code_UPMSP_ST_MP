@@ -3,20 +3,6 @@
 
 bool CompareMakespanMonoSolution(MonoSolution *& l, MonoSolution *& r) //(2)
 {
-    /*if(*l < *r){
-        return true;
-    }
-    else if (*r < *l){
-        return false;
-    }
-    else{
-        if(*l < *r){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }*/
 
     if(l->makeSpan < r->makeSpan){
         return true;
@@ -44,33 +30,16 @@ void SortByMakespanMonoSolution(vector<MonoSolution*> &set_solution)
 
 void SetWeights(NDSetSolution<MonoSolution *> non_dominated_set){
 
+    vector<pair<double, double>> Weigths;
     unsigned qtd_solutions;
     qtd_solutions = non_dominated_set.set_solution.size();
 
-    //W.resize(num_weights);
+    GenerateWeightVector(Weigths, qtd_solutions);
 
-    unsigned x,y;
-    x = 0;
-    y = qtd_solutions;
-
-
-    non_dominated_set.set_solution[0]->weights.first = 1-EPS;
-    non_dominated_set.set_solution[0]->weights.second = EPS;
-
-    x++;
-    y--;
-
-    for(unsigned h=1;h<qtd_solutions-1 ;h++){        
-        non_dominated_set.set_solution[h]->weights.first = double(y-1)/double(qtd_solutions-1);
-        non_dominated_set.set_solution[h]->weights.second = double(x)/double(qtd_solutions-1);
-        x++;
-        y--;
+    unsigned i=0;
+    for(auto it: non_dominated_set.set_solution){
+        it->weights = Weigths[i++];
     }
-
-    non_dominated_set.set_solution[qtd_solutions-1]->weights.first = EPS;
-    non_dominated_set.set_solution[qtd_solutions-1]->weights.second = 1-EPS;
-    x++;
-    y--;
 
 }
 
@@ -83,22 +52,21 @@ void GenerateWeightVector(vector<pair<double, double>> &Weigths, unsigned num_we
     x = 0;
     y = num_weights;
 
-
-    Weigths[0].first = 1-EPS;
-    Weigths[0].second = EPS;
+    Weigths[0].first = EPS;
+    Weigths[0].second = 1-EPS;
 
     x++;
     y--;
 
     for(unsigned h=1;h<num_weights-1 ;h++){
-        Weigths[h].first = double(y-1)/double(num_weights-1);
-        Weigths[h].second = double(x)/double(num_weights-1);
+        Weigths[h].first = double(x)/double(num_weights-1);
+        Weigths[h].second = double(y-1)/double(num_weights-1);
         x++;
         y--;
     }
 
-    Weigths[num_weights-1].first = EPS;
-    Weigths[num_weights-1].second = 1-EPS;
+    Weigths[num_weights-1].first = 1-EPS;
+    Weigths[num_weights-1].second = EPS;
     x++;
     y--;
 
