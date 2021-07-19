@@ -52,10 +52,10 @@ int main(int argc, char** argv)
     }
     else{
 
-        //alg_data.param.instance_folder = "../../Instances/SMALL/"; alg_data.param.instance_name = "6_2_1439_3_S_1-9";
+        alg_data.param.instance_folder = "../../Instances/SMALL/"; alg_data.param.instance_name = "6_2_1439_3_S_1-9";
         //alg_data.param.instance_folder = "../../Instances/LARGE/"; alg_data.param.instance_name = "50_10_1439_5_S_1-9";
         //alg_data.param.instance_folder = "../../Instances/LARGE/"; alg_data.param.instance_name = "250_10_1439_5_S_1-124";
-        alg_data.param.instance_folder = "../../Instances/LARGE/"; alg_data.param.instance_name = "750_10_1439_5_S_1-124";
+        //alg_data.param.instance_folder = "../../Instances/LARGE/"; alg_data.param.instance_name = "750_10_1439_5_S_1-124";
 
         alg_data.param.instance_extension = ".dat";
         alg_data.param.instance_file = alg_data.param.instance_folder + alg_data.param.instance_name + alg_data.param.instance_extension;
@@ -79,8 +79,8 @@ int main(int argc, char** argv)
         alg_data.param.s_population_size = "110";
         alg_data.param.s_prob_mutation = "5";
 
-        alg_data.param.u_decomposition_size = 40;
-        alg_data.param.u_decomposition_neighboor_size = 8;
+        alg_data.param.s_decomposition_size = "40";
+        alg_data.param.s_decomposition_neighboor_size = "8";
 
     }
 
