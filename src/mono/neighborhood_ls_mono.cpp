@@ -100,7 +100,8 @@ bool SwapInsideLSMono_BI(MonoSolution *my_solution)
 
                 //Verifica se a solução vizinha é melhor que a solução corrente
                 //Caso afirmativo, então retorna true, senão continua a busca
-                if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                //if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                if(neighbor_sol->objective_funtion - best_sol->objective_funtion < -EPS){
                     *best_sol = *neighbor_sol;
                 }
 
@@ -115,7 +116,8 @@ bool SwapInsideLSMono_BI(MonoSolution *my_solution)
     my_solution->CalculeMonoObjectiveTchebycheff();
     best_sol->CalculeMonoObjectiveTchebycheff();
 
-    if(best_sol->objective_funtion < my_solution->objective_funtion){
+    //if(best_sol->objective_funtion < my_solution->objective_funtion){
+    if(best_sol->objective_funtion - my_solution->objective_funtion < -EPS){
         *my_solution = *best_sol;
         improve=true;
     }
@@ -241,7 +243,8 @@ bool SwapOutsideLSMono_BI(MonoSolution *my_solution)
 
                     //Verifica se a solução vizinha é melhor que a solução corrente
                     //Caso afirmativo, então retorna true, senão continua a busca
-                    if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                    //if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                    if(neighbor_sol->objective_funtion - best_sol->objective_funtion < -EPS){
                         *best_sol = *neighbor_sol;
 
                     }
@@ -261,7 +264,8 @@ bool SwapOutsideLSMono_BI(MonoSolution *my_solution)
     my_solution->CalculeMonoObjectiveTchebycheff();
     best_sol->CalculeMonoObjectiveTchebycheff();
 
-    if(best_sol->objective_funtion < my_solution->objective_funtion){
+    //if(best_sol->objective_funtion < my_solution->objective_funtion){
+    if(best_sol->objective_funtion - my_solution->objective_funtion < -EPS){
         *my_solution = *best_sol;
         improve=true;
     }
@@ -372,7 +376,8 @@ bool InsertInsideLSMono_BI(MonoSolution *my_solution)
 
                 //Verifica se a solução vizinha é melhor que a solução corrente
                 //Caso afirmativo, então retorna true, senão continua a busca
-                if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                //if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                if(neighbor_sol->objective_funtion - best_sol->objective_funtion < -EPS){
                     *best_sol = *neighbor_sol;
 
                 }
@@ -388,7 +393,8 @@ bool InsertInsideLSMono_BI(MonoSolution *my_solution)
     best_sol->CalculeMonoObjectiveTchebycheff();
     my_solution->CalculeMonoObjectiveTchebycheff();
 
-    if(best_sol->objective_funtion < my_solution->objective_funtion){
+    //if(best_sol->objective_funtion < my_solution->objective_funtion){
+    if(best_sol->objective_funtion - my_solution->objective_funtion < -EPS){
         *my_solution = *best_sol;
         improve=true;
     }
@@ -511,7 +517,8 @@ bool InsertOutsideLSMono_BI(MonoSolution *my_solution)
 
                     //Verifica se a solução vizinha é melhor que a solução corrente
                     //Caso afirmativo, então retorna true, senão continua a busca
-                    if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                    //if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                    if(neighbor_sol->objective_funtion - best_sol->objective_funtion < -EPS){
                         *best_sol = *neighbor_sol;
 
                     }
@@ -531,7 +538,8 @@ bool InsertOutsideLSMono_BI(MonoSolution *my_solution)
     my_solution->CalculeMonoObjectiveTchebycheff();
     best_sol->CalculeMonoObjectiveTchebycheff();
 
-    if(best_sol->objective_funtion < my_solution->objective_funtion){
+    //if(best_sol->objective_funtion < my_solution->objective_funtion){
+    if(best_sol->objective_funtion - my_solution->objective_funtion < -EPS){
         *my_solution = *best_sol;
         improve=true;
     }
@@ -652,7 +660,8 @@ bool ChangeOpModeLSMono_BI(MonoSolution *my_solution)
 
                     //Verifica se a solução vizinha é melhor que a solução corrente
                     //Caso afirmativo, então retorna true, senão continua a busca
-                    if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                    //if(neighbor_sol->objective_funtion < best_sol->objective_funtion){
+                    if(neighbor_sol->objective_funtion - best_sol->objective_funtion < -EPS){
                         *best_sol = *neighbor_sol;
 
 
@@ -672,7 +681,8 @@ bool ChangeOpModeLSMono_BI(MonoSolution *my_solution)
     my_solution->CalculeMonoObjectiveTchebycheff();
     best_sol->CalculeMonoObjectiveTchebycheff();
 
-    if(best_sol->objective_funtion < my_solution->objective_funtion){
+    //if(best_sol->objective_funtion < my_solution->objective_funtion){
+    if(best_sol->objective_funtion - my_solution->objective_funtion < -EPS){
         *my_solution = *best_sol;
         improve=true;
     }

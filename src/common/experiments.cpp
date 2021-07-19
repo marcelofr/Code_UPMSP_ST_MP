@@ -46,7 +46,7 @@ void RunAlgorithm(algorithm_data alg_data){
     else if(alg_data.param.algorithm_name == "MOVNS_Eduardo"){
         RunAlgorithmMOVNSEduardo(alg_data, nd_set_solution, t1);
     }
-    else if(alg_data.param.algorithm_name == "MONO"){
+    else if(alg_data.param.algorithm_name == "MOVNS_D"){
         RunAlgorithmMono(alg_data, nd_set_solution, t1);
     }
 
@@ -78,8 +78,10 @@ void RunAlgorithm(algorithm_data alg_data){
     #ifdef IRACE
         pair<unsigned, double> reference_point;
         double hv;
-        reference_point.first = alg_data.non_dominated_set.back().first;
-        reference_point.second = alg_data.non_dominated_set.front().second;
+        /*reference_point.first = alg_data.non_dominated_set.back().first;
+        reference_point.second = alg_data.non_dominated_set.front().second;*/
+        reference_point.first = UINT_MAX;
+        reference_point.second = UINT_MAX;
         hv = CalculateHypervolumeMin(alg_data.non_dominated_set, reference_point);
         //cout << hv << " " << ir.elapsed_time_sec << endl;
         cout << hv << endl;
@@ -143,7 +145,6 @@ void RunAlgorithmExact(algorithm_data alg_data, vector<Solution*> &non_dominated
     RunWeightedMathModel(alg_data.time_limit, alg_data.param.d_alpha, my_solution);
 
     //Modelo espsilon-restrito
-
     /*if(true){
         my_solution->GenerateGreedySolutionMakespan();
         RunEpsilonMathModel(alg_data.time_limit, my_solution->makeSpan, 0, my_solution);
@@ -243,7 +244,7 @@ void RunAlgorithmMOVNSArroyo(algorithm_data alg_data, vector<Solution*> &nd_set_
         cout << "===========Fim Solução Inicial===========" << endl << endl;
     #endif
 
-    alg_data.qtd_neighbor = 5;
+    alg_data.qtd_neighbor = QTD_NEIGHBOR;
 
     MOVNS_Arroyo(*obj_nd_set_solution, alg_data, t1);
 
@@ -309,23 +310,30 @@ void RunAlgorithmMono(algorithm_data alg_data, vector<Solution*> &non_dominated_
     //non_dominated_set_ms->ConstructiveCombinatorialSolution();
     //non_dominated_set_ms->ConstrutiveRandom(10);
 
-    unsigned sz = 50;
+    unsigned sz = alg_data.param.u_decomposition_size;
 
-    alg_data.qtd_neighbor = 5;
-    alg_data.num_group = 3;
+    //Tamanho de cada grupo
+    alg_data.num_group = alg_data.param.u_decomposition_neighboor_size;
+
+    //Quantidade de vizinhanças 5+1
+    alg_data.qtd_neighbor = QTD_NEIGHBOR;
+
     alg_data.num_weights = sz;
-
     non_dominated_set_ms->ConstrutiveGreedyWeight(sz);
-    //alg_data.num_weights = non_dominated_set.set_solution.size();
+
+    /*non_dominated_set_ms->ConstructiveCombinatorialSolution();
+    alg_data.num_weights = non_dominated_set_ms->set_solution.size();*/
 
 
     #ifdef DEBUG
         cout << "===========Inicio Solução Inicial===========" << endl;
         non_dominated_set_ms->PrintSetSolution();
         cout << "===========Fim Solução Inicial===========" << endl << endl;
+
+        cout << "Tempo limite: " << alg_data.time_limit << endl;
     #endif
 
-    SortByMakespanMonoSolution(non_dominated_set_ms->set_solution);
+    //SortByMakespanMonoSolution(non_dominated_set_ms->set_solution);
 
     //SetWeights(*non_dominated_set_ms);
     MOVNS_D(*non_dominated_set_ms, alg_data, t1);

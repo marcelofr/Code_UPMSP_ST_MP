@@ -2,6 +2,7 @@
 #define BASIC_LOCAL_SEARCH_H
 
 #include "local_search/lssolution.h"
+#define QTD_NEIGHBOR 5
 
 bool SwapInsideLS_FI(LSSolution *my_solution, NDSetSolution<LSSolution*> &non_dominated_set);
 bool SwapInsideLS_BI(LSSolution *my_solution, NDSetSolution<LSSolution*> &non_dominated_set_out);

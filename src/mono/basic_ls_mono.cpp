@@ -153,7 +153,8 @@ void Construction(MonoSolution * partial_solution, vector<unsigned> removed_jobs
                         reconstructed_solution->CalculeMonoObjective();
                         best_reconstructed_solution->CalculeMonoObjective();
 
-                        if(reconstructed_solution->objective_funtion < best_reconstructed_solution->objective_funtion){
+                        //if(reconstructed_solution->objective_funtion < best_reconstructed_solution->objective_funtion){
+                        if(reconstructed_solution->objective_funtion - best_reconstructed_solution->objective_funtion < -EPS){
                             *best_reconstructed_solution = *reconstructed_solution;
                         }
 

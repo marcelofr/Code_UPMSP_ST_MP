@@ -143,19 +143,24 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
     Z_STAR::TEC = INT_MAX;
 
     for(auto it:non_dominated_set.set_solution){
+        if(it->makeSpan < Z_STAR::makespan){
+            Z_STAR::makespan = it->makeSpan;
+        }
+
+        if(it->TEC < Z_STAR::TEC){
+            Z_STAR::TEC = it->TEC;
+        }
+    }
+
+    for(auto it:non_dominated_set.set_solution){
         it->CalculeMonoObjectiveTchebycheff();
     }
 
-    //Calcular as distâncias entre as soluções e os pesos
-    unsigned size_nds = non_dominated_set.set_solution.size();
-    vector<vector<double>>distance_weighted_solution(alg_data.num_weights, vector<double>(size_nds));
-    pair<double, double> point;
-
+    //Calcular as distâncias entre os pesos par a par
+    vector<vector<double>>distance_weighted(alg_data.num_weights, vector<double>(alg_data.num_weights));
     for(unsigned i=0; i<alg_data.num_weights; i++){
-        for(unsigned j=0; j<non_dominated_set.set_solution.size(); j++){
-            point.first = non_dominated_set.set_solution[j]->makeSpan;
-            point.second = non_dominated_set.set_solution[j]->TEC;
-            distance_weighted_solution[i][j] = CalcDistanceWeightedToSolution(Weights[i], point);
+        for(unsigned j=0; j<alg_data.num_weights; j++){
+            distance_weighted[i][j] = CalcDistanceWeightedToWeighted(Weights[i], Weights[j]);
         }
     }
 
@@ -164,34 +169,19 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
     double best_distance;
     vector<vector<unsigned>>solution_neighboor(alg_data.num_weights, vector<unsigned>(alg_data.num_group));
 
-
-    //Associar cada solução a um peso
-    /*for(unsigned j=0; j<size_nds; j++){
-        best_distance = INT_MAX;
-        best_index = 0;
-        for(unsigned i=0; i<alg_data.num_weights; i++){
-            if(distance_weighted_solution[j][i] < best_distance){
-                best_distance = distance_weighted_solution[j][i];
-                best_index = i;
-            }
-        }
-        non_dominated_set.set_solution[j]->weights = Weights[best_index];
-    }*/
-
-    //Associar cada pesa a um conjunto j de soluções
-
+    //Associar cada peso a um conjunto j de pesos
     for(unsigned i=0; i<alg_data.num_weights; i++){
         for(unsigned k=0; k<alg_data.num_group; k++){
             best_distance = INT_MAX;
             best_index = 0;
-            for(unsigned j=0; j<size_nds; j++){
-                if(distance_weighted_solution[i][j] < best_distance){
-                    best_distance = distance_weighted_solution[i][j];
+            for(unsigned j=0; j<alg_data.num_weights; j++){
+                if(distance_weighted[i][j] < best_distance){
+                    best_distance = distance_weighted[i][j];
                     best_index = j;
                 }
             }
             solution_neighboor[i][k] = best_index;
-            distance_weighted_solution[i][best_index] = INT_MAX;
+            distance_weighted[i][best_index] = INT_MAX;
         }
     }
 
@@ -234,8 +224,10 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
                         non_dominated_set.set_solution[op]->CalculeMonoObjectiveTchebycheff();
 
                         if(current_solution->objective_funtion - non_dominated_set.set_solution[op]->objective_funtion < -0.01){
+                        //if(current_solution < non_dominated_set.set_solution[op]){
                             *non_dominated_set.set_solution[op] = *current_solution;
                             improve = true;
+                            //r = 0;
                         }
 
                     }
@@ -246,8 +238,10 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
 
                     non_dominated_set.set_solution[op]->CalculeMonoObjectiveTchebycheff();
 
-                    if(current_solution->objective_funtion < non_dominated_set.set_solution[op]->objective_funtion){
-                        //*non_dominated_set.set_solution[op] = *current_solution;
+                    //Se current_solution é melhor que non_dominated_set.set_solution[op]
+                    if(current_solution->objective_funtion - non_dominated_set.set_solution[op]->objective_funtion < -EPS){
+                    //if(current_solution < non_dominated_set.set_solution[op]){
+                        *non_dominated_set.set_solution[op] = *current_solution;
                         improve = true;
                     }
                 }
@@ -275,8 +269,9 @@ void MOVNS_D(NDSetSolution<MonoSolution *> &non_dominated_set, algorithm_data al
                                 w_j.second*(non_dominated_set.set_solution[it_j]->TEC - Z_STAR::TEC));
 
 
-                if(obj_i < obj_j){
-                    //*non_dominated_set.set_solution[it_j] = *non_dominated_set.set_solution[op];
+                //if(obj_i < obj_j){
+                if(obj_i - obj_j < -EPS){
+                    *non_dominated_set.set_solution[it_j] = *non_dominated_set.set_solution[op];
                     non_dominated_set.set_solution[it_j]->weights = w_j;
                 }
             }

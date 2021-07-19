@@ -20,6 +20,11 @@ struct parameters{
     unsigned u_prob_mutation;
     unsigned u_population_size;
     string s_seed, s_max_time_factor, s_alpha, s_prob_mutation, s_population_size;
+    string s_destruction_factor;
+    unsigned u_destruction_factor;
+    string s_decomposition_size, s_decomposition_neighboor_size;
+    unsigned u_decomposition_size, u_decomposition_neighboor_size;
+
 };
 
 struct algorithm_data{

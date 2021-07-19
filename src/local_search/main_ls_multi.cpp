@@ -384,7 +384,7 @@ void MOVNS_Arroyo(NDSetSolution<LSSolution *> &non_dominated_set, algorithm_data
 
     shaked_solution = new LSSolution ();
 
-    const double destruction_rate = 0.1;
+    const double destruction_rate = double(alg_data.param.u_destruction_factor)/double(100);
 
     while (t1->getElapsedTimeInMilliSec() < alg_data.time_limit) {
 

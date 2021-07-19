@@ -143,15 +143,22 @@ void SortByMakespan(vector<pair<unsigned, double>> &set_solution)
     sort(set_solution.begin(), set_solution.end(), CompareMakespanPoint);
 }
 
-double CalcDistanceWeightedToSolution(pair<double, double> cof_weighted, pair<double, double> point_solution)
+double CalcDistanceWeightedToWeighted(pair<double, double> cof_weighted, pair<double, double> point_solution)
 {
 
-    double distance;
+    /*double distance;
     double m;
     m = double(cof_weighted.second)/double(cof_weighted.first);
     double a, b;
     a = m;
     b = -1;
     distance = double(abs(a*point_solution.first + b*point_solution.second))/double(sqrt(pow(a,2)+pow(b,2)));
+    return distance;*/
+
+    double distance;
+
+    distance = double(sqrt(pow(cof_weighted.first-point_solution.first,2)+
+                      pow(cof_weighted.second-point_solution.second,2)));
+
     return distance;
 }

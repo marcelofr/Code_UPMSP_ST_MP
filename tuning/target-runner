@@ -21,8 +21,8 @@ error() {
     exit 1
 }
 
-EXE=/home/marcelo/Code_UPMSP_ST_MP/build/src/src
-FIXED_PARAMS="GA Solutions/ 0.1"
+EXE=/home/marcelo/Dropbox/Doutorado-Compartilhado/Tese/Code_UPMSP_ST_MP/build/src/src
+FIXED_PARAMS="GA Solutions/ 1000"
 
 CONFIG_ID=$1
 INSTANCE_ID=$2
@@ -52,7 +52,7 @@ fi
 #$EXE -i $INSTANCE ${FIXED_PARAMS} ${CONFIG_PARAMS} 1> ${STDOUT} 2> ${STDERR}
 # echo "Instância: "$INSTANCE
 #INSTANCE="Instances/50_10_1439_5_S_1-9.dat 12 .dat"
-$EXE $INSTANCE "file" ".dat" ${SEED} ${FIXED_PARAMS} ${CONFIG_PARAMS} "1000" 1> ${STDOUT} 2> ${STDERR}
+$EXE $INSTANCE "file" ".dat" ${SEED} ${FIXED_PARAMS} ${CONFIG_PARAMS} 1> ${STDOUT} 2> ${STDERR}
 
 # # This may be used to introduce a delay if there are filesystem
 # # issues.

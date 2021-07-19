@@ -38,6 +38,6 @@ void Union( int uf[],int x, int y ) ;
 
 bool AddPoint(pair<unsigned, double> point, vector<pair<unsigned, double>> &non_dominated_set);
 void SortByMakespan(vector<pair<unsigned, double>> &set_solution);
-double CalcDistanceWeightedToSolution(pair<double, double> point, pair<double, double> cof_line);
+double CalcDistanceWeightedToWeighted(pair<double, double> point, pair<double, double> cof_line);
 
 #endif // UTILS_H

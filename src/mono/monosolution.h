@@ -91,7 +91,7 @@ public:
                     obj_job = 0;
                     machine = 1;
                     GreedyChoiceWeigth(*it, o, machine, position, diff_time, obj_job);
-                    if(obj_job < best_obj_job){
+                    if(obj_job - best_obj_job < -EPS){
                         best_machine = machine;
                         best_position = position;
                         best_diff_time = diff_time;
