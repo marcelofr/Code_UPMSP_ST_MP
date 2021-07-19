@@ -369,21 +369,28 @@ void Discretize(unsigned factor){
 
     /*Fazer a discretização do tempo*/
     Instance::discretization_factor = factor;
-    Instance::num_planning_horizon = ((Instance::num_planning_horizon+1)/Instance::discretization_factor)-1;
+    Instance::num_planning_horizon = ceil(double(Instance::num_planning_horizon+1)
+                                      /double(Instance::discretization_factor))-1;
     for(unsigned i=0; i<Instance::num_days; i++){
-        Instance::v_peak_start[i] = Instance::v_peak_start[i]/Instance::discretization_factor;
-        Instance::v_peak_end[i] = ((Instance::v_peak_end[i]+1)/Instance::discretization_factor)-1;
+        Instance::v_peak_start[i] = ceil(double(Instance::v_peak_start[i])
+                                        /double(Instance::discretization_factor));
+        Instance::v_peak_end[i] = ceil(double(Instance::v_peak_end[i]+1)
+                                   /double(Instance::discretization_factor))-1;
     }
     for(unsigned i=1; i<=Instance::num_machine; i++){
         for(unsigned j=1; j<=Instance::num_jobs; j++){
-            Instance::m_processing_time[i][j] = ceil(double(Instance::m_processing_time[i][j])/double(Instance::discretization_factor));
+            Instance::m_processing_time[i][j] = ceil(double(Instance::m_processing_time[i][j])
+                                                     /double(Instance::discretization_factor));
             for(unsigned k=1; k<=Instance::num_jobs; k++){
-                Instance::m_setup_time[i][j][k] = ceil(double(Instance::m_setup_time[i][j][k])/double(Instance::discretization_factor));
+                Instance::m_setup_time[i][j][k] = ceil(double(Instance::m_setup_time[i][j][k])
+                                                       /double(Instance::discretization_factor));
             }
         }
     }
-    Instance::max_energy_cost = ceil(double(Instance::max_energy_cost)/double(Instance::discretization_factor));
-    Instance::max_makespan = ceil(double(Instance::max_makespan)/double(Instance::discretization_factor));
+    Instance::max_energy_cost = ceil(double(Instance::max_energy_cost)
+                                     /double(Instance::discretization_factor));
+    Instance::max_makespan = ceil(double(Instance::max_makespan)
+                                  /double(Instance::discretization_factor));
 
 }
 
