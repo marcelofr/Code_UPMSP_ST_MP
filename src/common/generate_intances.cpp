@@ -37,7 +37,7 @@ void GenerateSmallInstances()
     range_potency.second = 200;
     ip.range_potency = range_potency;
 
-    ip.destination_folder = DESTINATION_FOLDER;
+    ip.destination_folder = DESTINATION_FOLDER_SMALL;
 
     ip.speed_factor.push_back(1.2);
     ip.speed_factor.push_back(1);
@@ -89,8 +89,76 @@ void CreateNewIntance(InstanceParam ip)
     Instance::num_days = new_num_days;
 
     //Gerar uma solução inicial gulosa considerando o objetivo do makespan
-    my_solution->GenerateGreedySolutionMakespan();
-    Instance::max_cost = ceil(my_solution->TEC);
+    //my_solution->GenerateGreedySolutionMakespan();
+
+    /*
+     * --Calcular o maior valor possível para o makespan--
+     * maior tempo de término para todas as tarefas
+     * maior tempo de preparação para todas as tarefas
+     * todas na mesma máquina
+     * Não pode exceder o horizonte de planejamento
+    */
+
+    //Encontra o fator de velocidade mais lento
+    double slower_speed_factor = Instance::v_speed_factor[1];
+    for(unsigned op=2; op <= Instance::num_mode_op; op++){
+        if(Instance::v_speed_factor[op] < slower_speed_factor){
+            slower_speed_factor = Instance::v_speed_factor[op];
+        }
+    }
+
+    //Encontrar o maior custo para cada tarefa
+    unsigned max_proc_time_job = 0;
+    unsigned sum_proc_time_job = 0;
+    for (unsigned j=1; j <= Instance::num_jobs; j++) {
+        max_proc_time_job = 0;
+        for (unsigned i=1; i <= Instance::num_machine; i++) {
+            if(Instance::m_processing_time[i][j] > max_proc_time_job)
+                max_proc_time_job = Instance::m_processing_time[i][j];
+        }
+        sum_proc_time_job += max_proc_time_job;
+    }
+
+    unsigned max_setup_time_job = 0;
+    unsigned sum_setup_time_job = 0;
+    for (unsigned j=1; j <= Instance::num_jobs; j++) {
+        max_setup_time_job = 0;
+        for (unsigned i=1; i <= Instance::num_machine; i++) {
+            for (unsigned k=1; k <= Instance::num_jobs; k++) {
+                if(Instance::m_setup_time[i][j][k] > max_setup_time_job)
+                    max_setup_time_job = Instance::m_setup_time[i][j][k];
+            }
+        }
+        sum_setup_time_job += max_setup_time_job;
+    }
+
+    unsigned max_makespan = ceil(double(sum_proc_time_job)/double(slower_speed_factor))
+            + sum_setup_time_job;
+    //Instance::max_makespan = min(max_makespan, Instance::num_planning_horizon*Instance::num_days);
+    Instance::max_makespan = max_makespan;
+
+    //Encontrar a máquina com a maior potência (e maior consumo)
+    unsigned higher_potency_op = 1;
+    for(unsigned op=2; op <= Instance::num_machine; op++){
+        if(Instance::v_machine_potency[op] > Instance::v_machine_potency[higher_potency_op]){
+            higher_potency_op = op;
+        }
+    }
+
+    //Encontrar o modo de operação com maior fator de consumo consumo
+    unsigned higher_consumption_factor = 1;
+    for(unsigned op=2; op <= Instance::num_mode_op; op++){
+        if(Instance::v_consumption_factor[op] > Instance::v_consumption_factor[higher_consumption_factor]){
+            higher_consumption_factor = op;
+        }
+    }
+
+    double max_tec;
+    max_tec = sum_proc_time_job*Instance::v_machine_potency[higher_potency_op]
+            *Instance::rate_on_peak*Instance::v_consumption_factor[higher_consumption_factor];
+
+    max_tec = double(max_tec)/double(60);
+    Instance::max_energy_cost = max_tec;
 
     //Salvar dados da instância em arquivo
     SaveInstanceDataToFile(ip);
@@ -136,7 +204,7 @@ void GenerateLargeInstances()
     range_potency.second = 200;
     ip.range_potency = range_potency;
 
-    ip.destination_folder = DESTINATION_FOLDER;
+    ip.destination_folder = DESTINATION_FOLDER_LARGER;
 
     ip.speed_factor.push_back(1.2);
     ip.speed_factor.push_back(1.1);
@@ -176,7 +244,8 @@ void GenerateInstanceData(InstanceParam ip){
     Instance::num_mode_op = ip.num_op_mode;
     Instance::rate_on_peak = RATE_IN_PEAK;
     Instance::rate_off_peak = RATE_OFF_PEAK;
-    Instance::max_cost = MAX_COST;
+    Instance::max_energy_cost = MAX_COST;
+    Instance::max_makespan = MAX_COST;
 
     Instance::Init();
 
@@ -302,7 +371,8 @@ void SaveInstanceDataToFile(InstanceParam ip){
     MyFile << "o " << Instance::num_mode_op << endl;
     MyFile << "rate_in_peak " << RATE_IN_PEAK << endl;
     MyFile << "rate_off_peak " << RATE_OFF_PEAK << endl;
-    MyFile << "max_cost " << Instance::max_cost << endl;
+    MyFile << "max_energy_cost " << Instance::max_energy_cost << endl;
+    MyFile << "max_makespan " << Instance::max_makespan << endl;
 
     MyFile << endl;
 

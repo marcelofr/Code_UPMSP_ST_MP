@@ -7,7 +7,8 @@ unsigned Instance::num_days = 0;
 unsigned Instance::num_mode_op = 0;
 double Instance::rate_on_peak = 0;
 double Instance::rate_off_peak = 0;
-unsigned Instance::max_cost = 0;
+unsigned Instance::max_energy_cost = 0;
+unsigned Instance::max_makespan = 0;
 unsigned Instance::seed = 0;
 unsigned Instance::discretization_factor = 1;
 
@@ -95,7 +96,12 @@ void Instance::ReadJulioInstance(string instanceFile)
     //Leitura do custo máximo
     getline(arqEntrada, next);
     aux = next.substr(19,next.size()-20);
-    Instance::max_cost = size_t(stoi(aux));
+    Instance::max_energy_cost = size_t(stoi(aux));
+
+    //Leitura do custo máximo
+    getline(arqEntrada, next);
+    aux = next.substr(19,next.size()-20);
+    Instance::max_makespan = size_t(stoi(aux));
 
     Instance::Init();
 
@@ -229,7 +235,12 @@ void Instance::ReadMarceloInstance(string instance_file_name)
     //Leitura do custo máximo
     arqEntrada >> next;
     arqEntrada >> u_num;
-    Instance::max_cost = u_num;
+    Instance::max_energy_cost = u_num;
+
+    //Leitura do custo máximo
+    arqEntrada >> next;
+    arqEntrada >> u_num;
+    Instance::max_makespan = u_num;
 
     Instance::Init();
 
@@ -313,7 +324,8 @@ void Instance::PrintInstance1()
     cout << "Número de modos de operação: " << Instance::num_mode_op << endl;
     cout << "Tarifa dentro do horário de pico: " << Instance::rate_on_peak << endl;
     cout << "Tarifa fora do horário de pico: " << Instance::rate_off_peak << endl;
-    cout << "Custo máximo: " << Instance::max_cost << endl;
+    cout << "Custo máximo: " << Instance::max_energy_cost << endl;
+    cout << "Makespan máximo: " << Instance::max_makespan << endl;
 
     cout << "Horário de pico" << endl;
     for (size_t i = 0; i <= Instance::num_days; i++) {

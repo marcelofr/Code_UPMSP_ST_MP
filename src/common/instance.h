@@ -19,7 +19,7 @@ public:
     //fatorPotencia => lambda_l
     //horizontePlanej => H
     static unsigned num_jobs, num_machine, num_planning_horizon, num_days;
-    static unsigned num_mode_op, max_cost;
+    static unsigned num_mode_op, max_energy_cost, max_makespan;
     static double rate_on_peak, rate_off_peak;
     static unsigned seed;
     static unsigned discretization_factor;

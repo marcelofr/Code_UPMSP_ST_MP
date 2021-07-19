@@ -377,7 +377,8 @@ void Discretize(unsigned factor){
             }
         }
     }
-    Instance::max_cost = Instance::max_cost/Instance::discretization_factor;
+    Instance::max_energy_cost = ceil(double(Instance::max_energy_cost)/double(Instance::discretization_factor));
+    Instance::max_makespan = ceil(double(Instance::max_makespan)/double(Instance::discretization_factor));
 
 }
 

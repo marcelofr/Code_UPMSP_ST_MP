@@ -101,7 +101,7 @@ void Model::SetObjective(double alpha)
     // Set objective
     //(2)
     //double alpha = 0.5;
-    GRBLinExpr aux = (CMax/double(Instance::num_planning_horizon))*alpha +((PecOn+PecOff)/double(Instance::max_cost))*(1-alpha);
+    GRBLinExpr aux = (CMax/double(Instance::max_makespan))*alpha +((PecOn+PecOff)/double(Instance::max_energy_cost))*(1-alpha);
     //GRBLinExpr aux = CMax*alpha + (PecOn+PecOff)*(1-alpha);
     //GRBLinExpr aux = CMax + (PecOn+PecOff);
     //GRBLinExpr aux = (CMax);

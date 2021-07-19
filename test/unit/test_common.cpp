@@ -57,7 +57,7 @@ TEST_F(TestCommon, ReadMarceloInstance) {
     EXPECT_EQ(Instance::num_mode_op, 3);
     EXPECT_EQ(Instance::rate_on_peak, 0.47753);
     EXPECT_EQ(Instance::rate_off_peak, 0.32282);
-    EXPECT_EQ(Instance::max_cost, 148);
+    EXPECT_EQ(Instance::max_energy_cost, 148);
 
     EXPECT_EQ(Instance::v_peak_start[0], 1080);
     EXPECT_EQ(Instance::v_peak_end[0], 1259);
