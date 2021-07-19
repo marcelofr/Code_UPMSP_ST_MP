@@ -79,6 +79,9 @@ int main(int argc, char** argv)
         alg_data.param.s_population_size = "110";
         alg_data.param.s_prob_mutation = "5";
 
+        alg_data.param.u_decomposition_size = 40;
+        alg_data.param.u_decomposition_neighboor_size = 8;
+
     }
 
     //Fazer as conversões de dados
