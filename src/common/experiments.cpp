@@ -136,10 +136,15 @@ void RunAlgorithmNSGAII(algorithm_data alg_data, vector<Solution*> &non_dominate
 
 void RunAlgorithmExact(algorithm_data alg_data, vector<Solution*> &non_dominated_set){
 
-    Solution * my_solution;
+    MonoSolution * my_solution;
 
     //Gerar uma solução inicial gulosa considerando o objetivo do makespan
-    my_solution = new Solution();
+    my_solution = new MonoSolution();
+
+    my_solution->weights.first = alg_data.param.d_alpha;
+    my_solution->weights.second = 1-alg_data.param.d_alpha;
+
+    my_solution->GenerateGreedySolutionWeigth();
 
     //Modelo ponderado
     RunWeightedMathModel(alg_data.time_limit, alg_data.param.d_alpha, my_solution);
