@@ -80,8 +80,8 @@ void RunAlgorithm(algorithm_data alg_data){
         double hv;
         /*reference_point.first = alg_data.non_dominated_set.back().first;
         reference_point.second = alg_data.non_dominated_set.front().second;*/
-        reference_point.first = UINT_MAX;
-        reference_point.second = UINT_MAX;
+        reference_point.first = Instance::max_makespan;
+        reference_point.second = Instance::max_energy_cost;
         hv = CalculateHypervolumeMin(alg_data.non_dominated_set, reference_point);
         //cout << hv << " " << ir.elapsed_time_sec << endl;
         cout << hv << endl;
