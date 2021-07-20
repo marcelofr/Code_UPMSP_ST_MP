@@ -46,10 +46,12 @@ seed[1]=60543
 size_seed=${#seed[@]}
 
 #Algoritmos
-algorithm[1]="GA"
-algorithm[2]="MOVNS_Arroyo"
-algorithm[3]="MOVNS_Eduardo"
-algorithm[4]="MONO"
+algorithm[1]="EXACT"
+#algorithm[1]="GA"
+#algorithm[2]="MOVNS_Arroyo"
+#algorithm[3]="MOVNS_Eduardo"
+#algorithm[4]="MOVNS_D"
+
 #Pega quantos algoritmos serao executados
 size_algorithm=${#algorithm[@]}
 
@@ -136,15 +138,53 @@ do
                     echo "  max_time_factor: "$max_time_factor
                     echo "  folder_solution: "$folder_solution
 
-                    alpha=0.1
+                    
                     tam_population=110
                     prob_mutation=5
+                    destruction_factor=10
+                    decomp_size=40
+                    decomp_neigh_size=8
 
-                    echo "  alpha: "$alpha
-                    echo "  tam_population: "$tam_population
-                    echo "  prob_mutation: "$prob_mutation
-                    
-                    ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $folder_solution $alpha $tam_population $prob_mutation $max_time_factor
+                    if [ $algorithm == "EXACT" ]
+                    then
+                        alpha=0.1
+                        max_time_factor=$((max_time_factor / 1000))
+                        echo "  new_max_time_factor: "$max_time_factor
+
+                        for((k=1;k<=9;k++))
+                        do
+
+                            alpha_i=$(echo "scale=4; $alpha*$k" | bc)
+                            echo "  alpha_i: "$alpha_i
+
+                            ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $folder_solution $max_time_factor $alpha_i $prob_mutation
+                        done
+
+                        exit;
+                        
+                    fi
+
+                    if [ $algorithm == "GA" ]
+                    then
+                        echo "  tam_population: "$tam_population
+                        echo "  prob_mutation: "$prob_mutation
+
+                        ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $folder_solution $max_time_factor $tam_population $prob_mutation
+                    fi
+
+                    if [ $algorithm == "MOVNS_Arroyo" ]
+                    then
+                        echo "  destruction_factor: "$destruction_factor
+
+                        ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $folder_solution $max_time_factor $destruction_factor $prob_mutation
+                    fi
+
+                    if [ $algorithm == "MOVNS_D" ]
+                    then
+                        echo "  destruction_factor: "$destruction_factor
+
+                        ./build/src/src $instance_folder $instance_name $instance_extension $seed $algorithm $folder_solution $max_time_factor $decomp_size $decomp_neigh_size
+                    fi
 
                     #Se o comando falhou salva a hora
                     if [ $? -gt 0 ];
