@@ -8,13 +8,6 @@ void CalculateHypervolume(map<string, map<string, vector<pair<unsigned, double>>
     algorithm_data alg_data;
     double hv;
 
-    //cout << setprecision(10);
-
-    //pair<unsigned, double> reference;
-
-
-    //string ref = "ref";
-
     //Para cada instância
     for(auto instance: sets){
 
@@ -31,7 +24,8 @@ void CalculateHypervolume(map<string, map<string, vector<pair<unsigned, double>>
 
 }
 
-void ReadFiles(vector<string> files, map<string, map<string, vector<pair<unsigned, double>>>> &sets){
+void ReadFiles(vector<string> files,
+               map<string, map<string, vector<pair<unsigned, double>>>> &sets){
 
     algorithm_data alg_data;
 
@@ -52,8 +46,7 @@ void ReadFiles(vector<string> files, map<string, map<string, vector<pair<unsigne
 
 void GenerateReferenceSet(string folder_solution,
                           map<string, map<string, vector<pair<unsigned, double>>>> &sets,
-                          map<string, map<string, double>> &hypervolume,
-                          map<string, pair<unsigned, double>> &reference_points){
+                          map<string, map<string, double>> &hypervolume){
 
     double hv;
     vector<pair<unsigned, double>> non_dominated_set;
@@ -83,6 +76,13 @@ void GenerateReferenceSet(string folder_solution,
             }
         }
 
+        string file_name = Instance::folder+instance.first+".dat";
+
+        Instance::ReadMarceloInstance(file_name);
+
+        reference_point.first = Instance::max_makespan;
+        reference_point.second = Instance::max_energy_cost;
+
         SortByMakespan(non_dominated_set);
         SalveReferenceSolution(non_dominated_set, folder_solution, instance.first, "GA", reference_point);
 
@@ -90,7 +90,7 @@ void GenerateReferenceSet(string folder_solution,
         sets[instance.first].insert({"ref", non_dominated_set});
 
         //Inserir o ponto de referência em reference_points
-        reference_points.insert({instance.first, reference_point});
+        //reference_points.insert({instance.first, reference_point});
 
         hv = CalculateHypervolumeMin(non_dominated_set, reference_point);
         //cout << "Hipervolume reference: " << hv << endl;

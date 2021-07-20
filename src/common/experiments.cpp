@@ -420,9 +420,27 @@ void SalveFileSolution(algorithm_data alg_data){
     MyFile << "Time_limit: "<< alg_data.time_limit << endl;
     MyFile << "Seed: "<< alg_data.param.s_seed << endl;
     MyFile << "Elapsed_time: " << alg_data.elapsed_time_sec << endl;
-    MyFile << "Alpha: " << alg_data.param.s_alpha << endl;
-    MyFile << "Population_size: " << alg_data.param.s_population_size << endl;
-    MyFile << "Probability_of_mutation: " << alg_data.param.s_prob_mutation << endl;
+    if(alg_data.param.algorithm_name == "GA"){
+        MyFile << "param1: " << alg_data.param.s_population_size << endl;
+        MyFile << "param2: " << alg_data.param.s_prob_mutation << endl;
+        MyFile << "param3: " << "nan" << endl;
+    }
+    else if(alg_data.param.algorithm_name == "MOVNS_Arroyo"){
+        MyFile << "param1: " << alg_data.param.s_destruction_factor << endl;
+        MyFile << "param2: " << "nan" << endl;
+        MyFile << "param3: " << "nan" << endl;
+    }
+    else if(alg_data.param.algorithm_name == "MOVNS_D"){
+        MyFile << "param1: " << alg_data.param.s_decomposition_size << endl;
+        MyFile << "param2: " << alg_data.param.s_decomposition_neighboor_size << endl;
+        MyFile << "param3: " << "nan" << endl;
+    }
+    else{
+        MyFile << "param1: " << "nan" << endl;
+        MyFile << "param2: " << "nan" << endl;
+        MyFile << "param3: " << "nan" << endl;
+    }
+
 
     MyFile << endl;
 
@@ -464,12 +482,14 @@ void SelectOnlyValidSolutions(vector<Solution*> non_dominated_set){
     }
 }
 
-void CalculateMetric(string folder_solution)
+void CalculateMetric(string folder_solution, string folder_instance)
 {
+
 
     vector<string> files;
     map<string, map<string, vector<pair<unsigned, double>>>> sets;
     map<string, map<string, double>> hypervolume;
+    map<string, pair<unsigned, double>> reference_points;
 
     //Encontrar todos os arquivos que estão na pasta de soluções
     FindFilesInFolder(folder_solution, files);
@@ -477,13 +497,24 @@ void CalculateMetric(string folder_solution)
     //Ler o conteúdo de cada arquivo de solução e guardar em sets
     ReadFiles(files, sets);
 
-    map<string, pair<unsigned, double>> reference_points;
+
+    //Identificar os pontos de referência
+    string file_instance;
+    pair<unsigned, double> reference_point;
+    for(auto it:sets){
+
+        file_instance = folder_instance + it.first + ".dat";
+
+        Instance::ReadMarceloInstance(file_instance);
+        reference_point.first = Instance::max_makespan;
+        reference_point.second = Instance::max_energy_cost;
+        reference_points.insert({it.first, reference_point});
+    }
 
     //Gerar o conjunto de referência
     //Calcular seu hipervolume
     //Salvá-lo em um arquivo
-    //Identificar os pontos de referência
-    GenerateReferenceSet(folder_solution, sets, hypervolume, reference_points);
+    GenerateReferenceSet(folder_solution, sets, hypervolume);
 
     //Calcular o hipervolume para todas as instâncias em sets
     CalculateHypervolume(sets, hypervolume, reference_points);

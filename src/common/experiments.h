@@ -27,7 +27,7 @@ void SalveFileSolution(algorithm_data alg_data);
 void SelectOnlyValidSolutions(vector<Solution*> non_dominated_set);
 
 //void GenerateReferenceSet(string folder_solution, map<string, map<string, vector<pair<unsigned, double>>>> sets);
-void CalculateMetric(string folder_solution);
+void CalculateMetric(string folder_solution, string folder_instance);
 
 void Discretize(unsigned factor);
 
