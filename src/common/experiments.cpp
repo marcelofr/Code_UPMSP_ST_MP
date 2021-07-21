@@ -487,8 +487,9 @@ void CalculateMetric(string folder_solution, string folder_instance)
 
 
     vector<string> files;
-    map<string, map<string, vector<pair<unsigned, double>>>> sets;
-    map<string, map<string, double>> hypervolume;
+    map<string,map<string, map<string, vector<pair<unsigned, double>>>>> sets;
+    //map<string, map<string, double>> hypervolume;
+    map<string,map<string, map<string, double>>> hypervolume1;
     map<string, pair<unsigned, double>> reference_points;
 
     //Encontrar todos os arquivos que estão na pasta de soluções
@@ -499,25 +500,25 @@ void CalculateMetric(string folder_solution, string folder_instance)
 
 
     //Identificar os pontos de referência
-    string file_instance;
+    /*string file_instance;
     pair<unsigned, double> reference_point;
-    for(auto it:sets){
+    for(auto &it_instance:sets){
 
-        file_instance = folder_instance + it.first + ".dat";
+        file_instance = folder_instance + it_instance.first + ".dat";
 
         Instance::ReadMarceloInstance(file_instance);
         reference_point.first = Instance::max_makespan;
         reference_point.second = Instance::max_energy_cost;
-        reference_points.insert({it.first, reference_point});
-    }
+        reference_points.insert({it_instance.first, reference_point});
+    }*/
 
     //Gerar o conjunto de referência
-    //Calcular seu hipervolume
+    //Calcular seu hipervolume do conjunto de referência
     //Salvá-lo em um arquivo
-    GenerateReferenceSet(folder_solution, sets, hypervolume);
+    GenerateReferenceSet(folder_solution, sets, hypervolume1, reference_points);
 
     //Calcular o hipervolume para todas as instâncias em sets
-    CalculateHypervolume(sets, hypervolume, reference_points);
+    CalculateHypervolume(sets, hypervolume1, reference_points);
 
     //Calcular a diferença de hipervolume para todas as instâncias em sets
     /*for(auto instance : hypervolume){
@@ -530,17 +531,25 @@ void CalculateMetric(string folder_solution, string folder_instance)
 
     //Imprimir os resultados
     unsigned header = false;
-    for(auto instance : hypervolume){
+    for(auto &instance : hypervolume1){
 
         if(!header){
             cout << "Instance ";
 
-            for(auto seed : instance.second){
+            //cout << "Algoritmo ";
+
+            //cout << "Média HV ";
+
+            /*for(auto &seed : instance.second){
                 cout << seed.first << " ";
             }
 
             cout << "Max_makespan ";
-            cout << "Max_PEP ";
+            cout << "Max_PEP ";*/
+
+            for(auto &it_algorithm : instance.second){
+                cout << " " << it_algorithm.first << " ";
+            }
 
             cout << endl;
 
@@ -549,13 +558,21 @@ void CalculateMetric(string folder_solution, string folder_instance)
 
         cout << instance.first << " " ;
 
-        for(auto seed : instance.second){
-            cout << seed.second << " ";
+
+        for(auto &it_algorithm : instance.second){
+        long HV = 0;
+        for(auto &seed : it_algorithm.second){
+
+            HV += seed.second;
+            //cout << seed.second << " ";
         }
+        cout << HV/it_algorithm.second.size() << " ";
+        }
+
         //cout << seed.first << ": " << seed.second << "\t";
 
-        cout << reference_points[instance.first].first << " ";
-        cout << reference_points[instance.first].second << " ";
+        /*cout << reference_points[instance.first].first << " ";
+        cout << reference_points[instance.first].second << " ";*/
 
 
         cout << endl;

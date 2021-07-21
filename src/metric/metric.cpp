@@ -1,7 +1,7 @@
 #include "metric.h"
 
-void CalculateHypervolume(map<string, map<string, vector<pair<unsigned, double>>>> sets,
-                          map<string, map<string, double>> &hypervolume,
+void CalculateHypervolume(map<string,map<string, map<string, vector<pair<unsigned, double>>>>> sets,
+                          map<string,map<string, map<string, double>>> &hypervolume,
                           map<string, pair<unsigned, double>> reference_points)
 {
 
@@ -9,14 +9,17 @@ void CalculateHypervolume(map<string, map<string, vector<pair<unsigned, double>>
     double hv;
 
     //Para cada instância
-    for(auto instance: sets){
+    for(auto &it_instance: sets){
 
-        for(auto seed : instance.second){
+        //Para cada semente
+        for(auto &it_seed : it_instance.second){
 
-            //Calcular o hipervolume para cada solução e armazenar
-            //SortByMakespan(sd.non_dominated_set);
-            hv = CalculateHypervolumeMin(seed.second, reference_points[instance.first]);
-            hypervolume[instance.first].insert({seed.first, hv});
+            for(auto &it_algorithm : it_seed.second){
+                //Calcular o hipervolume para cada solução e armazenar
+                //SortByMakespan(sd.non_dominated_set);
+                hv = CalculateHypervolumeMin(it_algorithm.second, reference_points[it_instance.first]);
+                hypervolume[it_instance.first][it_seed.first].insert({it_algorithm.first, hv});
+            }
 
         }
 
@@ -25,7 +28,7 @@ void CalculateHypervolume(map<string, map<string, vector<pair<unsigned, double>>
 }
 
 void ReadFiles(vector<string> files,
-               map<string, map<string, vector<pair<unsigned, double>>>> &sets){
+               map<string,map<string, map<string, vector<pair<unsigned, double>>>>> &sets){
 
     algorithm_data alg_data;
 
@@ -33,29 +36,31 @@ void ReadFiles(vector<string> files,
     sort(files.begin(), files.end());
 
     //Ler cada arquivo de solução
-    for(auto it : files){
+    for(auto &it : files){
         alg_data.param.file_solution = it;
         alg_data.non_dominated_set.clear();
         ReadFile(alg_data);
 
         //Montar a estrutura com todas as instâncias e seus conjunto de soluções
         //sets[alg_data.param.instance_name].insert({alg_data.param.s_seed, alg_data.non_dominated_set});
-        sets[alg_data.param.instance_name][alg_data.param.s_seed].insert(sets[alg_data.param.instance_name][alg_data.param.s_seed].begin(), alg_data.non_dominated_set.begin(), alg_data.non_dominated_set.end());
+        sets[alg_data.param.instance_name][alg_data.param.algorithm_name][alg_data.param.s_seed] = alg_data.non_dominated_set;
+
+        //sets[alg_data.param.instance_name][alg_data.param.s_seed].insert(sets[alg_data.param.instance_name][alg_data.param.s_seed].begin(), alg_data.non_dominated_set.begin(), alg_data.non_dominated_set.end());
 
     }
 }
 
 void GenerateReferenceSet(string folder_solution,
-                          map<string, map<string, vector<pair<unsigned, double>>>> &sets,
-                          map<string, map<string, double>> &hypervolume){
+                          map<string,map<string, map<string, vector<pair<unsigned, double>>>>> &sets,
+                          map<string,map<string, map<string, double>>> &hypervolume,
+                          map<string, pair<unsigned, double>> &reference_points){
 
     double hv;
     vector<pair<unsigned, double>> non_dominated_set;
 
     pair<unsigned, double> reference_point;
 
-
-    for(auto instance: sets){
+    for(auto &it_instance: sets){
 
         //cout << instance.first << "\t";
 
@@ -63,8 +68,9 @@ void GenerateReferenceSet(string folder_solution,
         reference_point.first = reference_point.second = 0;
         non_dominated_set.clear();
 
-        for(auto seed : instance.second){
-            for(auto point : seed.second){
+        for(auto &it_algorithm : it_instance.second){
+        for(auto &it_seed: it_algorithm.second){
+            for(auto &point : it_seed.second){
                 //cout << point.first << "\t" << point.second << endl;
                 AddPoint(point, non_dominated_set);
 
@@ -76,12 +82,15 @@ void GenerateReferenceSet(string folder_solution,
                 }
             }
         }
+        }
+
+        reference_points[it_instance.first] = reference_point;
 
         SortByMakespan(non_dominated_set);
-        SalveReferenceSolution(non_dominated_set, folder_solution, instance.first, reference_point);
+        SalveReferenceSolution(non_dominated_set, folder_solution, it_instance.first, reference_point);
 
         //Inserir o conjunto de referência em sets
-        sets[instance.first].insert({"ref", non_dominated_set});
+        sets[it_instance.first]["ref_set"].insert({"all", non_dominated_set});
 
         //Inserir o ponto de referência em reference_points
         //reference_points.insert({instance.first, reference_point});
@@ -89,7 +98,7 @@ void GenerateReferenceSet(string folder_solution,
         hv = CalculateHypervolumeMin(non_dominated_set, reference_point);
         //cout << "Hipervolume reference: " << hv << endl;
 
-        hypervolume[instance.first].insert({"ref", hv});
+        hypervolume[it_instance.first]["ref_set"].insert({"all", hv});
 
     }
 
