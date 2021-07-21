@@ -39,7 +39,8 @@ void ReadFiles(vector<string> files,
         ReadFile(alg_data);
 
         //Montar a estrutura com todas as instâncias e seus conjunto de soluções
-        sets[alg_data.param.instance_name].insert({alg_data.param.s_seed, alg_data.non_dominated_set});
+        //sets[alg_data.param.instance_name].insert({alg_data.param.s_seed, alg_data.non_dominated_set});
+        sets[alg_data.param.instance_name][alg_data.param.s_seed].insert(sets[alg_data.param.instance_name][alg_data.param.s_seed].begin(), alg_data.non_dominated_set.begin(), alg_data.non_dominated_set.end());
 
     }
 }
@@ -76,15 +77,8 @@ void GenerateReferenceSet(string folder_solution,
             }
         }
 
-        string file_name = Instance::folder+instance.first+".dat";
-
-        Instance::ReadMarceloInstance(file_name);
-
-        reference_point.first = Instance::max_makespan;
-        reference_point.second = Instance::max_energy_cost;
-
         SortByMakespan(non_dominated_set);
-        SalveReferenceSolution(non_dominated_set, folder_solution, instance.first, "GA", reference_point);
+        SalveReferenceSolution(non_dominated_set, folder_solution, instance.first, reference_point);
 
         //Inserir o conjunto de referência em sets
         sets[instance.first].insert({"ref", non_dominated_set});
@@ -102,20 +96,20 @@ void GenerateReferenceSet(string folder_solution,
 }
 
 void SalveReferenceSolution(vector<pair<unsigned, double>> non_dominated_set,
-                            string folder_solution, string instance_name, string algorithm_name,
+                            string folder_solution, string instance_name,
                             pair<unsigned, double> reference_point){
 
     ofstream MyFile;
 
     string file_name;
 
-    file_name = folder_solution + algorithm_name + "_" + instance_name + ".ref";
+    file_name = folder_solution + "Ref_" + instance_name + ".ref";
 
     //Abrir o arquivo
     MyFile.open(file_name);
 
     MyFile << "Instance: " << instance_name << endl;
-    MyFile << "Algorithm: " << algorithm_name << endl;
+    //MyFile << "Algorithm: " << algorithm_name << endl;
     MyFile << "Max_makespan: " << reference_point.first << endl;
     MyFile << "Max_PEP: " << reference_point.second << endl;
 

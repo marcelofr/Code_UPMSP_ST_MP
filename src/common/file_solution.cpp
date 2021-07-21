@@ -60,17 +60,17 @@ void ReadFile(algorithm_data &alg_data)
 
         //Tamanho da população
         file >> str;
-        file >> num;
+        file >> str;
         alg_data.param.u_population_size = num;
 
         //Probabilidade de mutação
         file >> str;
-        file >> num;
+        file >> str;
         alg_data.param.u_prob_mutation = num;
 
         //param3
         file >> str;
-        file >> d_num;
+        file >> str;
     }
     else if(alg_data.param.algorithm_name == "MOVNS_Arroyo"){
 
@@ -81,11 +81,11 @@ void ReadFile(algorithm_data &alg_data)
 
         //param2
         file >> str;
-        file >> num;
+        file >> str;
 
         //param3
         file >> str;
-        file >> d_num;
+        file >> str;
     }
     else if(alg_data.param.algorithm_name == "MOVNS_D"){
         //Tamanho da população
@@ -100,20 +100,20 @@ void ReadFile(algorithm_data &alg_data)
 
         //param3
         file >> str;
-        file >> d_num;
+        file >> str;
     }
     else{
         //param1
         file >> str;
-        file >> num;
+        file >> str;
 
         //param2
         file >> str;
-        file >> num;
+        file >> str;
 
         //param3
         file >> str;
-        file >> d_num;
+        file >> str;
     }
 
 
